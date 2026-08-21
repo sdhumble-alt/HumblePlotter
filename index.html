@@ -115,7 +115,7 @@ input[type=checkbox],input[type=radio]{width:15px;height:15px;cursor:pointer;fle
 <body>
 <div id="app">
 <div class="toolbar">
-  <div style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;flex:1;min-width:0;"><div style="display:flex;flex-direction:column;align-items:flex-start;gap:1px;"><span class="toolbar-title"><i class="ti ti-chart-bar" style="font-size:16px;vertical-align:-2px;margin-right:4px;"></i>A Humble Plotter</span><span style="font-size:8.5pt;color:#888;font-style:italic;line-height:1.2;">A Simple Graphing App for Teachers, Students, and Scientists. Built by Steven Humble.</span></div><span style="font-size:8pt;color:#aaaaaa;font-family:Arial,sans-serif;white-space:nowrap;margin-left:16px;">v1.7.1 &mdash; 2026-08-20</span></div>
+  <div style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;flex:1;min-width:0;"><div style="display:flex;flex-direction:column;align-items:flex-start;gap:1px;"><span class="toolbar-title"><i class="ti ti-chart-bar" style="font-size:16px;vertical-align:-2px;margin-right:4px;"></i>A Humble Plotter</span><span style="font-size:8.5pt;color:#888;font-style:italic;line-height:1.2;">A Simple Graphing App for Teachers, Students, and Scientists. Built by Steven Humble.</span></div><span style="font-size:8pt;color:#aaaaaa;font-family:Arial,sans-serif;white-space:nowrap;margin-left:16px;">V1.7.2 &mdash; 2026-08-21</span></div>
   <div class="step-pills">
     <div class="step-pill active" id="pill1" onclick="pillNav(1)"><span class="pill-num">1</span>&nbsp;Chart type</div>
     <div class="step-pill" id="pill2" onclick="pillNav(2)"><span class="pill-num">2</span>&nbsp;Configure &amp; Preview</div>
@@ -511,17 +511,17 @@ input[type=checkbox],input[type=radio]{width:15px;height:15px;cursor:pointer;fle
 <script>
 
 'use strict';
-const APP_VERSION='1.7.1';
-const APP_DATE='2026-08-20';
+const APP_VERSION='V1.7.2';
+const APP_DATE='2026-08-21';
 let selT=null,curChart=null,lineSeriesCount=0,scatterSeriesCount=0,bwSeriesCount=0;
 let debounceTimer=null;
 
 const PALETTE=[
-  {name:'Solid Black (100%)',hex:'#111827'},
   {name:'Mid Gray (55%)',hex:'#6b7280'},
   {name:'Light Gray (25%)',hex:'#d1d5db'},
   {name:'Charcoal (80%)',hex:'#374151'},
   {name:'Ghost Gray (15%)',hex:'#e5e7eb'},
+  {name:'Solid Black (100%)',hex:'#111827'},
   {name:'Grey 1',hex:'#f3f3f3'},{name:'Grey 2',hex:'#eeeeee'},{name:'Grey 3',hex:'#d9d9d9'},
   {name:'Grey 4',hex:'#cccccc'},{name:'Grey 5',hex:'#b7b7b7'},{name:'Grey 6',hex:'#999999'},
   {name:'Grey 7',hex:'#666666'},{name:'Grey 8',hex:'#434343'},{name:'Black',hex:'#000000'},
@@ -530,9 +530,9 @@ const PALETTE=[
   {name:'Orange',hex:'#ff6d01'},{name:'Custom hex',hex:''}
 ];
 
-const DEFCOLORS_BAR=['#ffffff','#eeeeee','#cccccc','#999999','#666666'];
+const DEFCOLORS_BAR=['#6b7280','#d1d5db','#374151','#e5e7eb','#111827'];
 const DEFTEXTURES_BAR=['solid','solid','solid','solid','solid'];
-const DEFCOLORS_LINE=['#ffffff','#eeeeee','#cccccc','#999999','#666666'];
+const DEFCOLORS_LINE=['#6b7280','#d1d5db','#374151','#e5e7eb','#111827'];
 const DEFMARKERS_LINE=['circle','rect','triangle','rectRot','cross'];
 const DEFLINE_STYLES=['solid','dashed','dotted','dashdot','longdash'];
 
@@ -584,20 +584,20 @@ document.getElementById('controls-panel').addEventListener('change',function(e){
 });
 
 function makeColorPicker(defaultHex,uid){
-  const dh=(defaultHex||'#111827').toLowerCase();
+  const dh=(defaultHex||'#6b7280').toLowerCase();
   let si=PALETTE.findIndex(function(c){return c.hex.toLowerCase()===dh;});
   if(si<0)si=PALETTE.length-1;
   const showHex=(si===PALETTE.length-1);
-  const swColor=showHex?dh:(PALETTE[si].hex||'#111827');
+  const swColor=showHex?dh:(PALETTE[si].hex||'#6b7280');
   const opts=PALETTE.map(function(c,i){return '<option value="'+c.hex+'" '+(i===si?'selected':'')+'>'+c.name+'</option>';}).join('');
   return '<div class="cpw" id="cpw-'+uid+'"><span class="csw" id="csw-'+uid+'" style="background:'+swColor+';"></span>'
     +'<select onchange="onCSel(this,\''+uid+'\')">'+opts+'</select>'
     +'<input type="text" placeholder="#rrggbb" id="chex-'+uid+'" value="'+(showHex?dh:'')+'" style="display:'+(showHex?'inline-block':'none')+';" oninput="onHexIn(this,\''+uid+'\')"></div>';
 }
 function getColor(uid){
-  const w=document.getElementById('cpw-'+uid);if(!w)return'#111827';
+  const w=document.getElementById('cpw-'+uid);if(!w)return'#6b7280';
   const s=w.querySelector('select');
-  if(s.value===''){const h=(document.getElementById('chex-'+uid)||{}).value||'';return validHex(h.trim())?h.trim():'#111827';}
+  if(s.value===''){const h=(document.getElementById('chex-'+uid)||{}).value||'';return validHex(h.trim())?h.trim():'#6b7280';}
   return s.value;
 }
 function validHex(h){return/^#[0-9A-Fa-f]{6}$/.test(h);}
@@ -868,7 +868,7 @@ function rebuildBarGroups(){
   const grid=document.createElement('div');
   grid.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin-bottom:8px;';
   for(let g=0;g<n;g++){
-    const color=(existingColors[g]&&existingColors[g]!=='#111827'&&g<existingColors.length)?existingColors[g]:DEFCOLORS_BAR[g%DEFCOLORS_BAR.length];
+    const color=(existingColors[g]&&existingColors[g]!=='#6b7280'&&g<existingColors.length)?existingColors[g]:DEFCOLORS_BAR[g%DEFCOLORS_BAR.length];
     const texture=existingTextures[g]||DEFTEXTURES_BAR[g%DEFTEXTURES_BAR.length];
     const dv=document.createElement('div');
     const lb=document.createElement('div');lb.style.cssText='font-size:10pt;color:#555;font-weight:500;margin-bottom:3px;';lb.textContent='Group '+(g+1);
@@ -1254,18 +1254,61 @@ function addBWRow(btn){
   triggerLiveUpdate();
 }
 
-const errPlugin={id:'errPlugin',afterDatasetsDraw:function(chart,_,opts){
-  if(!opts||!opts.items||!opts.items.length)return;
-  const ctx=chart.ctx;ctx.save();ctx.strokeStyle='#000';ctx.lineWidth=1.5;const cap=6;
-  opts.items.forEach(function(e){
-    if(!e||e.err==null||isNaN(e.err)||e.err===0)return;
-    const meta=chart.getDatasetMeta(e.di),el=meta.data[e.pi];if(!el)return;
-    const xc=el.x,yA=e.yAxis||'y',yT=chart.scales[yA].getPixelForValue(e.val+e.err),yB=chart.scales[yA].getPixelForValue(e.val-e.err);
-    ctx.beginPath();ctx.moveTo(xc,yT);ctx.lineTo(xc,yB);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(xc-cap,yT);ctx.lineTo(xc+cap,yT);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(xc-cap,yB);ctx.lineTo(xc+cap,yB);ctx.stroke();
-  });ctx.restore();
-}};
+const errPlugin = {
+  id: 'errPlugin',
+  afterDatasetsDraw: function(chart, _, opts) {
+    if (!opts || !opts.items || !opts.items.length) return;
+    const ctx = chart.ctx;
+    const cap = 6;
+
+    function drawBarLines(xc, yT, yB) {
+      ctx.beginPath(); ctx.moveTo(xc, yT); ctx.lineTo(xc, yB); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(xc - cap, yT); ctx.lineTo(xc + cap, yT); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(xc - cap, yB); ctx.lineTo(xc + cap, yB); ctx.stroke();
+    }
+
+    opts.items.forEach(function(e) {
+      if (!e || e.err == null || isNaN(e.err) || e.err === 0) return;
+      const meta = chart.getDatasetMeta(e.di);
+      const el = meta.data[e.pi];
+      if (!el) return;
+
+      const xc = el.x;
+      const yA = e.yAxis || 'y';
+      const yT = chart.scales[yA].getPixelForValue(e.val + e.err);
+      const yB = chart.scales[yA].getPixelForValue(e.val - e.err);
+
+      // 1. Draw black error bar
+      ctx.save();
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 1.5;
+      drawBarLines(xc, yT, yB);
+      ctx.restore();
+
+      // 2. If the background bar is dark, clip to the bar area and redraw in white
+      const barColor = (chart.data.datasets[e.di] && chart.data.datasets[e.di].backgroundColor)
+        ? (getColor('barg' + e.di) || '#111827')
+        : '#111827';
+
+      if (typeof contrastColor === 'function' && contrastColor(barColor) === '#ffffff') {
+        const barLeft = el.x - (el.width / 2);
+        const barTop = Math.min(el.y, el.base);
+        const barHeight = Math.abs(el.base - el.y);
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(barLeft, barTop, el.width, barHeight);
+        ctx.clip();
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        drawBarLines(xc, yT, yB);
+        ctx.restore();
+      }
+    });
+  }
+};
+
 const scErrPlugin={id:'scErrPlugin',afterDatasetsDraw:function(chart,_,opts){
   if(!opts||!opts.items||!opts.items.length)return;
   const ctx=chart.ctx;ctx.save();ctx.strokeStyle='#000';ctx.lineWidth=1.5;const cap=5;
@@ -2402,7 +2445,7 @@ function buildLine(canvas,xlabel,ylabel,y2label,ymin,ymax,ystep,y2min,y2max,y2st
       sd.pts.forEach(function(p){allXVals.push(p.xNum);});
       var mk=st.markerVal;
       var ptOpts=mk==='none'?{pointRadius:0,pointHoverRadius:0,pointStyle:'circle'}:{pointRadius:5,pointHoverRadius:7,pointStyle:mk};
-      var ds={label:st.nameVal,data:pts,borderColor:st.colorHex,borderDash:getDashPattern(st.lineStyleVal),backgroundColor:st.colorHex+'33',pointBackgroundColor:st.colorHex,tension:0,fill:false,yAxisID:onY2?'y2':'y',showLine:true};
+      var ds={label:st.nameVal,data:pts,borderColor:st.colorHex,borderDash:getDashPattern(st.lineStyleVal),backgroundColor:st.colorHex+'33',pointBackgroundColor:st.colorHex,tension:0,fill:false,yAxisID:onY2?'y2':'y',showLine:true,clip:false};
       Object.assign(ds,ptOpts);datasets.push(ds);
       if(hasErr){sd.pts.forEach(function(p,pi){errItems.push({di:di,pi:pi,x:p.xNum,y:p.y,xe:0,ye:p.e,yAxis:onY2?'y2':'y'});});}
       if(D.showLegend)lb.innerHTML+='<span class="leg-item" data-label="'+st.nameVal+(onY2?' (Y2)':'')+'" data-color="'+st.colorHex+'" data-shape="'+st.markerVal+'" data-linestyle="'+st.lineStyleVal+'" style="display:flex;align-items:center;gap:5px;">'+markerSVG(st.markerVal,st.colorHex,st.lineStyleVal)+'<span style="font-size:10.5pt;">'+parseHtmlFormatting(st.nameVal)+(onY2?' (Y2)':'')+'</span></span>';
@@ -2419,7 +2462,7 @@ function buildLine(canvas,xlabel,ylabel,y2label,ymin,ymax,ystep,y2min,y2max,y2st
       scales.y2=Object.assign({},makeYSc(y2label||'Y2',sc2,D,'right',D.pctY),{grid:{drawOnChartArea:false}});}
     Chart.register(scErrPlugin,axisArrowPlugin,boldZeroPlugin,dlP);
     curChart=new Chart(canvas,{type:'scatter',data:{datasets:datasets},
-      options:{responsive:false,plugins:{legend:{display:false},title:titleP,scErrPlugin:{items:errItems},axisArrowPlugin:arrowOpts,boldZeroPlugin:{enabled:D.boldZero}},scales:scales},
+      options:{responsive:false,layout:{padding:{top:6,bottom:6,left:6,right:6}},plugins:{legend:{display:false},title:titleP,scErrPlugin:{items:errItems},axisArrowPlugin:arrowOpts,boldZeroPlugin:{enabled:D.boldZero}},scales:scales},
       plugins:[scErrPlugin,axisArrowPlugin,boldZeroPlugin,dlP]});
 
   } else {
@@ -2431,7 +2474,7 @@ function buildLine(canvas,xlabel,ylabel,y2label,ymin,ymax,ystep,y2min,y2max,y2st
       if(hasErr){sd.pts.forEach(function(p,pi){errItems.push({di:di,pi:pi,x:0,y:p.y,xe:0,ye:p.e,yAxis:onY2?'y2':'y'});});}
       var mk=st.markerVal;
       var ptOpts=mk==='none'?{pointRadius:0,pointHoverRadius:0,pointStyle:'circle'}:{pointRadius:5,pointHoverRadius:7,pointStyle:mk};
-      var ds={label:st.nameVal,data:vals,borderColor:st.colorHex,borderDash:getDashPattern(st.lineStyleVal),backgroundColor:st.colorHex+'33',pointBackgroundColor:st.colorHex,tension:0,fill:false,yAxisID:onY2?'y2':'y'};
+      var ds={label:st.nameVal,data:vals,borderColor:st.colorHex,borderDash:getDashPattern(st.lineStyleVal),backgroundColor:st.colorHex+'33',pointBackgroundColor:st.colorHex,tension:0,fill:false,yAxisID:onY2?'y2':'y',clip:false};
       Object.assign(ds,ptOpts);datasets.push(ds);
       if(D.showLegend)lb.innerHTML+='<span class="leg-item" data-label="'+st.nameVal+(onY2?' (Y2)':'')+'" data-color="'+st.colorHex+'" data-shape="'+st.markerVal+'" data-linestyle="'+st.lineStyleVal+'" style="display:flex;align-items:center;gap:5px;">'+markerSVG(st.markerVal,st.colorHex,st.lineStyleVal)+'<span style="font-size:10.5pt;">'+parseHtmlFormatting(st.nameVal)+(onY2?' (Y2)':'')+'</span></span>';
     });
@@ -2444,7 +2487,7 @@ function buildLine(canvas,xlabel,ylabel,y2label,ymin,ymax,ystep,y2min,y2max,y2st
       scales.y2=Object.assign({},makeYSc(y2label||'Y2',sc2,D,'right',D.pctY),{grid:{drawOnChartArea:false}});}
     Chart.register(scErrPlugin,axisArrowPlugin,boldZeroPlugin,dlP);
     curChart=new Chart(canvas,{type:'line',data:{labels:firstLabels,datasets:datasets},
-      options:{responsive:false,plugins:{legend:{display:false},title:titleP,scErrPlugin:{items:errItems},axisArrowPlugin:arrowOpts,boldZeroPlugin:{enabled:D.boldZero}},scales:scales},
+      options:{responsive:false,layout:{padding:{top:6,bottom:6,left:6,right:6}},plugins:{legend:{display:false},title:titleP,scErrPlugin:{items:errItems},axisArrowPlugin:arrowOpts,boldZeroPlugin:{enabled:D.boldZero}},scales:scales},
       plugins:[scErrPlugin,axisArrowPlugin,boldZeroPlugin,dlP]});
   }
 }
@@ -2464,9 +2507,9 @@ function buildScatter(canvas,xlabel,ylabel,y2label,ymin,ymax,ystep,y2min,y2max,y
       pts.push({x:x,y:y});allX.push(x);allY.push(y);
       if(hasErr){const ye=gv(ins[3]);allYErr.push(y+ye,y-ye);errItems.push({di:di,pi:pi,x:x,y:y,xe:gv(ins[2]),ye:ye,yAxis:onY2?'y2':'y'});}
     });
-    datasets.push({label:st.nameVal,data:pts,backgroundColor:st.colorHex,borderColor:st.colorHex,pointRadius:6,pointHoverRadius:8,pointStyle:st.markerVal,yAxisID:onY2?'y2':'y'});
+    datasets.push({label:st.nameVal,data:pts,backgroundColor:st.colorHex,borderColor:st.colorHex,pointRadius:6,pointHoverRadius:8,pointStyle:st.markerVal,yAxisID:onY2?'y2':'y',clip:false});
     if(D.showLegend)lb.innerHTML+='<span class="leg-item" data-label="'+st.nameVal+(onY2?' (Y2)':'')+'" data-color="'+st.colorHex+'" data-shape="'+st.markerVal+'" style="display:flex;align-items:center;gap:5px;">'+markerSVG(st.markerVal,st.colorHex,'solid')+'<span style="font-size:10.5pt;">'+parseHtmlFormatting(st.nameVal)+(onY2?' (Y2)':'')+'</span></span>';
-    if(D.showTrendline){const reg=linReg(pts);if(reg)trendDatasets.push({type:'line',label:st.nameVal+' trend',data:[{x:reg.xMin,y:reg.m*reg.xMin+reg.b},{x:reg.xMax,y:reg.m*reg.xMax+reg.b}],borderColor:st.colorHex,borderWidth:2,borderDash:[6,3],pointRadius:0,fill:false,tension:0,yAxisID:onY2?'y2':'y'});}
+    if(D.showTrendline){const reg=linReg(pts);if(reg)trendDatasets.push({type:'line',label:st.nameVal+' trend',data:[{x:reg.xMin,y:reg.m*reg.xMin+reg.b},{x:reg.xMax,y:reg.m*reg.xMax+reg.b}],borderColor:st.colorHex,borderWidth:2,borderDash:[6,3],pointRadius:0,fill:false,tension:0,yAxisID:onY2?'y2':'y',clip:false});}
   });
   const dataXMin=allX.length?Math.min.apply(null,allX):0,dataXMax=allX.length?Math.max.apply(null,allX):1;
   const scX=niceScaleX(dataXMin,dataXMax,xmin,xmax,xstep);
@@ -2483,7 +2526,7 @@ function buildScatter(canvas,xlabel,ylabel,y2label,ymin,ymax,ystep,y2min,y2max,y
   const dlP=makeDLP(D,true);
   Chart.register(scErrPlugin,axisArrowPlugin,boldZeroPlugin,dlP);
   curChart=new Chart(canvas,{type:'scatter',data:{datasets:datasets.concat(trendDatasets)},
-    options:{responsive:false,plugins:{legend:{display:false},title:titleP,scErrPlugin:{items:errItems},axisArrowPlugin:arrowOpts,boldZeroPlugin:{enabled:D.boldZero}},scales:scales},
+    options:{responsive:false,layout:{padding:{top:6,bottom:6,left:6,right:6}},plugins:{legend:{display:false},title:titleP,scErrPlugin:{items:errItems},axisArrowPlugin:arrowOpts,boldZeroPlugin:{enabled:D.boldZero}},scales:scales},
     plugins:[scErrPlugin,axisArrowPlugin,boldZeroPlugin,dlP]});
 }
 
