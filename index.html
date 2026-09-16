@@ -56,8 +56,6 @@
   --btn-danger-text: #ffffff;
 
   /* Layout Spacing */
-  --sidebar-wide-min: 380px;
-  --sidebar-wide-max: 440px;
   --split-gap: 18px;
   --split-padding: 16px;
 }
@@ -232,10 +230,10 @@ html, body {
   overflow: hidden;
 }
 
-/* Independent Scrolling Split Layout */
+/* Independent Scrolling Split Layout - 60% Left / 40% Right */
 .split-layout {
   display: grid;
-  grid-template-columns: minmax(var(--sidebar-wide-min), var(--sidebar-wide-max)) 1fr;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   gap: var(--split-gap);
   height: 100%;
   width: 100%;
@@ -844,7 +842,7 @@ input[type=radio] {
         <div class="step-pill active" id="pill1" onclick="pillNav(1)"><span class="pill-num">1</span>&nbsp;Chart type</div>
         <div class="step-pill" id="pill2" onclick="pillNav(2)"><span class="pill-num">2</span>&nbsp;Configure &amp; Preview</div>
       </div>
-      <div class="toolbar-ver">V 1.9.0 &mdash; 2026-09-16</div>
+      <div class="toolbar-ver">V 1.8.0 &mdash; 2026-09-16</div>
     </div>
   </header>
 
@@ -885,7 +883,7 @@ input[type=radio] {
       <!-- STEP 2: Configure & Preview -->
       <div id="s2" class="step">
         <div class="split-layout">
-          <!-- LEFT PANEL: Controls & Data Entry -->
+          <!-- LEFT PANEL: Controls & Data Entry (60% width) -->
           <div class="split-left" id="controls-panel">
             
             <div id="de-datatable-wrap" style="display:none;margin-bottom:14px;">
@@ -1248,7 +1246,7 @@ input[type=radio] {
             </div>
           </div>
 
-          <!-- RIGHT PANEL: Fixed Live Preview & Export -->
+          <!-- RIGHT PANEL: Fixed Live Preview & Export (40% width) -->
           <div class="split-right" id="stage-panel">
             <div class="preview-container">
               <div id="graph-legend" class="graph-legend"></div>
@@ -1276,12 +1274,12 @@ input[type=radio] {
 
 <script>
 'use strict';
-const APP_VERSION = 'V 1.9.0';
+const APP_VERSION = 'V 1.8.0';
 const APP_DATE = '2026-09-16';
 let selT = null, curChart = null, lineSeriesCount = 0, scatterSeriesCount = 0, bwSeriesCount = 0;
 let debounceTimer = null;
 
-// Accessible Okabe-Ito Palette tokens[cite: 2]
+// Accessible Okabe-Ito Palette tokens
 const OKABE_ITO_PALETTE = [
   { name: 'Navy / Blue',     hex: '#0072B2' },
   { name: 'Orange',          hex: '#E69F00' },
