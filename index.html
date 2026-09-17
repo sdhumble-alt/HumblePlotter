@@ -230,10 +230,10 @@ html, body {
   overflow: hidden;
 }
 
-/* Independent Scrolling Split Layout - 60% Left / 40% Right */
+/* Independent Scrolling Split Layout - 40% Left / 60% Right */
 .split-layout {
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
   gap: var(--split-gap);
   height: 100%;
   width: 100%;
@@ -392,8 +392,7 @@ html, body {
 /* Inputs & Form Controls */
 input[type=text],
 input[type=number],
-select,
-.rich-input {
+select {
   border: 1.5px solid var(--input-border);
   border-radius: 6px;
   padding: 6px 9px;
@@ -408,23 +407,15 @@ select,
   box-sizing: border-box;
 }
 
-.rich-input {
-  min-height: 36px;
-  cursor: text;
-  overflow-x: auto;
-}
-
 input[type=text]:hover,
 input[type=number]:hover,
-select:hover,
-.rich-input:hover {
+select:hover {
   border-color: var(--input-border-hover);
 }
 
 input[type=text]:focus,
 input[type=number]:focus,
-select:focus,
-.rich-input:focus {
+select:focus {
   border-color: var(--input-border-focus);
   border-width: 2px;
   box-shadow: 0 0 0 3px var(--input-focus-ring);
@@ -444,30 +435,8 @@ select:focus,
 }
 
 .field-row input,
-.field-row select,
-.field-row .rich-input {
+.field-row select {
   width: 100%;
-}
-
-.formatting-toolbar {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 3px;
-}
-
-.fmt-btn {
-  background: #f1f5f9;
-  border: 1px solid var(--card-border);
-  border-radius: 4px;
-  padding: 2px 7px;
-  font-size: 8.5pt;
-  cursor: pointer;
-  color: var(--btn-primary-bg);
-  font-weight: bold;
-}
-
-.fmt-btn:hover {
-  background: #e2e8f0;
 }
 
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -679,7 +648,7 @@ input[type=radio] {
   border-bottom: 1px solid var(--card-header-border);
 }
 
-.series-head .rich-input {
+.series-head input[type=text] {
   flex: 1;
   min-width: 80px;
   border: 1px solid var(--input-border);
@@ -693,7 +662,7 @@ input[type=radio] {
   box-shadow: none;
 }
 
-.series-head .rich-input:focus {
+.series-head input[type=text]:focus {
   border-color: var(--input-border-focus);
   box-shadow: 0 0 0 2px var(--input-focus-ring);
 }
@@ -883,7 +852,7 @@ input[type=radio] {
       <!-- STEP 2: Configure & Preview -->
       <div id="s2" class="step">
         <div class="split-layout">
-          <!-- LEFT PANEL: Controls & Data Entry (60% width) -->
+          <!-- LEFT PANEL: Controls & Data Entry (40% width) -->
           <div class="split-left" id="controls-panel">
             
             <div id="de-datatable-wrap" style="display:none;margin-bottom:14px;">
@@ -946,16 +915,16 @@ input[type=radio] {
                   <div class="opt-group-header-left"><i class="ti ti-typography"></i><span class="opt-group-title">Labels</span></div>
                 </div>
                 <div class="opt-group-body">
-                  <div class="field-row"><label>Chart title (optional)</label><div class="formatting-toolbar"><button type="button" class="fmt-btn" onclick="formatRichText('chartTitle', 'sub')" title="Subscript">Sub</button><button type="button" class="fmt-btn" onclick="formatRichText('chartTitle', 'sup')" title="Superscript">Sup</button></div><div id="chartTitle" class="rich-input" contenteditable="true" oninput="triggerLiveUpdate()"></div></div>
+                  <div class="field-row"><label>Chart title (optional)</label><input type="text" id="chartTitle"></div>
                   <div class="grid-2">
-                    <div class="field-row"><label id="xlbl-lbl">X-axis label</label><div class="formatting-toolbar"><button type="button" class="fmt-btn" onclick="formatRichText('xlabel', 'sub')" title="Subscript">Sub</button><button type="button" class="fmt-btn" onclick="formatRichText('xlabel', 'sup')" title="Superscript">Sup</button></div><div id="xlabel" class="rich-input" contenteditable="true" oninput="triggerLiveUpdate()"></div></div>
-                    <div class="field-row"><label id="ylbl-lbl">Y-axis label</label><div class="formatting-toolbar"><button type="button" class="fmt-btn" onclick="formatRichText('ylabel', 'sub')" title="Subscript">Sub</button><button type="button" class="fmt-btn" onclick="formatRichText('ylabel', 'sup')" title="Superscript">Sup</button></div><div id="ylabel" class="rich-input" contenteditable="true" oninput="triggerLiveUpdate()"></div></div>
+                    <div class="field-row"><label id="xlbl-lbl">X-axis label</label><input type="text" id="xlabel"></div>
+                    <div class="field-row"><label id="ylbl-lbl">Y-axis label</label><input type="text" id="ylabel"></div>
                   </div>
                   <div id="y2-toggle-wrap" style="display:none;margin-top:4px;margin-bottom:6px;" class="toggle-row">
                     <input type="checkbox" id="useY2Global" onchange="toggleY2UI()">
                     <label for="useY2Global" style="font-weight:500;">Enable second Y-axis (Y2)</label>
                   </div>
-                  <div id="y2-cfg" style="display:none;"><div class="field-row"><label>Second Y-axis label</label><div class="formatting-toolbar"><button type="button" class="fmt-btn" onclick="formatRichText('y2label', 'sub')" title="Subscript">Sub</button><button type="button" class="fmt-btn" onclick="formatRichText('y2label', 'sup')" title="Superscript">Sup</button></div><div id="y2label" class="rich-input" contenteditable="true" oninput="triggerLiveUpdate()"></div></div></div>
+                  <div id="y2-cfg" style="display:none;"><div class="field-row"><label>Second Y-axis label</label><input type="text" id="y2label"></div></div>
                   <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:6px;">
                     <div class="toggle-row" style="margin:0;"><input type="checkbox" id="axisLabelBold" checked><label for="axisLabelBold">Bold axis labels</label></div>
                     <div style="display:flex;align-items:center;gap:5px;"><label style="font-size:9.5pt;color:var(--input-label);font-weight:600;">Label size</label><input type="number" id="axisLabelSize" value="12" min="6" max="36" style="width:56px;"><span style="font-size:9.5pt;color:#64748b;">pt</span></div>
@@ -1246,7 +1215,7 @@ input[type=radio] {
             </div>
           </div>
 
-          <!-- RIGHT PANEL: Fixed Live Preview & Export (40% width) -->
+          <!-- RIGHT PANEL: Fixed Live Preview & Export (60% width) -->
           <div class="split-right" id="stage-panel">
             <div class="preview-container">
               <div id="graph-legend" class="graph-legend"></div>
@@ -1300,38 +1269,6 @@ const DEFCOLORS_SERIES = ['#0072B2', '#E69F00', '#009E73', '#D55E00', '#56B4E9',
 const DEFTEXTURES_BAR = ['solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'solid'];
 const DEFMARKERS_LINE = ['circle', 'rect', 'triangle', 'rectRot', 'cross', 'star', 'crossRot'];
 const DEFLINE_STYLES = ['solid', 'dashed', 'dotted', 'dashdot', 'longdash'];
-
-function formatRichText(id, tag) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const sel = window.getSelection();
-  if (!sel.rangeCount) return;
-  const range = sel.getRangeAt(0);
-  if (!el.contains(range.commonAncestorContainer)) return;
-  
-  const node = document.createElement(tag);
-  if (range.collapsed) {
-    node.appendChild(document.createTextNode('\u200b'));
-    range.insertNode(node);
-    range.selectNodeContents(node);
-    sel.removeAllRanges();
-    sel.addRange(range);
-  } else {
-    node.appendChild(range.extractContents());
-    range.insertNode(node);
-  }
-  triggerLiveUpdate();
-}
-
-function getRichTextVal(id) {
-  const el = document.getElementById(id);
-  return el ? el.innerHTML.trim() : '';
-}
-
-function setRichTextVal(id, html) {
-  const el = document.getElementById(id);
-  if (el) el.innerHTML = html || '';
-}
 
 function triggerLiveUpdate() {
   if (!selT) return;
@@ -1521,7 +1458,9 @@ function go1() {
   document.querySelectorAll('.type-card').forEach(function(c) { c.classList.remove('sel'); });
   lineSeriesCount = 0; scatterSeriesCount = 0; bwSeriesCount = 0;
 
-  ['chartTitle', 'xlabel', 'ylabel', 'y2label'].forEach(function(id) { setRichTextVal(id, ''); });
+  ['chartTitle', 'xlabel', 'ylabel', 'y2label'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
   ['ymin', 'ymax', 'ystep', 'y2min', 'y2max', 'y2step', 'xmin', 'xmax', 'xstep', 'histPasteZone'].forEach(function(id) { 
     var el = document.getElementById(id); if (el) el.value = ''; 
   }); 
@@ -1675,10 +1614,10 @@ function nGroups() { return parseInt(document.getElementById('barGroups').value)
 
 function rebuildBarGroups() {
   const n = nGroups(), cont = document.getElementById('bar-group-labels');
-  const existingHTMLs = [];
+  const existingNames = [];
   for (let _g = 0; _g < n; _g++) { 
     var _ni = document.getElementById('barGroupName' + _g); 
-    existingHTMLs.push(_ni ? _ni.innerHTML : ''); 
+    existingNames.push(_ni ? _ni.value : ''); 
   }
   const existingColors = []; for (let g = 0; g < n; g++) existingColors.push(getColor('barg' + g));
   const existingTextures = []; for (let g = 0; g < n; g++) { 
@@ -1693,14 +1632,12 @@ function rebuildBarGroups() {
     const texture = existingTextures[g] || DEFTEXTURES_BAR[g % DEFTEXTURES_BAR.length];
     const dv = document.createElement('div');
     const lb = document.createElement('div'); lb.style.cssText = 'font-size:9.5pt;color:var(--input-label);font-weight:600;margin-bottom:3px;'; lb.textContent = 'Group ' + (g + 1);
-    const fmtBarGrp = '<div class="formatting-toolbar"><button type="button" class="fmt-btn" onclick="formatRichText(\'barGroupName' + g + '\', \'sub\')" title="Subscript">Sub</button><button type="button" class="fmt-btn" onclick="formatRichText(\'barGroupName' + g + '\', \'sup\')" title="Superscript">Sup</button></div>';
-    const inp = document.createElement('div'); inp.className = 'rich-input'; inp.contentEditable = true; inp.id = 'barGroupName' + g; inp.innerHTML = existingHTMLs[g] || ('Group ' + (g + 1));
-    inp.style.cssText = 'display:block;width:100%;margin-bottom:4px;min-height:32px;';
+    const inp = document.createElement('input'); inp.type = 'text'; inp.id = 'barGroupName' + g; inp.value = existingNames[g] || ('Group ' + (g + 1));
+    inp.style.cssText = 'display:block;width:100%;margin-bottom:4px;';
     inp.oninput = function() { triggerLiveUpdate(); };
     const clr = document.createElement('div'); clr.style.cssText = 'margin-bottom:4px;'; clr.innerHTML = makeColorPicker(color, 'barg' + g);
     const txSel = document.createElement('div'); txSel.innerHTML = makeTextureSel('bargTexture' + g, texture);
     dv.appendChild(lb);
-    const fmtDiv = document.createElement('div'); fmtDiv.innerHTML = fmtBarGrp; dv.appendChild(fmtDiv.firstElementChild);
     dv.appendChild(inp); dv.appendChild(clr); dv.appendChild(txSel); grid.appendChild(dv);
   }
   cont.appendChild(grid); rebuildBarTable();
@@ -1846,12 +1783,12 @@ function addHistRow() {
   triggerLiveUpdate();
 }
 
-function seriesHdrHTML(idx, isLine, nameHTML, colorHex, useY2, y2checked, isFirst, markerVal, lineStyleVal) {
+function seriesHdrHTML(idx, isLine, nameVal, colorHex, useY2, y2checked, isFirst, markerVal, lineStyleVal) {
   const cpId = 'sc' + isLine + '_' + idx, mkId = 'mk_' + isLine + '_' + idx, lsId = 'ls_' + isLine + '_' + idx;
   const mk = markerVal || (DEFMARKERS_LINE[idx % DEFMARKERS_LINE.length]);
   const ls = lineStyleVal || (DEFLINE_STYLES[idx % DEFLINE_STYLES.length]);
   const nameInpId = 'seriesName_' + isLine + '_' + idx;
-  let h = '<div style="flex:1;display:flex;flex-direction:column;"><div class="formatting-toolbar"><button type="button" class="fmt-btn" onclick="formatRichText(\'' + nameInpId + '\', \'sub\')" title="Subscript">Sub</button><button type="button" class="fmt-btn" onclick="formatRichText(\'' + nameInpId + '\', \'sup\')" title="Superscript">Sup</button></div><div id="' + nameInpId + '" class="rich-input" contenteditable="true" oninput="triggerLiveUpdate()" style="width:100%;min-height:32px;">' + (nameHTML || ('Series ' + (idx + 1))) + '</div></div>';
+  let h = '<input type="text" id="' + nameInpId + '" value="' + (nameVal || ('Series ' + (idx + 1))) + '" oninput="triggerLiveUpdate()">';
   if (isLine) {
     h += '<span style="font-size:9.5pt;color:var(--input-label);font-weight:600;">Style</span>';
     h += makeLineStyleSel(lsId, ls);
@@ -1867,8 +1804,8 @@ function seriesHdrHTML(idx, isLine, nameHTML, colorHex, useY2, y2checked, isFirs
 
 function getSeriesState(blk, isLine) {
   const hdr = blk.querySelector('.series-head');
-  const nameDiv = hdr.querySelector('.rich-input');
-  const nameVal = nameDiv ? nameDiv.innerHTML : 'Series';
+  const nameInp = hdr.querySelector('input[type=text]');
+  const nameVal = nameInp ? nameInp.value : 'Series';
   const idx = blk.dataset.sidx;
   return {
     nameVal: nameVal, 
@@ -2080,7 +2017,7 @@ function addBWSeries() {
   const isFirst = !list.children.length;
   const hdrDiv = document.createElement('div'); hdrDiv.className = 'series-head';
   const bwNameInpId = 'bwName_' + idx;
-  hdrDiv.innerHTML = '<div style="flex:1;display:flex;flex-direction:column;"><div class="formatting-toolbar"><button type="button" class="fmt-btn" onclick="formatRichText(\'' + bwNameInpId + '\', \'sub\')" title="Subscript">Sub</button><button type="button" class="fmt-btn" onclick="formatRichText(\'' + bwNameInpId + '\', \'sup\')" title="Superscript">Sup</button></div><div id="' + bwNameInpId + '" class="rich-input" contenteditable="true" oninput="triggerLiveUpdate()" style="width:100%;min-height:32px;">Group ' + (idx + 1) + '</div></div>'
+  hdrDiv.innerHTML = '<input type="text" id="' + bwNameInpId + '" value="Group ' + (idx + 1) + '" oninput="triggerLiveUpdate()">'
     + '<span style="font-size:9.5pt;color:var(--input-label);font-weight:600;">Color</span>' + makeColorPicker(color, 'bw' + idx)
     + (!isFirst ? '<button class="btn-danger-sm" onclick="this.closest(\'.series-block\').remove();triggerLiveUpdate();">✕</button>' : '');
   blk.appendChild(hdrDiv);
@@ -2386,13 +2323,26 @@ function fmtLbl(v, p) { return p ? (v + '%') : (v + ''); }
 
 function parseHtmlFormatting(text) {
   if (!text) return '';
-  return text.replace(/<sub>(.*?)<\/sub>/g, (_, g) => {
-    const map = {'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉','+':'₊','-':'₋','=':'₌','(':'₍',')':'₎','a':'ₐ','e':'ₑ','h':'ₕ','i':'ᵢ','j':'ⱼ','k':'ₖ','l':'ₕ','m':'ₘ','n':'ₙ','o':'ₒ','p':'ₚ','r':'ᵣ','s':'ₛ','t':'ₜ','u':'ᵤ','v':'ᵥ','x':'ₓ'};
-    return g.split('').map(char => map[char] || char).join('');
-  }).replace(/<sup>(.*?)<\/sup>/g, (_, g) => {
-    const map = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','+':'⁺','-':'⁻','=':'₌','(':'⁽',')':'⁾','a':'ᵃ','b':'ᵇ','c':'ᶜ','d':'ᵈ','e':'ᵉ','f':'ᶠ','g':'ᵍ','h':'ʰ','i':'ⁱ','j':'ʲ','k':'ᵏ','l':'ˡ','m':'ᵐ','n':'ⁿ','o':'ᵒ','p':'ᵖ','r':'ʳ','s':'ˢ','t':'ᵗ','u':'ᵘ','v':'ᵛ','w':'ʷ','x':'ˣ','y':'ʸ','z':'ᶻ'};
-    return g.split('').map(char => map[char] || char).join('');
-  });
+
+  const subMap = {'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉','+':'₊','-':'₋','=':'₌','(':'₍',')':'₎','a':'ₐ','e':'ₑ','h':'ₕ','i':'ᵢ','j':'ⱼ','k':'ₖ','l':'ₗ','m':'ₘ','n':'ₙ','o':'ₒ','p':'ₚ','r':'ᵣ','s':'ₛ','t':'ₜ','u':'ᵤ','v':'ᵥ','x':'ₓ'};
+  const supMap = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','+':'⁺','-':'⁻','=':'₌','(':'⁽',')':'⁾','a':'ᵃ','b':'ᵇ','c':'ᶜ','d':'ᵈ','e':'ᵉ','f':'ᶠ','g':'ᵍ','h':'ʰ','i':'ⁱ','j':'ʲ','k':'ᵏ','l':'ˡ','m':'ᵐ','n':'ⁿ','o':'ᵒ','p':'ᵖ','r':'ʳ','s':'ˢ','t':'ᵗ','u':'ᵘ','v':'ᵛ','w':'ʷ','x':'ˣ','y':'ʸ','z':'ᶻ'};
+
+  function toSub(str) { return str.split('').map(char => subMap[char] || char).join(''); }
+  function toSup(str) { return str.split('').map(char => supMap[char] || char).join(''); }
+
+  // 1. Process HTML tags <sub> and <sup> if any remain
+  let res = text.replace(/<sub>(.*?)<\/sub>/gi, (_, g) => toSub(g))
+                .replace(/<sup>(.*?)<\/sup>/gi, (_, g) => toSup(g));
+
+  // 2. Process bracketed caret & underscore syntax (e.g., ^{123}, _{abc})
+  res = res.replace(/\^\{([^}]+)\}/g, (_, g) => toSup(g))
+           .replace(/_\{([^}]+)\}/g, (_, g) => toSub(g));
+
+  // 3. Process single-character caret & underscore syntax (e.g., x^2, H_2)
+  res = res.replace(/\^([0-9a-zA-Z\+\-\=])/g, (_, g) => toSup(g))
+           .replace(/_([0-9a-zA-Z\+\-\=])/g, (_, g) => toSub(g));
+
+  return res;
 }
 
 function axFont(D) { return { family: 'Arial', size: D.axLblSz, weight: D.axBold ? 'bold' : 'normal' }; }
@@ -2515,7 +2465,7 @@ function contrastColor(hex) {
   var b = parseInt(c.substr(4, 2), 16) / 255;
   r = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
   g = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
-  b = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
+  b = b <= 0.03928 ? b / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
   var L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
   return L > 0.179 ? '#1e2a3a' : '#ffffff';
 }
@@ -3242,8 +3192,8 @@ function buildFlatCanvas() {
 }
 
 function buildGraph() {
-  const xlabel = getRichTextVal('xlabel'), ylabel = getRichTextVal('ylabel');
-  const y2label = getRichTextVal('y2label'), chartTitle = getRichTextVal('chartTitle');
+  const xlabel = gt(document.getElementById('xlabel')), ylabel = gt(document.getElementById('ylabel'));
+  const y2label = gt(document.getElementById('y2label')), chartTitle = gt(document.getElementById('chartTitle'));
   const ymin = gopt('ymin'), ymax = gopt('ymax'), ystep = gopt('ystep');
   const y2min = gopt('y2min'), y2max = gopt('y2max'), y2step = gopt('y2step');
   const xmin = gopt('xmin'), xmax = gopt('xmax'), xstep = gopt('xstep');
@@ -3276,7 +3226,7 @@ function buildBar(canvas, xlabel, ylabel, ymin, ymax, ystep, titleP, D, arrowOpt
   const groupNames = [], groupColors = [], groupTextures = [];
   for (let g = 0; g < n; g++) {
     var _gni = document.getElementById('barGroupName' + g);
-    groupNames.push(_gni && _gni.innerHTML ? _gni.innerHTML : ('Group ' + (g + 1)));
+    groupNames.push(_gni && _gni.value ? _gni.value : ('Group ' + (g + 1)));
     groupColors.push(getColor('barg' + g));
     var _tx = document.getElementById('bargTexture' + g);
     groupTextures.push(_tx ? _tx.value : DEFTEXTURES_BAR[g % DEFTEXTURES_BAR.length]);
@@ -3515,8 +3465,8 @@ function buildBoxWhisker(canvas, xlabel, ylabel, ymin, ymax, ystep, titleP, D, a
   const blks = document.querySelectorAll('#bw-series-list .series-block');
   const labels = [], stats = [], colors = [];
   blks.forEach(function(blk, i) {
-    const nameDiv = blk.querySelector('.series-head .rich-input');
-    const name = nameDiv ? nameDiv.innerHTML : ('Group ' + (i + 1));
+    const nameInp = blk.querySelector('.series-head input[type=text]');
+    const name = nameInp ? nameInp.value : ('Group ' + (i + 1));
     const color = getColor('bw' + blk.dataset.sidx);
     const vals = Array.from(blk.querySelectorAll('.bwb input[type=number]')).map(function(inp) { return parseFloat(inp.value); }).filter(function(v) { return !isNaN(v); });
     const st = computeBoxStats(vals, outlierMode); if (!st) return;
