@@ -1131,7 +1131,16 @@ input[type=radio] {
                   </div>
                   <div class="toggle-row" style="margin-bottom:6px;"><input type="checkbox" id="cpShowTickLabels" checked><label for="cpShowTickLabels">Show tick labels</label></div>
                   <div class="toggle-row" style="margin-bottom:6px;"><input type="checkbox" id="cpShowMinorGrid"><label for="cpShowMinorGrid">Show minor gridlines (half-step)</label></div>
-                  <div class="toggle-row" style="margin-bottom:6px;"><input type="checkbox" id="cpShowArrows" checked><label for="cpShowArrows">Arrowheads on axes</label></div>
+                  <div class="toggle-row" style="margin-bottom:6px;">
+                    <input type="checkbox" id="cpShowArrows" checked onchange="document.getElementById('cp-arrows-sub').style.display=this.checked?'block':'none';">
+                    <label for="cpShowArrows">Arrowheads on axes</label>
+                  </div>
+                  <div id="cp-arrows-sub" style="margin-left:22px;margin-bottom:6px;display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+                    <div class="toggle-row" style="margin:0;"><input type="checkbox" id="cpArrowXPos" checked><label for="cpArrowXPos">X positive (right)</label></div>
+                    <div class="toggle-row" style="margin:0;"><input type="checkbox" id="cpArrowXNeg" checked><label for="cpArrowXNeg">X negative (left)</label></div>
+                    <div class="toggle-row" style="margin:0;"><input type="checkbox" id="cpArrowYPos" checked><label for="cpArrowYPos">Y positive (top)</label></div>
+                    <div class="toggle-row" style="margin:0;"><input type="checkbox" id="cpArrowYNeg" checked><label for="cpArrowYNeg">Y negative (bottom)</label></div>
+                  </div>
                   <div class="toggle-row" style="margin-bottom:6px;"><input type="checkbox" id="cpShowAxisLabels" checked><label for="cpShowAxisLabels">Show axis variable labels</label></div>
                   <div class="grid-2" style="gap:10px;margin-bottom:8px;">
                     <div class="field-row"><label>X variable</label><input type="text" id="cpXVarLabel" value="x"></div>
@@ -2367,7 +2376,7 @@ function contrastColor(hex) {
   var b = parseInt(c.substr(4, 2), 16) / 255;
   r = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
   g = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
-  b = b <= 0.03928 ? b / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
+  b = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
   var L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
   return L > 0.179 ? '#1e2a3a' : '#ffffff';
 }
@@ -2414,6 +2423,10 @@ function buildCartesian(canvas, D) {
   var showTicks = document.getElementById('cpShowTickLabels').checked;
   var showMinor = document.getElementById('cpShowMinorGrid').checked;
   var showArrows = document.getElementById('cpShowArrows').checked;
+  var arrowXPos = showArrows && document.getElementById('cpArrowXPos').checked;
+  var arrowXNeg = showArrows && document.getElementById('cpArrowXNeg').checked;
+  var arrowYPos = showArrows && document.getElementById('cpArrowYPos').checked;
+  var arrowYNeg = showArrows && document.getElementById('cpArrowYNeg').checked;
   var showAxisVarLabels = document.getElementById('cpShowAxisLabels').checked;
   var cpXVarLabel = ((document.getElementById('cpXVarLabel') || {}).value || 'x').trim() || 'x';
   var cpYVarLabel = ((document.getElementById('cpYVarLabel') || {}).value || 'y').trim() || 'y';
@@ -2514,22 +2527,23 @@ function buildCartesian(canvas, D) {
 
   ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.fillStyle = '#000';
   ctx.beginPath(); ctx.moveTo(marginL, y0); ctx.lineTo(marginL + plotW, y0); ctx.stroke();
-  if (showArrows) {
+
+  function drw(x, y, dx, dy) {
+    var px = -dy, py2 = dx;
     ctx.beginPath();
-    ctx.moveTo(marginL + plotW + AS, y0);
-    ctx.lineTo(marginL + plotW, y0 - AS * 0.5);
-    ctx.lineTo(marginL + plotW, y0 + AS * 0.5);
-    ctx.closePath(); ctx.fill();
+    ctx.moveTo(x + dx * AS, y + dy * AS);
+    ctx.lineTo(x + px * 5, y + py2 * 5);
+    ctx.lineTo(x - px * 5, y - py2 * 5);
+    ctx.closePath();
+    ctx.fill();
   }
 
+  if (arrowXPos) drw(marginL + plotW, y0, 1, 0);
+  if (arrowXNeg) drw(marginL, y0, -1, 0);
+
   ctx.beginPath(); ctx.moveTo(x0, marginT + plotH); ctx.lineTo(x0, marginT); ctx.stroke();
-  if (showArrows) {
-    ctx.beginPath();
-    ctx.moveTo(x0, marginT - AS);
-    ctx.lineTo(x0 - AS * 0.5, marginT);
-    ctx.lineTo(x0 + AS * 0.5, marginT);
-    ctx.closePath(); ctx.fill();
-  }
+  if (arrowYPos) drw(x0, marginT, 0, -1);
+  if (arrowYNeg) drw(x0, marginT + plotH, 0, 1);
 
   ctx.font = tickFont + 'pt Arial'; ctx.fillStyle = '#1e2a3a'; ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
   var pxPerXStep = plotW / (xMax - xMin) * xStep;
@@ -2566,9 +2580,9 @@ function buildCartesian(canvas, D) {
   if (showAxisVarLabels) {
     ctx.font = 'italic bold ' + labelFont + 'pt Arial'; ctx.fillStyle = '#1e2a3a';
     ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-    ctx.fillText(parseHtmlFormatting(cpXVarLabel), marginL + plotW + (showArrows ? AS + 8 : 6), y0);
+    ctx.fillText(parseHtmlFormatting(cpXVarLabel), marginL + plotW + (arrowXPos ? AS + 8 : 6), y0);
     ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-    ctx.fillText(parseHtmlFormatting(cpYVarLabel), x0, marginT - (showArrows ? AS + 4 : 2));
+    ctx.fillText(parseHtmlFormatting(cpYVarLabel), x0, marginT - (arrowYPos ? AS + 4 : 2));
   }
 
   if (cpXLabel) {
