@@ -1,175 +1,68 @@
-# A Humble Quick Plot
+# A Humble Plotter
 
-A lightweight, interactive client-side graph builder designed for students to rapidly create, customize, and export math and science charts.
-
-**Author:** Steven Humble
-
-**Version:** V 1.3.0
-
-**Build Date:** 09-24-2026
-
-**License:** Free for educational use
+A lightweight, zero-backend graphing and data visualization web application designed for teachers, students, and scientists[cite: 1]. Built as a standalone HTML file with vanilla JavaScript, CSS3, Tabler Icons, and Chart.js[cite: 1].
 
 ---
 
-## 1. Overview
+## Overview
 
-**A Humble Quick Plot** is an interactive, single-file HTML5 Canvas graphing web application. It simplifies graph generation for STEM assignments by providing an intuitive direct-manipulation interface for plotting data directly onto a canvas, managing multiple series, formatting mathematical typography, calculating linear regressions, and exporting clean figures for lab reports and presentations.
+**A Humble Plotter** allows users to quickly format data, configure visual options, preview changes in real time, and export production-ready charts or tables[cite: 1]. The interface features an independent two-column split screen: the left pane handles graph selection, style settings, and data entry, while the right pane provides a live preview and quick-export controls[cite: 1].
 
----
-
-## 2. Key Features
-
-### 📊 Graph Types
-
-* **Bar Chart:** Grouped and clustered bar layouts with dynamic category management.
-
-
-* **Line Graph:** Multi-series connected line plots with point markers and color coordination.
-
-
-* **Scatter Plot:** Discrete point mapping with distinct marker shapes per series and automatic best-fit line regression.
-
-
-* **Histogram:** Distribution graphing with custom bin starting points, bin widths, bin counts, and direct-click frequency entry.
-
-
-
-### 🎨 Accessible Color System (Okabe-Ito Palette)
-
-Pre-configured with universal colorblind-friendly colors:
-
-1. **Navy / Blue** (`#0072B2`)
-
-
-2. **Orange** (`#E69F00`)
-
-
-3. **Bluish Green** (`#009E73`)
-
-
-4. **Vermilion** (`#D55E00`)
-
-
-5. **Sky Blue** (`#56B4E9`)
-
-
-6. **Reddish Purple** (`#CC79A7`)
-
-
-7. **Darkened Gold** (`#E5C494`)
-
-
-8. **Charcoal Slate** (`#4A5568`)
-
-
-
-* *Custom Hex Picker:* Allows picking any custom color via an integrated HTML color picker.
-
-
-
-### 📐 Scientific & Math Tools
-
-* **Linear Regression:** Automatic calculation and overlay of the slope-intercept equation ($y = mx + b$) and coefficient of determination ($R^2$) on scatter plots.
-
-
-* **± Error Bars:** Interactive drag-to-set error bar sizing mode with horizontal end caps.
-
-
-* **Quarter-Interval Minor Gridlines:** Toggleable subtle gridlines drawn at 1/4, 1/2, and 3/4 intervals between major scale ticks.
-
-
-* **Adjustable Tick Font Size:** Numeric stepper control directly inside the Tools & Modifiers bar to adjust axis number and category label sizes (defaulting to 16px).
-* **Scientific Symbols Dropdown:** Quick-insertion for `±`, `°`, `μ`, `Δ`, `Ψ`, `α`, `β`, `Φ`, and `×`.
-
-
-* **One-Click Sub/Superscript:** `X²` and `X₂` buttons to transform highlighted text into native Unicode sub/super characters.
-
-
-
-### 🔒 Contextual Workflow Locks
-
-To prevent incomplete plots, interface controls dynamically unlock as required prerequisites are completed:
-
-* **Bar Graph:** The "Groups within Categories" and "Labels & Scales" cards remain locked until at least one X category has been added.
-* **Histogram:** The "Series" and "Labels & Scales" cards remain locked until all three bin parameters (*Bin Starts At*, *Width of Bin*, and *# of Bins*) have been entered.
-
-### 💾 Project Management & Export
-
-* **JSON Project Persistence:** Save (`.json`) and open complete project files to resume work across sessions. Saves graph type, labels, scale bounds, bin settings, tick font size, and plotted data.
-
-
-* **Export Options:** Download high-resolution PNG images with an integrated legend strip, or copy the composite graphic directly to the system clipboard.
-
-
+* **Version**: 2.0.0[cite: 1]
+* **Release Date**: 2026-09-22[cite: 1]
+* **Author**: Steven Humble[cite: 1]
+* **Tech Stack**: Vanilla HTML5, CSS3, JavaScript (ES6), Chart.js (v4.4.1), Tabler Icons (v3.31.0)[cite: 1].
 
 ---
 
-## 3. UI Layout & Controls Structure
+## Features & Modules
 
-### Left Panel: Step-by-Step Configuration Cards
+### 1. Graph Types
+* **Bar Chart**: Supports 1 to 5 grouped series per category, custom textures (solid, diagonal lines, light tint, crosshatch, sparse dots), error bars ($\pm$), and on-bar data labels[cite: 1].
+* **Line Chart**: Multi-series line plots with configurable line styles (solid, dashed, dotted, dash-dot, long dash), custom node marker styles, dual Y-axis ($Y_2$) support, and point error bars[cite: 1].
+* **Scatter Plot**: Numerical $XY$ plots supporting custom marker shapes, linear regression trendlines, independent $X$ and $Y$ error bars, and dual Y-axis ($Y_2$) support[cite: 1].
+* **Histogram**: Frequency distributions with automatic bin calculation or custom start/bin widths, configurable bin boundary label styles, and diagonal/vertical label rotation[cite: 1].
+* **Pie Chart**: Slice customization with interactive legends and flexible callout/slice labeling (percentages, raw counts, label names, or combinations)[cite: 1].
+* **Box & Whisker**: Five-number summary visualization computed directly from raw data arrays, featuring configurable outlier handling (all values, 1.5 $\times$ IQR fence markers, or excluded outliers)[cite: 1].
 
-1. **Graph Type:** Grid selector for Bar, Line, Scatter, and Histogram layouts.
-
-
-2. **Tools & Modifiers:**
-* **Action Grid:** Row 1 (*Best Fit*, *± Error*, *Minor Grid*); Row 2 (*Undo*, *Delete*, *Clear*).
-* **Tick Font Stepper:** Numeric input box with native up/down increment arrows to control tick label size.
-
-
-3. **X Categories (Bar Graph Only):** Input field, category chip tag list, and removal buttons.
-
-
-4. **Histogram Bins (Histogram Only):** 3-column input configuration for *Bin Starts At*, *Width of Bin*, and *# of Bins*.
-5. **Series / Groups within Categories:** Multi-series manager with individual color pickers, label renaming fields, and SVG trash-can deletion buttons.
-
-
-6. **Labels & Scales:** Title, X/Y axis labels, symbol toolbar, formatting tools, and numeric scale ranges (Min, Max, Step).
-
-
-
-### Right Panel: Interactive Canvas Stage
-
-* **Active Drawing Strip:** Bar/Line series selection indicators.
-
-
-* **HTML Legend Strip:** Dynamic color swatch and title summary.
-
-
-* **Canvas Stage:** 3-layer HTML5 canvas viewport for real-time drafting and point placement.
-
-
-* **Export Tray:** Action buttons to download PNG or copy image to clipboard.
-
-
+### 2. Data Tools
+* **Data Table**: Canvas-rendered tabular data generator with custom fonts, border styling, header shading, cell alignments, alternating row backgrounds, and direct CSV/Excel TSV pasting[cite: 1].
+* **Cartesian Coordinate Plane**: Pure HTML5 Canvas coordinate grid generator designed for classroom handouts, worksheets, and presentations[cite: 1].
+  * Configurable domain and range ($X$ and $Y$ min/max/step)[cite: 1].
+  * Sub-gridlines (half-step minor gridlines) and selectable grid styles (dashed, dotted, solid)[cite: 1].
+  * Axis labels, variable notation ($x$, $y$), origin marker ($O$), and numerical ticks[cite: 1].
+  * **Granular Directional Arrowheads**: Master toggle for axis arrows with individual direction toggles:
+    * Positive $X$ (Right)
+    * Negative $X$ (Left)
+    * Positive $Y$ (Top)
+    * Negative $Y$ (Bottom)
+    * Default state: Enabled with all 4 directions active on reveal.
 
 ---
 
-## 4. Architecture & Technology
+## Styling & Typography
 
-### Technology Stack
+* **Color Palette**: Preset with a curated sequence of 6 grayscale shades, the accessible Okabe-Ito colorblind-safe palette, slate accents, and an arbitrary hex color picker[cite: 1].
+* **HTML & Sub/Superscript Parser**: Labels, axis titles, and chart titles support sub/superscript parsing using either standard HTML tags (`<sub>`, `<sup>`) or LaTeX-style shorthand (`x_1`, `x^2`, `H_{2}O`)[cite: 1].
+* **Dynamic Contrast**: Data labels and error bars automatically invert their foreground color against dark backgrounds for readability[cite: 1].
 
-* **HTML5 Canvas:** 3-layer canvas stack (`gc` for grid/labels, `dc` for data points/lines, `oc` for overlays).
+---
 
+## Data Input & Import Capabilities
 
-* **Vanilla JavaScript:** Zero external JavaScript dependencies; self-contained DOM manipulation and canvas rendering.
+* **Direct Inline Editing**: Dynamic tables allowing rows and columns to be added, reordered, or removed with single-click delete buttons[cite: 1].
+* **Spreadsheet Import**: Built-in clipboard parsers allow users to paste tab-separated rows directly from Microsoft Excel or Google Sheets, as well as comma-separated values (CSV)[cite: 1].
 
+---
 
-* **Tabler Icons & Inline SVG:** Used for clean, dependency-resilient UI icons.
+## Export Utilities
 
+* **Download PNG**: Generates a high-resolution flat PNG image[cite: 1]. For standard charts, the external HTML legend is rendered onto the canvas above the plot before downloading[cite: 1].
+* **Copy to Clipboard**: Uses the asynchronous Clipboard API (`image/png` blob) for quick pasting into Word, Google Docs, slides, or emails, with an automated fallback for embedded environments[cite: 1].
+* **Copy as HTML Table**: Specifically available when using the Data Table tool to paste semantic HTML markup directly into rich text editors or web pages[cite: 1].
 
-* **CSS3:** Flexible split-view layout with custom form elements and focus rings.
+---
 
+## Project Structure
 
-
-### Canvas Layering Model
-
-```text
-┌───────────────────────────────────────────┐
-│ #graph-wrap                               │
-│  ├─ canvas #gc (Grid, Ticks, Axes, Titles)│
-│  ├─ canvas #dc (Bars, Lines, Scatter, Fit)│
-│  └─ canvas #oc (Interactive Overlays)     │
-└───────────────────────────────────────────┘
-
-```
+The entire application is encapsulated inside a single distribution file:
