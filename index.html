@@ -95,6 +95,22 @@ html, body {
   gap: 16px;
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon {
+  height: 34px;
+  width: 34px;
+  display: block;
+  border: 1.5px solid #ffffff;
+  border-radius: 8px;
+  padding: 1px;
+  box-sizing: border-box;
+}
+
 .header-titles {
   display: flex;
   flex-direction: column;
@@ -740,9 +756,12 @@ input[type=radio] {
 <div id="app">
   <!-- Top Header -->
   <header id="app-header">
-    <div class="header-titles">
-      <div id="app-title">A Humble Plotter</div>
-      <div id="app-subtitle">A Simple Graphing App for Teachers, Students, and Scientists &mdash; Built by Steven Humble</div>
+    <div class="header-left">
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231e2a3a'/%3E%3Cpath d='M6 10h20M6 22h20M10 6v20M22 6v20' stroke='%23334155' stroke-width='1' stroke-dasharray='2 2' fill='none'/%3E%3Cline x1='16' y1='4' x2='16' y2='28' stroke='%23cbd5e1' stroke-width='1.5'/%3E%3Cline x1='4' y1='16' x2='28' y2='16' stroke='%23cbd5e1' stroke-width='1.5'/%3E%3Cpolygon points='16,3 13.5,6 18.5,6' fill='%23cbd5e1'/%3E%3Cpolygon points='29,16 26,13.5 26,18.5' fill='%23cbd5e1'/%3E%3Ccircle cx='22' cy='10' r='2.5' fill='%233266ad' stroke='%23ffffff' stroke-width='1'/%3E%3C/svg%3E" alt="App Icon" class="header-icon">
+      <div class="header-titles">
+        <div id="app-title">A Humble Plotter</div>
+        <div id="app-subtitle">A Simple Graphing App for Teachers, Students, and Scientists &mdash; Built by Steven Humble</div>
+      </div>
     </div>
     <div class="header-right">
       <div class="toolbar-ver">V 2.0.0 &mdash; 2026-09-22</div>
@@ -2026,16 +2045,16 @@ const scErrPlugin = {
         const yTraw = yS.getPixelForValue(e.y + e.ye), yBraw = yS.getPixelForValue(e.y - e.ye);
         const yT = Math.max(yTraw, ca2.top), yB = Math.min(yBraw, ca2.bottom);
         ctx.beginPath(); ctx.moveTo(xc, yT); ctx.lineTo(xc, yB); ctx.stroke();
-        if (yTraw >= ca2.top) { ctx.beginPath(); ctx.moveTo(xc - cap, yT); ctx.lineTo(xc + cap, yT); ctx.stroke(); }
-        if (yBraw <= ca2.bottom) { ctx.beginPath(); ctx.moveTo(xc - cap, yB); ctx.lineTo(xc + cap, yB); ctx.stroke(); }
+        if (yTraw >= ca2.top) { ctx.beginPath(); ctx.moveTo(xc - cap, yT); ctx.lineTo(xc + cap, yT); }
+        if (yBraw <= ca2.bottom) { ctx.beginPath(); ctx.moveTo(xc - cap, yB); ctx.lineTo(xc + cap, yB); }
       }
       if (e.xe > 0) {
         const ca = chart.chartArea;
         const xLraw = xS.getPixelForValue(e.x - e.xe), xRraw = xS.getPixelForValue(e.x + e.xe);
         const xL = Math.max(xLraw, ca.left), xR = Math.min(xRraw, ca.right);
         ctx.beginPath(); ctx.moveTo(xL, yc); ctx.lineTo(xR, yc); ctx.stroke();
-        if (xLraw >= ca.left) { ctx.beginPath(); ctx.moveTo(xL, yc - cap); ctx.lineTo(xL, yc + cap); ctx.stroke(); }
-        if (xRraw <= ca.right) { ctx.beginPath(); ctx.moveTo(xR, yc - cap); ctx.lineTo(xR, yc + cap); ctx.stroke(); }
+        if (xLraw >= ca.left) { ctx.beginPath(); ctx.moveTo(xL, yc - cap); ctx.lineTo(xL, yc + cap); }
+        if (xRraw <= ca.right) { ctx.beginPath(); ctx.moveTo(xR, yc - cap); ctx.lineTo(xR, yc + cap); }
       }
     });
     ctx.restore();
@@ -3138,462 +3157,6 @@ function buildFlatCanvas() {
   });
   ctx.drawImage(srcCanvas, 0, 0, srcCanvas.width, srcCanvas.height, 0, legendH, W, H);
   return tmp;
-}
-
-function buildGraph() {
-  if (!selT) return;
-  const xlabel = gt(document.getElementById('xlabel')), ylabel = gt(document.getElementById('ylabel'));
-  const y2label = gt(document.getElementById('y2label')), chartTitle = gt(document.getElementById('chartTitle'));
-  const ymin = gopt('ymin'), ymax = gopt('ymax'), ystep = gopt('ystep');
-  const y2min = gopt('y2min'), y2max = gopt('y2max'), y2step = gopt('y2step');
-  const xmin = gopt('xmin'), xmax = gopt('xmax'), xstep = gopt('xstep');
-  const D = getD();
-  if (curChart) { curChart.destroy(); curChart = null; }
-  document.getElementById('graph-legend').innerHTML = ''; document.getElementById('copy-feedback').style.display = 'none';
-  const canvas = document.getElementById('mainChart');
-  canvas.width = D.gW; canvas.height = D.gH; canvas.style.width = D.gW + 'px'; canvas.style.height = D.gH + 'px'; 
-  canvas.dataset.logicalW = D.gW; canvas.dataset.logicalH = D.gH;
-  Chart.defaults.font.family = 'Arial'; Chart.defaults.font.size = D.tickSz;
-  const titleP = chartTitle ? { display: true, text: parseHtmlFormatting(chartTitle), font: { family: 'Arial', size: Math.round(D.axLblSz * 1.1), weight: 'bold' }, color: '#1e2a3a', padding: { bottom: 14 } } : { display: false };
-  const arrowOpts = { yTop: D.arrowYTop, yBot: D.arrowYBot, xRight: D.arrowXRight, xLeft: D.arrowXLeft };
-  
-  var _chb = document.getElementById('copyHtmlBtn');
-  if (_chb) _chb.style.display = selT === 'datatable' ? 'inline-flex' : 'none';
-  if (selT === 'datatable') { buildDataTable(D); return; }
-  if (selT === 'cartesian') { buildCartesian(canvas, D); return; }
-  if (selT === 'pie') { buildPie(canvas, chartTitle, D); return; }
-  if (selT === 'bar') { buildBar(canvas, xlabel, ylabel, ymin, ymax, ystep, titleP, D, arrowOpts); return; }
-  if (selT === 'line') { buildLine(canvas, xlabel, ylabel, y2label, ymin, ymax, ystep, y2min, y2max, y2step, xmin, xmax, xstep, titleP, D, arrowOpts); return; }
-  if (selT === 'scatter') { buildScatter(canvas, xlabel, ylabel, y2label, ymin, ymax, ystep, y2min, y2max, y2step, xmin, xmax, xstep, titleP, D, arrowOpts); return; }
-  if (selT === 'histogram') { buildHistogram(canvas, xlabel, ylabel, ymin, ymax, ystep, titleP, D, arrowOpts); return; }
-  if (selT === 'boxwhisker') { buildBoxWhisker(canvas, xlabel, ylabel, ymin, ymax, ystep, titleP, D, arrowOpts); return; }
-}
-
-function buildBar(canvas, xlabel, ylabel, ymin, ymax, ystep, titleP, D, arrowOpts) {
-  const n = nGroups(), hasErr = document.getElementById('errGlobal') ? document.getElementById('errGlobal').checked : false;
-  const rows = document.getElementById('bar-tbody').querySelectorAll('tr');
-  const cats = [], groupVals = [], groupErrs = [];
-  const groupNames = [], groupColors = [], groupTextures = [];
-  for (let g = 0; g < n; g++) {
-    var _gni = document.getElementById('barGroupName' + g);
-    groupNames.push(_gni && _gni.value ? _gni.value : ('Group ' + (g + 1)));
-    groupColors.push(getColor('barg' + g));
-    var _tx = document.getElementById('bargTexture' + g);
-    groupTextures.push(_tx ? _tx.value : DEFTEXTURES_BAR[g % DEFTEXTURES_BAR.length]);
-    groupVals.push([]); groupErrs.push([]);
-  }
-  rows.forEach(function(tr) {
-    cats.push(gt(tr.querySelector('.bar-cat')) || '');
-    const valIs = tr.querySelectorAll('.bar-val'), errIs = tr.querySelectorAll('.bar-err');
-    for (let g = 0; g < n; g++) { groupVals[g].push(gv(valIs[g])); groupErrs[g].push(hasErr ? gv(errIs[g]) : 0); }
-  });
-  const allVals = groupVals.flat(), allErrs = groupErrs.flat();
-  const errTop = hasErr ? allVals.map(function(v, i) { return v + allErrs[i]; }) : allVals;
-  const errBot = hasErr ? allVals.map(function(v, i) { return v - allErrs[i]; }) : allVals;
-  const sc = niceScale(Math.min.apply(null, [0].concat(allVals)), Math.max.apply(null, errTop), Math.min.apply(null, [0].concat(errBot)), Math.max.apply(null, errTop), ymin, ymax, ystep);
-  const errItems = [];
-  const datasets = groupVals.map(function(vals, g) {
-    vals.forEach(function(v, i) { if (hasErr) errItems.push({ di: g, pi: i, val: v, err: groupErrs[g][i] }); });
-    const fillPattern = createTexturePattern(groupColors[g], groupTextures[g], '#ffffff');
-    return { label: groupNames[g], data: vals, backgroundColor: fillPattern, borderColor: '#111827', borderWidth: 1, borderRadius: 0 };
-  });
-  const lb = document.getElementById('graph-legend');
-  if (n > 1) groupNames.forEach(function(nm, g) {
-    lb.innerHTML += '<span class="leg-item" data-label="' + nm + '" data-color="' + groupColors[g] + '" data-texture="' + groupTextures[g] + '" style="display:flex;align-items:center;gap:5px;">'
-      + barTextureSVG(groupColors[g], groupTextures[g]) + '<span style="font-size:10pt;">' + parseHtmlFormatting(nm) + '</span></span>';
-  });
-  var barDLP = {
-    id: 'barDLP',
-    afterDatasetsDraw: function(chart) {
-      var dlEl = document.getElementById('showDataLabels');
-      if (!dlEl || !dlEl.checked) return;
-      var usePct = document.getElementById('pctY') && document.getElementById('pctY').checked;
-      var ctx = chart.ctx;
-      chart.data.datasets.forEach(function(_, di) {
-        var meta = chart.getDatasetMeta(di);
-        meta.data.forEach(function(bar, i) {
-          var val = chart.data.datasets[di].data[i];
-          if (val === null || val === undefined) return;
-          var n2 = +parseFloat(val).toFixed(8);
-          var txt = usePct ? (n2 + '%') : (n2.toString());
-          var barH = Math.abs(bar.base - bar.y);
-          var fontSize = D.tickSz || 10;
-          ctx.save(); ctx.font = 'bold ' + fontSize + 'pt Arial';
-          if (barH >= fontSize * 1.8 + 8 && groupTextures[di] === 'solid') {
-            ctx.fillStyle = contrastColor(groupColors[di] || '#000000');
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText(txt, bar.x, bar.y + barH / 2);
-          } else {
-            ctx.fillStyle = '#1e2a3a'; ctx.textAlign = 'center';
-            ctx.textBaseline = val < 0 ? 'top' : 'bottom';
-            ctx.fillText(txt, bar.x, val < 0 ? bar.y + 4 : bar.y - 4);
-          }
-          ctx.restore();
-        });
-      });
-    }
-  };
-  Chart.register(errPlugin, axisArrowPlugin, boldZeroPlugin, barDLP);
-  curChart = new Chart(canvas, {
-    type: 'bar', data: { labels: cats, datasets: datasets },
-    options: {
-      responsive: false, plugins: { legend: { display: false }, title: titleP, errPlugin: { items: errItems }, axisArrowPlugin: arrowOpts, boldZeroPlugin: { enabled: D.boldZero } },
-      scales: { x: makeXCat(xlabel, D), y: makeYSc(ylabel, sc, D, undefined, D.pctY) }
-    },
-    plugins: [errPlugin, axisArrowPlugin, boldZeroPlugin, barDLP]
-  });
-}
-
-function buildLine(canvas, xlabel, ylabel, y2label, ymin, ymax, ystep, y2min, y2max, y2step, xmin, xmax, xstep, titleP, D, arrowOpts) {
-  var hasErr = document.getElementById('errGlobal') ? document.getElementById('errGlobal').checked : false;
-  var useY2 = document.getElementById('useY2Global').checked;
-  var blks = document.querySelectorAll('#line-series-list .series-block');
-  var datasets = [], errItems = [], lb = document.getElementById('graph-legend');
-  var allNumericX = true;
-  var allXVals = [], allYVals = [], allErrVals = [];
-  var seriesData = [];
-
-  blks.forEach(function(blk, di) {
-    var st = getSeriesState(blk, true);
-    var onY2 = useY2 && blk.querySelector('.use-y2-series') && blk.querySelector('.use-y2-series').checked;
-    var rows = blk.querySelectorAll('.lsb tr');
-    var pts = [];
-    rows.forEach(function(tr, pi) {
-      var ins = tr.querySelectorAll('input[type=text],input[type=number]');
-      var xRaw = gt(ins[0]) || '';
-      var xNum = parseFloat(xRaw);
-      if (isNaN(xNum) || xRaw.trim() === '') allNumericX = false;
-      var y = gv(ins[1]);
-      var e = hasErr ? gv(ins[2]) : 0;
-      pts.push({ xRaw: xRaw, xNum: xNum, y: y, e: e, pi: pi });
-      if (!onY2) allYVals.push(y);
-      if (hasErr && !onY2) allErrVals.push(y + e, y - e);
-    });
-    seriesData.push({ st: st, onY2: onY2, pts: pts, di: di });
-  });
-
-  var errEx = allErrVals.length ? { min: Math.min.apply(null, allErrVals), max: Math.max.apply(null, allErrVals) } : {};
-  var sc = niceScale(Math.min.apply(null, [0].concat(allYVals)), Math.max.apply(null, allYVals), errEx.min, errEx.max, ymin, ymax, ystep);
-  var dlP = makeDLP(D, true);
-  var scales, firstLabels = [];
-
-  if (allNumericX) {
-    seriesData.forEach(function(sd, di) {
-      var st = sd.st, onY2 = sd.onY2;
-      var pts = sd.pts.map(function(p) { return { x: p.xNum, y: p.y }; });
-      sd.pts.forEach(function(p) { allXVals.push(p.xNum); });
-      var mk = st.markerVal;
-      var ptOpts = mk === 'none' ? { pointRadius: 0, pointHoverRadius: 0, pointStyle: 'circle' } : { pointRadius: 5, pointHoverRadius: 7, pointStyle: mk };
-      var ds = { label: st.nameVal, data: pts, borderColor: st.colorHex, borderDash: getDashPattern(st.lineStyleVal), backgroundColor: st.colorHex + '33', pointBackgroundColor: st.colorHex, tension: 0, fill: false, yAxisID: onY2 ? 'y2' : 'y', showLine: true, clip: false };
-      Object.assign(ds, ptOpts); datasets.push(ds);
-      if (hasErr) { sd.pts.forEach(function(p, pi) { errItems.push({ di: di, pi: pi, x: p.xNum, y: p.y, xe: 0, ye: p.e, yAxis: onY2 ? 'y2' : 'y' }); }); }
-      if (D.showLegend) lb.innerHTML += '<span class="leg-item" data-label="' + st.nameVal + (onY2 ? ' (Y2)' : '') + '" data-color="' + st.colorHex + '" data-shape="' + st.markerVal + '" data-linestyle="' + st.lineStyleVal + '" style="display:flex;align-items:center;gap:5px;">' + markerSVG(st.markerVal, st.colorHex, st.lineStyleVal) + '<span style="font-size:10pt;">' + parseHtmlFormatting(st.nameVal) + (onY2 ? ' (Y2)' : '') + '</span></span>';
-    });
-    var dataXMin = allXVals.length ? Math.min.apply(null, allXVals) : 0;
-    var dataXMax = allXVals.length ? Math.max.apply(null, allXVals) : 1;
-    var scX = niceScaleX(dataXMin, dataXMax, xmin, xmax, xstep);
-    scales = { x: makeXLin(xlabel, scX, D, D.pctX), y: makeYSc(ylabel, sc, D, undefined, D.pctY) };
-    if (useY2) {
-      var y2ValsNum = []; seriesData.forEach(function(sd) { if (sd.onY2) sd.pts.forEach(function(p) { y2ValsNum.push(p.y); }); });
-      var y2MinN = y2ValsNum.length ? Math.min.apply(null, y2ValsNum) : 0;
-      var y2MaxN = y2ValsNum.length ? Math.max.apply(null, y2ValsNum) : 1;
-      var sc2 = niceScale(y2MinN, y2MaxN, y2MinN, y2MaxN, y2min, y2max, y2step);
-      scales.y2 = Object.assign({}, makeYSc(y2label || 'Y2', sc2, D, 'right', D.pctY), { grid: { drawOnChartArea: false } });
-    }
-    Chart.register(scErrPlugin, axisArrowPlugin, boldZeroPlugin, dlP);
-    curChart = new Chart(canvas, {
-      type: 'scatter', data: { datasets: datasets },
-      options: { responsive: false, layout: { padding: { top: 6, bottom: 6, left: 6, right: 6 } }, plugins: { legend: { display: false }, title: titleP, scErrPlugin: { items: errItems }, axisArrowPlugin: arrowOpts, boldZeroPlugin: { enabled: D.boldZero } }, scales: scales },
-      plugins: [scErrPlugin, axisArrowPlugin, boldZeroPlugin, dlP]
-    });
-  } else {
-    seriesData.forEach(function(sd, di) {
-      var st = sd.st, onY2 = sd.onY2;
-      var lbls = sd.pts.map(function(p) { return p.xRaw; });
-      var vals = sd.pts.map(function(p) { return p.y; });
-      if (di === 0) firstLabels = lbls;
-      if (hasErr) { sd.pts.forEach(function(p, pi) { errItems.push({ di: di, pi: pi, x: 0, y: p.y, xe: 0, ye: p.e, yAxis: onY2 ? 'y2' : 'y' }); }); }
-      var mk = st.markerVal;
-      var ptOpts = mk === 'none' ? { pointRadius: 0, pointHoverRadius: 0, pointStyle: 'circle' } : { pointRadius: 5, pointHoverRadius: 7, pointStyle: mk };
-      var ds = { label: st.nameVal, data: vals, borderColor: st.colorHex, borderDash: getDashPattern(st.lineStyleVal), backgroundColor: st.colorHex + '33', pointBackgroundColor: st.colorHex, tension: 0, fill: false, yAxisID: onY2 ? 'y2' : 'y', clip: false };
-      Object.assign(ds, ptOpts); datasets.push(ds);
-      if (D.showLegend) lb.innerHTML += '<span class="leg-item" data-label="' + st.nameVal + (onY2 ? ' (Y2)' : '') + '" data-color="' + st.colorHex + '" data-shape="' + st.markerVal + '" data-linestyle="' + st.lineStyleVal + '" style="display:flex;align-items:center;gap:5px;">' + markerSVG(st.markerVal, st.colorHex, st.lineStyleVal) + '<span style="font-size:10pt;">' + parseHtmlFormatting(st.nameVal) + (onY2 ? ' (Y2)' : '') + '</span></span>';
-    });
-    scales = { x: makeXCatStep(xlabel, D, xstep), y: makeYSc(ylabel, sc, D, undefined, D.pctY) };
-    if (useY2) {
-      var y2ValsCat = []; seriesData.forEach(function(sd) { if (sd.onY2) sd.pts.forEach(function(p) { y2ValsCat.push(p.y); }); });
-      var y2MinC = y2ValsCat.length ? Math.min.apply(null, y2ValsCat) : 0;
-      var y2MaxC = y2ValsCat.length ? Math.max.apply(null, y2ValsCat) : 1;
-      var sc2 = niceScale(y2MinC, y2MaxC, y2MinC, y2MaxC, y2min, y2max, y2step);
-      scales.y2 = Object.assign({}, makeYSc(y2label || 'Y2', sc2, D, 'right', D.pctY), { grid: { drawOnChartArea: false } });
-    }
-    Chart.register(scErrPlugin, axisArrowPlugin, boldZeroPlugin, dlP);
-    curChart = new Chart(canvas, {
-      type: 'line', data: { labels: firstLabels, datasets: datasets },
-      options: { responsive: false, layout: { padding: { top: 6, bottom: 6, left: 6, right: 6 } }, plugins: { legend: { display: false }, title: titleP, scErrPlugin: { items: errItems }, axisArrowPlugin: arrowOpts, boldZeroPlugin: { enabled: D.boldZero } }, scales: scales },
-      plugins: [scErrPlugin, axisArrowPlugin, boldZeroPlugin, dlP]
-    });
-  }
-}
-
-function buildScatter(canvas, xlabel, ylabel, y2label, ymin, ymax, ystep, y2min, y2max, y2step, xmin, xmax, xstep, titleP, D, arrowOpts) {
-  const hasErr = document.getElementById('errGlobal') ? document.getElementById('errGlobal').checked : false;
-  const useY2 = document.getElementById('useY2Global').checked;
-  const blks = document.querySelectorAll('#scatter-series-list .series-block');
-  const datasets = [], errItems = [], lb = document.getElementById('graph-legend');
-  let allX = [], allY = [], allYErr = []; const trendDatasets = [];
-  blks.forEach(function(blk, di) {
-    const st = getSeriesState(blk, false);
-    const onY2 = useY2 && blk.querySelector('.use-y2-series') && blk.querySelector('.use-y2-series').checked;
-    const pts = [];
-    blk.querySelectorAll('.ssb tr').forEach(function(tr, pi) {
-      const ins = tr.querySelectorAll('input[type=number]'), x = gv(ins[0]), y = gv(ins[1]);
-      pts.push({ x: x, y: y }); allX.push(x); allY.push(y);
-      if (hasErr) { const ye = gv(ins[3]); allYErr.push(y + ye, y - ye); errItems.push({ di: di, pi: pi, x: x, y: y, xe: gv(ins[2]), ye: ye, yAxis: onY2 ? 'y2' : 'y' }); }
-    });
-    datasets.push({ label: st.nameVal, data: pts, backgroundColor: st.colorHex, borderColor: st.colorHex, pointRadius: 6, pointHoverRadius: 8, pointStyle: st.markerVal, yAxisID: onY2 ? 'y2' : 'y', clip: false });
-    if (D.showLegend) lb.innerHTML += '<span class="leg-item" data-label="' + st.nameVal + (onY2 ? ' (Y2)' : '') + '" data-color="' + st.colorHex + '" data-shape="' + st.markerVal + '" style="display:flex;align-items:center;gap:5px;">' + markerSVG(st.markerVal, st.colorHex, 'solid') + '<span style="font-size:10pt;">' + parseHtmlFormatting(st.nameVal) + (onY2 ? ' (Y2)' : '') + '</span></span>';
-    if (D.showTrendline) { const reg = linReg(pts); if (reg) trendDatasets.push({ type: 'line', label: st.nameVal + ' trend', data: [{ x: reg.xMin, y: reg.m * reg.xMin + reg.b }, { x: reg.xMax, y: reg.m * reg.xMax + reg.b }], borderColor: st.colorHex, borderWidth: 2, borderDash: [6, 3], pointRadius: 0, fill: false, tension: 0, yAxisID: onY2 ? 'y2' : 'y', clip: false }); }
-  });
-  const dataXMin = allX.length ? Math.min.apply(null, allX) : 0, dataXMax = allX.length ? Math.max.apply(null, allX) : 1;
-  const scX = niceScaleX(dataXMin, dataXMax, xmin, xmax, xstep);
-  const errYEx = allYErr.length ? { min: Math.min.apply(null, allYErr), max: Math.max.apply(null, allYErr) } : {};
-  const dataYMin = allY.length ? Math.min.apply(null, allY) : 0, dataYMax = allY.length ? Math.max.apply(null, allY) : 1;
-  const scY = niceScale(dataYMin, dataYMax, errYEx.min || dataYMin, errYEx.max || dataYMax, ymin, ymax, ystep);
-  const scales = { x: makeXLin(xlabel, scX, D, D.pctX), y: makeYSc(ylabel, scY, D, undefined, D.pctY) };
-  if (useY2) {
-    var y2ValsSc = []; blks.forEach(function(blk) { var _onY2 = useY2 && blk.querySelector('.use-y2-series') && blk.querySelector('.use-y2-series').checked; if (_onY2) blk.querySelectorAll('.ssb tr').forEach(function(tr) { var ins = tr.querySelectorAll('input[type=number]'); if (ins[1]) y2ValsSc.push(gv(ins[1])); }); });
-    var y2AutoMinS = y2ValsSc.length ? Math.min.apply(null, y2ValsSc) : 0;
-    var y2AutoMaxS = y2ValsSc.length ? Math.max.apply(null, y2ValsSc) : 1;
-    const sc2 = niceScale(y2AutoMinS, y2AutoMaxS, y2AutoMinS, y2AutoMaxS, y2min, y2max, y2step);
-    scales.y2 = Object.assign({}, makeYSc(y2label || 'Y2', sc2, D, 'right', D.pctY), { grid: { drawOnChartArea: false } });
-  }
-  const dlP = makeDLP(D, true);
-  Chart.register(scErrPlugin, axisArrowPlugin, boldZeroPlugin, dlP);
-  curChart = new Chart(canvas, {
-    type: 'scatter', data: { datasets: datasets.concat(trendDatasets) },
-    options: { responsive: false, layout: { padding: { top: 6, bottom: 6, left: 6, right: 6 } }, plugins: { legend: { display: false }, title: titleP, scErrPlugin: { items: errItems }, axisArrowPlugin: arrowOpts, boldZeroPlugin: { enabled: D.boldZero } }, scales: scales },
-    plugins: [scErrPlugin, axisArrowPlugin, boldZeroPlugin, dlP]
-  });
-}
-
-function buildHistogram(canvas, xlabel, ylabel, ymin, ymax, ystep, titleP, D, arrowOpts) {
-  const bins = parseInt(document.getElementById('histBins').value) || 5;
-  const startVal = gopt('histStart'), binSize = gopt('histBinSize'), color = getColor('hist0');
-  const vals = Array.from(document.getElementById('hist-tbody').querySelectorAll('input[type=number]')).map(function(i) { return parseFloat(i.value); }).filter(function(v) { return !isNaN(v); });
-  const histLabelStyleEl = document.getElementById('histLabelStyle');
-  const histLabelOffset = histLabelStyleEl ? parseFloat(histLabelStyleEl.value) : 1;
-  const histRotEl = document.getElementById('histLabelRotation');
-  const histRotVal = histRotEl ? histRotEl.value : '0';
-  const histMaxRot = histRotVal === 'auto' ? 90 : parseInt(histRotVal) || 0;
-  const histMinRot = histRotVal === 'auto' ? 0 : histMaxRot;
-  const h = computeHistogram(vals, bins, startVal, binSize, histLabelOffset);
-  const sc = niceScale(0, Math.max.apply(null, [1].concat(h.counts)), 0, Math.max.apply(null, [1].concat(h.counts)), ymin, ymax, ystep);
-  const dlP = makeDLP(D, false); const extraDatasets = [];
-  if (D.showTrendline && h.binEdges && h.binEdges.length > 1) {
-    const pts = h.counts.map(function(c, i) { return { x: (h.binEdges[i] + h.binEdges[i + 1]) / 2, y: c }; });
-    const reg = linReg(pts);
-    if (reg) extraDatasets.push({ type: 'line', label: 'Trend', data: [{ x: reg.xMin, y: reg.m * reg.xMin + reg.b }, { x: reg.xMax, y: reg.m * reg.xMax + reg.b }], borderColor: '#D55E00', borderWidth: 2, pointRadius: 0, fill: false, tension: 0 });
-  }
-  const baseX = makeXCat(xlabel, D);
-  const xScale = Object.assign({}, baseX, { ticks: Object.assign({}, baseX.ticks, { maxRotation: histMaxRot, minRotation: histMinRot, font: { family: 'Arial', size: Math.max(7, D.tickSz - 1) }, callback: function(val) { const lbl = this.getLabelForValue(val); return typeof lbl === 'string' ? wrapLbl(lbl, 10) : lbl; } }) });
-  Chart.register(axisArrowPlugin, boldZeroPlugin, dlP);
-  curChart = new Chart(canvas, {
-    type: 'bar',
-    data: { labels: h.labels, datasets: [{ data: h.counts, backgroundColor: color, borderColor: '#000', borderWidth: 1, borderRadius: 0, barPercentage: 1.0, categoryPercentage: 1.0 }].concat(extraDatasets) },
-    options: {
-      responsive: false, plugins: { legend: { display: false }, title: titleP, axisArrowPlugin: arrowOpts, boldZeroPlugin: { enabled: D.boldZero } },
-      scales: { x: xScale, y: makeYSc(ylabel || 'Frequency', sc, D, undefined, D.pctY) }
-    },
-    plugins: [axisArrowPlugin, boldZeroPlugin, dlP]
-  });
-}
-
-function buildBoxWhisker(canvas, xlabel, ylabel, ymin, ymax, ystep, titleP, D, arrowOpts) {
-  var _om = document.querySelector('input[name=bwOutlierMode]:checked');
-  var outlierMode = _om ? _om.value : 'all';
-  const blks = document.querySelectorAll('#bw-series-list .series-block');
-  const labels = [], stats = [], colors = [];
-  blks.forEach(function(blk, i) {
-    const nameInp = blk.querySelector('.series-head input[type=text]');
-    const name = nameInp ? nameInp.value : ('Group ' + (i + 1));
-    const color = getColor('bw' + blk.dataset.sidx);
-    const vals = Array.from(blk.querySelectorAll('.bwb input[type=number]')).map(function(inp) { return parseFloat(inp.value); }).filter(function(v) { return !isNaN(v); });
-    const st = computeBoxStats(vals, outlierMode); if (!st) return;
-    labels.push(name); stats.push(st); colors.push(color);
-    document.getElementById('graph-legend').innerHTML += '<span class="leg-item" data-label="' + name + '" data-color="' + color + '" data-shape="rect" style="display:flex;align-items:center;gap:5px;"><span style="width:12px;height:12px;border-radius:2px;background:' + color + ';border:1px solid #999;display:inline-block;"></span><span style="font-size:10pt;">' + parseHtmlFormatting(name) + '</span></span>';
-  });
-  if (!stats.length) return;
-  const mn = Math.min.apply(null, stats.map(function(s) { return s.min; }));
-  const mx = Math.max.apply(null, stats.map(function(s) { return s.max; }));
-  const sc = niceScale(mn, mx, mn, mx, ymin, ymax, ystep);
-  Chart.register(bwPlugin, axisArrowPlugin, boldZeroPlugin);
-  curChart = new Chart(canvas, {
-    type: 'bar',
-    data: { labels: labels, datasets: [{ data: stats.map(function(s) { return s.max - s.min; }), backgroundColor: 'rgba(0,0,0,0)', borderColor: 'rgba(0,0,0,0)', borderWidth: 0 }] },
-    options: {
-      responsive: false, plugins: { legend: { display: false }, title: titleP, tooltip: { enabled: false },
-        bwPlugin: { groups: stats.map(function(s, i) { return Object.assign({}, s, { color: colors[i], outliers: s.outliers || [] }); }) },
-        axisArrowPlugin: arrowOpts, boldZeroPlugin: { enabled: D.boldZero } },
-      scales: { x: makeXCat(xlabel, D), y: makeYSc(ylabel, sc, D, undefined, false) }
-    },
-    plugins: [bwPlugin, axisArrowPlugin, boldZeroPlugin]
-  });
-}
-
-function buildPie(canvas, chartTitle, D) {
-  const rows = document.getElementById('pie-tbody').querySelectorAll('tr');
-  const labels = [], values = [], colors = [];
-  rows.forEach(function(tr, i) {
-    const inpText = tr.querySelector('input[type=text]');
-    const lbl = inpText ? inpText.value.trim() : '';
-    const valInp = tr.querySelector('input[type=number]');
-    const v = valInp ? parseFloat(valInp.value) || 0 : 0;
-    const c = getColor('pie' + i);
-    labels.push(lbl || ('Slice ' + (i + 1)));
-    values.push(v);
-    colors.push(c);
-  });
-  const total = values.reduce(function(a, b) { return a + b; }, 0);
-  const lb = document.getElementById('graph-legend');
-  const lgmode = D.pieLegendMode || 'pct';
-  labels.forEach(function(l, i) {
-    var pctStr = total > 0 ? ((values[i] / total) * 100).toFixed(1) + '%' : '0%';
-    var suffix = lgmode === 'none' ? '(skip)' :
-      lgmode === 'label' ? '' :
-      lgmode === 'count' ? ' (' + values[i] + ')' :
-      lgmode === 'labelcount' ? ' (' + values[i] + ')' :
-      lgmode === 'pct' ? ' (' + pctStr + ')' :
-      lgmode === 'labelpct' ? ' (' + pctStr + ')' : '';
-    if (lgmode === 'none') return;
-    lb.innerHTML += '<span class="leg-item" data-label="' + l + suffix + '" data-color="' + colors[i] + '" data-shape="rect" style="display:flex;align-items:center;gap:5px;">'
-      + '<span style="width:12px;height:12px;border-radius:2px;background:' + colors[i]
-      + ';border:1px solid #999;display:inline-block;"></span>'
-      + '<span style="font-size:10pt;">' + parseHtmlFormatting(l + suffix) + '</span></span>';
-  });
-  
-  var pieDLP = {
-    id: 'pieDLP',
-    afterDatasetsDraw: function(chart) {
-      var gs = document.getElementById('pieGraphShow');
-      if (!gs || !gs.checked) return;
-      var r = document.querySelector('input[name=pieLabelMode]:checked');
-      var mode = r ? r.value : 'none';
-      if (mode === 'none') return;
-      var ctx = chart.ctx, meta = chart.getDatasetMeta(0);
-      if (!meta || !meta.data || !meta.data.length) return;
-      var dataset = chart.data.datasets[0];
-      var curVals = dataset.data || [];
-      var curLabels = chart.data.labels || [];
-      var curColors = dataset.backgroundColor || [];
-      var tot = curVals.reduce(function(a, b) { return a + Number(b || 0); }, 0);
-      
-      meta.data.forEach(function(arc, i) {
-        var val = Number(curVals[i] || 0);
-        var lbl = curLabels[i] || ('Slice ' + (i + 1));
-        var arcSize = Math.abs(arc.endAngle - arc.startAngle);
-        var midAngle = arc.startAngle + arcSize / 2;
-        var cx = arc.x, cy = arc.y, outerR = arc.outerRadius;
-        var pct2 = tot > 0 ? ((val / tot) * 100).toFixed(1) + '%' : '0%';
-        var txt = mode === 'pct' ? pct2 :
-          mode === 'count' ? String(val) :
-          mode === 'label' ? lbl :
-          mode === 'labelpct' ? lbl + ' (' + pct2 + ')' :
-          mode === 'labelcount' ? lbl + ' (' + val + ')' : '';
-        if (!txt) return;
-        ctx.save();
-        ctx.fillStyle = '#1e2a3a';
-        ctx.font = 'bold 10pt Arial';
-        var txtW = ctx.measureText(parseHtmlFormatting(txt)).width;
-        var midR = (arc.innerRadius + arc.outerRadius) / 2;
-        var chordW = 2 * midR * Math.sin(arcSize / 2);
-        var fitsInside = chordW > txtW + 8 && arcSize > 0.2;
-        if (fitsInside) {
-          var x = cx + midR * Math.cos(midAngle);
-          var y = cy + midR * Math.sin(midAngle);
-          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-          ctx.fillStyle = contrastColor(curColors[i] || '#000000');
-          ctx.fillText(parseHtmlFormatting(txt), x, y);
-        } else {
-          ctx.font = 'bold 8.5pt Arial';
-          var lineStartR = outerR + 5;
-          var lineEndR = outerR + 18;
-          var lx1 = cx + lineStartR * Math.cos(midAngle);
-          var ly1 = cy + lineStartR * Math.sin(midAngle);
-          var lx2 = cx + lineEndR * Math.cos(midAngle);
-          var ly2 = cy + lineEndR * Math.sin(midAngle);
-          var goRight = Math.cos(midAngle) >= 0;
-          var tickLen = 12;
-          var lx3 = lx2 + (goRight ? tickLen : -tickLen);
-          ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1;
-          ctx.beginPath(); ctx.moveTo(lx1, ly1); ctx.lineTo(lx2, ly2); ctx.lineTo(lx3, ly2); ctx.stroke();
-          ctx.textAlign = goRight ? 'left' : 'right';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(parseHtmlFormatting(txt), lx3 + (goRight ? 4 : -4), ly2);
-        }
-        ctx.restore();
-      });
-    }
-  };
-  var _piePad = { top: 16, bottom: 16, left: 16, right: 16 };
-  var _gs2 = document.getElementById('pieGraphShow');
-  var _rm2 = document.querySelector('input[name=pieLabelMode]:checked');
-  var _OUTSIDE_FONT = 'bold 8.5pt Arial';
-  if (_gs2 && _gs2.checked && _rm2 && _rm2.value !== 'none') {
-    var _mc = document.createElement('canvas').getContext('2d');
-    _mc.font = _OUTSIDE_FONT;
-    var _m2 = _rm2.value;
-    var _estR = Math.min(canvas.width, canvas.height) / 2 * 0.75;
-    var _lineLen = 36;
-    var _padT = 16, _padB = 16, _padL = 16, _padR = 16;
-    var _cumAngle = -Math.PI / 2;
-    var _total3 = values.reduce(function(a, b) { return a + Number(b || 0); }, 0) || 1;
-    values.forEach(function(v, i) {
-      var _arc = (v / _total3) * 2 * Math.PI;
-      var _mid = _cumAngle + _arc / 2;
-      _cumAngle += _arc;
-      var _p2 = _total3 > 0 ? ((v / _total3) * 100).toFixed(1) + '%' : '0%';
-      var _t2 = _m2 === 'pct' ? _p2 : _m2 === 'count' ? String(v) : _m2 === 'label' ? labels[i] :
-        _m2 === 'labelpct' ? labels[i] + ' (' + _p2 + ')' : _m2 === 'labelcount' ? labels[i] + ' (' + v + ')' : '';
-      var _tw = _mc.measureText(parseHtmlFormatting(_t2)).width;
-      var _chord = 2 * (_estR * 0.5) * Math.sin(_arc / 2);
-      var _inside = _chord > _tw + 8 && _arc > 0.2;
-      if (!_inside) {
-        var _goR = Math.cos(_mid) >= 0;
-        var _needX = _lineLen + _tw + 8;
-        var _needY = _lineLen + 14;
-        if (_goR) _padR = Math.max(_padR, _needX);
-        else _padL = Math.max(_padL, _needX);
-        if (Math.sin(_mid) < 0) _padT = Math.max(_padT, _needY);
-        else _padB = Math.max(_padB, _needY);
-      }
-    });
-    var _padH = Math.max(_padL, _padR);
-    var _padV = Math.max(_padT, _padB);
-    _piePad = { top: _padV, bottom: _padV, left: _padH, right: _padH };
-  }
-  curChart = new Chart(canvas, {
-    type: 'pie',
-    data: { labels: labels, datasets: [{
-      data: values,
-      backgroundColor: colors,
-      borderColor: '#ffffff',
-      borderWidth: 1.5
-    }]},
-    options: {
-      responsive: false,
-      layout: { padding: _piePad },
-      plugins: {
-        legend: { display: false },
-        title: chartTitle ? { display: true, text: parseHtmlFormatting(chartTitle), font: { family: 'Arial', size: 14, weight: 'bold' }, color: '#1e2a3a', padding: { bottom: 14 } } : { display: false },
-        tooltip: { callbacks: { label: function(ctx) {
-          var pct = total > 0 ? ((ctx.parsed / total) * 100).toFixed(1) : 0;
-          return ' ' + ctx.label + ': ' + ctx.parsed + ' (' + pct + '%)';
-        }}}
-      }
-    },
-    plugins: [pieDLP]
-  });
 }
 
 function dlGraph() {
