@@ -1271,6 +1271,8 @@ const APP_PALETTE = [
   { name: 'Blue',            hex: '#0000ff' },
   { name: 'Yellow',          hex: '#ffff00' },
   { name: 'Green',           hex: '#008000' },
+  { name: 'Purple',          hex: '#800080' },
+  { name: 'Brown',           hex: '#8b4513' },
   { name: 'Custom hex',      hex: '' }
 ];
 
@@ -3478,6 +3480,12 @@ function buildGraph() {
     },
     plugins: [axisArrowPlugin, boldZeroPlugin]
   };
+
+  if (selT === 'pie' && cb('pieSmartCallout')) {
+    cfg.options.layout = { padding: { left: 100, right: 100, top: 40, bottom: 40 } };
+  } else if (selT === 'pie') {
+    cfg.options.layout = { padding: 10 };
+  }
 
   if (selT === 'bar') {
     cfg.type = 'bar';
