@@ -3220,6 +3220,259 @@ function fallbackCopy(tmp) {
   }
 }
 
+// --- RESTORED CORE RENDER LOGIC ---
+function buildGraph() {
+  if (!selT) return;
+  clearTimeout(debounceTimer); 
+  var D = getD();
+  var canvas = document.getElementById('mainChart');
+  if (!canvas) return;
+
+  if (selT === 'cartesian') { buildCartesian(canvas, D); return; }
+  if (selT === 'datatable') { buildDataTable(D); return; }
+
+  if (curChart) { curChart.destroy(); curChart = null; }
+
+  canvas.width = D.gW; canvas.height = D.gH;
+  canvas.style.width = D.gW + 'px'; canvas.style.height = D.gH + 'px';
+  canvas.dataset.logicalW = D.gW; canvas.dataset.logicalH = D.gH;
+  var ctx = canvas.getContext('2d');
+
+  var legendDiv = document.getElementById('graph-legend');
+  if (legendDiv) legendDiv.innerHTML = '';
+
+  var chartTitle = gt(document.getElementById('chartTitle'));
+  var xlabel = gt(document.getElementById('xlabel'));
+  var ylabel = gt(document.getElementById('ylabel'));
+
+  var cfg = {
+    type: selT === 'boxwhisker' ? 'bar' : (selT === 'histogram' ? 'bar' : selT),
+    data: { labels: [], datasets: [] },
+    options: {
+      responsive: false, maintainAspectRatio: false, animation: false,
+      plugins: {
+        legend: { display: false },
+        title: { display: !!chartTitle, text: parseHtmlFormatting(chartTitle), font: { family: 'Arial', size: Math.round(D.axLblSz * 1.15), weight: 'bold' }, color: '#1e2a3a' },
+        tooltip: { enabled: false }
+      },
+      scales: {}
+    },
+    plugins: [axisArrowPlugin, boldZeroPlugin]
+  };
+
+  if (selT === 'bar') {
+    cfg.type = 'bar';
+    var n = nGroups();
+    var rows = Array.from(document.querySelectorAll('#bar-tbody tr'));
+    cfg.data.labels = rows.map(function(tr) { return tr.querySelector('.bar-cat').value; });
+    var errItems = [];
+    var maxY = -Infinity, minY = 0;
+    
+    for (var g = 0; g < n; g++) {
+      var col = getColor('barg' + g);
+      var lbl = gt(document.getElementById('barGroupName' + g)) || ('Group ' + (g+1));
+      var tex = (document.getElementById('bargTexture'+g) || {}).value || 'solid';
+      var ds = { label: lbl, data: [], backgroundColor: createTexturePattern(col, tex, '#ffffff'), borderColor: '#111827', borderWidth: 1 };
+      
+      rows.forEach(function(tr, pi) {
+        var vals = tr.querySelectorAll('.bar-val'), errs = tr.querySelectorAll('.bar-err');
+        var v = parseFloat(vals[g] ? vals[g].value : 0) || 0;
+        ds.data.push(v);
+        var e = 0;
+        if (errs.length > g && errs[g]) e = parseFloat(errs[g].value) || 0;
+        if (e > 0) errItems.push({ di: g, pi: pi, val: v, err: e, yAxis: 'y' });
+        if (v + e > maxY) maxY = v + e;
+        if (v - e < minY) minY = v - e;
+      });
+      cfg.data.datasets.push(ds);
+      
+      if (D.showLegend && legendDiv) {
+         legendDiv.innerHTML += '<span class="leg-item" data-label="'+lbl+'" data-color="'+col+'" data-texture="'+tex+'" style="display:inline-flex;align-items:center;gap:4px;">' + barTextureSVG(col, tex) + ' ' + parseHtmlFormatting(lbl) + '</span>';
+      }
+    }
+    
+    if (maxY === -Infinity) maxY = 10;
+    cfg.options.scales.x = makeXCat(xlabel, D);
+    cfg.options.scales.y = makeYSc(ylabel, niceScale(minY, maxY, undefined, undefined, gopt('ymin'), gopt('ymax'), gopt('ystep')), D, 'left', D.pctY);
+    if (errItems.length) {
+      cfg.plugins.push(errPlugin);
+      cfg.options.plugins.errPlugin = { items: errItems };
+    }
+    cfg.plugins.push(makeDLP(D, false));
+    
+  } else if (selT === 'line' || selT === 'scatter') {
+    var isLine = selT === 'line';
+    cfg.type = isLine ? 'line' : 'scatter';
+    var blks = document.querySelectorAll((isLine ? '#line-series-list' : '#scatter-series-list') + ' .series-block');
+    var errItems = [], scErrItems = [];
+    var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    var hasY2 = false, minY2 = Infinity, maxY2 = -Infinity;
+    var globalLabels = [];
+
+    blks.forEach(function(blk, di) {
+      var st = getSeriesState(blk, isLine);
+      if (st.y2checked) hasY2 = true;
+      var ds = {
+        label: st.nameVal, data: [],
+        borderColor: st.colorHex, backgroundColor: st.colorHex,
+        borderWidth: 2, pointRadius: 4, pointStyle: st.markerVal,
+        showLine: isLine, fill: false, yAxisID: st.y2checked ? 'y2' : 'y'
+      };
+      if (isLine) ds.borderDash = getDashPattern(st.lineStyleVal);
+
+      var rows = blk.querySelectorAll(isLine ? '.lsb tr' : '.ssb tr');
+      rows.forEach(function(tr, pi) {
+         if (isLine) {
+           var ins = tr.querySelectorAll('input');
+           var xl = ins[0].value, yv = parseFloat(ins[1].value), ev = parseFloat(ins[2] ? ins[2].value : 0) || 0;
+           if (!globalLabels.includes(xl) && xl) globalLabels.push(xl);
+           if (!isNaN(yv)) {
+             ds.data.push(yv);
+             var yAxis = st.y2checked ? 'y2' : 'y';
+             if (ev > 0) errItems.push({ di: di, pi: pi, val: yv, err: ev, yAxis: yAxis });
+             var locMax = yv + ev, locMin = yv - ev;
+             if (st.y2checked) { if (locMax > maxY2) maxY2 = locMax; if (locMin < minY2) minY2 = locMin; }
+             else { if (locMax > maxY) maxY = locMax; if (locMin < minY) minY = locMin; }
+           } else { ds.data.push(null); }
+         } else {
+           var ins = tr.querySelectorAll('input[type=number]');
+           var xv = parseFloat(ins[0].value), yv = parseFloat(ins[1].value);
+           var xe = parseFloat(ins[2] ? ins[2].value : 0) || 0, ye = parseFloat(ins[3] ? ins[3].value : 0) || 0;
+           if (!isNaN(xv) && !isNaN(yv)) {
+             ds.data.push({ x: xv, y: yv });
+             if (xe > 0 || ye > 0) scErrItems.push({ di: di, pi: ds.data.length - 1, x: xv, y: yv, xe: xe, ye: ye, yAxis: st.y2checked ? 'y2' : 'y' });
+             var lMxX = xv + xe, lMnX = xv - xe, lMxY = yv + ye, lMnY = yv - ye;
+             if (lMxX > maxX) maxX = lMxX; if (lMnX < minX) minX = lMnX;
+             if (st.y2checked) { if (lMxY > maxY2) maxY2 = lMxY; if (lMnY < minY2) minY2 = lMnY; }
+             else { if (lMxY > maxY) maxY = lMxY; if (lMnY < minY) minY = lMnY; }
+           }
+         }
+      });
+      cfg.data.datasets.push(ds);
+      
+      if (D.showLegend && legendDiv) {
+         legendDiv.innerHTML += '<span class="leg-item" data-label="'+st.nameVal+'" data-color="'+st.colorHex+'" data-shape="'+st.markerVal+'" data-linestyle="'+(isLine?st.lineStyleVal:'solid')+'" style="display:inline-flex;align-items:center;gap:4px;">' + markerSVG(st.markerVal, st.colorHex, isLine?st.lineStyleVal:'solid') + ' ' + parseHtmlFormatting(st.nameVal) + '</span>';
+      }
+    });
+
+    if (minX === Infinity) { minX = 0; maxX = 10; }
+    if (minY === Infinity) { minY = 0; maxY = 10; }
+    if (minY2 === Infinity) { minY2 = 0; maxY2 = 10; }
+
+    if (isLine) {
+       cfg.data.labels = globalLabels.length ? globalLabels : Array.from({length: cfg.data.datasets[0]?.data.length||5}, (_, i) => i+1);
+       cfg.options.scales.x = makeXCat(xlabel, D);
+       if (errItems.length) { cfg.plugins.push(errPlugin); cfg.options.plugins.errPlugin = { items: errItems }; }
+    } else {
+       cfg.options.scales.x = makeXLin(xlabel, niceScaleX(minX, maxX, gopt('xmin'), gopt('xmax'), gopt('xstep')), D, D.pctX);
+       if (scErrItems.length) { cfg.plugins.push(scErrPlugin); cfg.options.plugins.scErrPlugin = { items: scErrItems }; }
+    }
+    cfg.options.scales.y = makeYSc(ylabel, niceScale(minY, maxY, undefined, undefined, gopt('ymin'), gopt('ymax'), gopt('ystep')), D, 'left', D.pctY);
+    if (hasY2) {
+       cfg.options.scales.y2 = makeYSc(gt(document.getElementById('y2label')), niceScale(minY2, maxY2, undefined, undefined, gopt('y2min'), gopt('y2max'), gopt('y2step')), D, 'right', D.pctY);
+       cfg.options.scales.y2.grid.display = false;
+    }
+    cfg.plugins.push(makeDLP(D, !isLine));
+    
+  } else if (selT === 'pie') {
+    cfg.type = 'pie';
+    var rows = document.querySelectorAll('#pie-tbody tr');
+    var ds = { data: [], backgroundColor: [] };
+    var total = 0;
+    rows.forEach(function(tr, i) {
+       var lbl = tr.querySelector('input[type=text]').value || ('Slice '+(i+1));
+       var val = parseFloat(tr.querySelector('input[type=number]').value) || 0;
+       var col = getColor('pie' + i);
+       if (val > 0) {
+         cfg.data.labels.push(lbl);
+         ds.data.push(val);
+         ds.backgroundColor.push(col);
+         total += val;
+       }
+    });
+    cfg.data.datasets.push(ds);
+    cfg.options.plugins.legend = {
+       display: cb('pieLegendShow'),
+       position: 'right',
+       labels: {
+          font: { family: 'Arial', size: D.tickSz }, color: '#1e2a3a',
+          generateLabels: function(chart) {
+             var data = chart.data;
+             if (data.labels.length && data.datasets.length) {
+                return data.labels.map(function(label, i) {
+                   var ds = data.datasets[0];
+                   var val = ds.data[i];
+                   var pct = total > 0 ? Math.round((val / total) * 100) : 0;
+                   var text = label;
+                   if (D.pieLegendMode === 'count') text = val;
+                   else if (D.pieLegendMode === 'labelcount') text = label + ' (' + val + ')';
+                   else if (D.pieLegendMode === 'pct') text = pct + '%';
+                   else if (D.pieLegendMode === 'labelpct') text = label + ' (' + pct + '%)';
+                   else if (D.pieLegendMode === 'none') text = '';
+                   return { text: text, fillStyle: ds.backgroundColor[i], hidden: false, index: i };
+                });
+             }
+             return [];
+          }
+       }
+    };
+    
+  } else if (selT === 'histogram') {
+    cfg.type = 'bar';
+    var rows = document.querySelectorAll('#hist-tbody tr');
+    var vals = [];
+    rows.forEach(function(tr) { var v = parseFloat(tr.querySelector('input').value); if (!isNaN(v)) vals.push(v); });
+    var bins = gnum('histBins', 5);
+    var start = gopt('histStart');
+    var bsize = gopt('histBinSize');
+    var lblMode = parseFloat(document.getElementById('histLabelStyle').value) || 1;
+    var hist = computeHistogram(vals, bins, start, bsize, lblMode);
+    var col = getColor('hist0');
+    cfg.data.labels = hist.labels;
+    cfg.data.datasets.push({ label: 'Frequency', data: hist.counts, backgroundColor: col, borderColor: '#111827', borderWidth: 1, barPercentage: 1.0, categoryPercentage: 1.0 });
+    var maxY = Math.max.apply(null, hist.counts.length ? hist.counts : [10]);
+    cfg.options.scales.x = makeXCat(xlabel, D);
+    var rot = document.getElementById('histLabelRotation').value;
+    if (rot !== 'auto') {
+       cfg.options.scales.x.ticks.maxRotation = parseInt(rot);
+       cfg.options.scales.x.ticks.minRotation = parseInt(rot);
+    }
+    cfg.options.scales.y = makeYSc(ylabel, niceScale(0, Math.max(1, maxY), undefined, undefined, gopt('ymin'), gopt('ymax'), gopt('ystep')), D, 'left', false);
+    cfg.plugins.push(makeDLP(D, false));
+    
+  } else if (selT === 'boxwhisker') {
+    cfg.type = 'bar'; 
+    var blks = document.querySelectorAll('#bw-series-list .series-block');
+    var groups = [];
+    var minVal = Infinity, maxVal = -Infinity;
+    var outlierMode = document.querySelector('input[name=bwOutlierMode]:checked').value;
+    
+    blks.forEach(function(blk, i) {
+       var lbl = gt(document.getElementById('bwName_' + i)) || ('Group '+(i+1));
+       var col = getColor('bw' + i);
+       var rows = blk.querySelectorAll('.bwb tr');
+       var vals = [];
+       rows.forEach(function(tr) { var v = parseFloat(tr.querySelector('input').value); if (!isNaN(v)) vals.push(v); });
+       var stats = computeBoxStats(vals, outlierMode);
+       if (stats) {
+         stats.label = lbl; stats.color = col; groups.push(stats);
+         if (stats.min < minVal) minVal = stats.min;
+         if (stats.max > maxVal) maxVal = stats.max;
+         cfg.data.labels.push(lbl);
+         cfg.data.datasets.push({ label: lbl, data: [0], backgroundColor: 'transparent', borderColor: 'transparent' }); 
+       }
+    });
+    
+    if (minVal === Infinity) { minVal = 0; maxVal = 10; }
+    cfg.options.scales.x = makeXCat(xlabel, D);
+    cfg.options.scales.y = makeYSc(ylabel, niceScale(minVal, maxVal, undefined, undefined, gopt('ymin'), gopt('ymax'), gopt('ystep')), D, 'left', false);
+    cfg.plugins.push(bwPlugin);
+    cfg.options.plugins.bwPlugin = { groups: groups };
+  }
+
+  curChart = new Chart(ctx, cfg);
+}
+
 // Initial unselected state
 drawInitialPlaceholder(document.getElementById('mainChart'));
 </script>
