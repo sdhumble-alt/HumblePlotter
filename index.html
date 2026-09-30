@@ -2180,6 +2180,7 @@ const pieLabelPlugin = {
     
     // Estimate radius if padding was 10
     var estRadius = Math.min(chart.width - 20, chart.height - 20) / 2;
+    var maxCalloutW = 0;
     
     for (var i = 0; i < ds.data.length; i++) {
       var val = ds.data[i];
@@ -2193,22 +2194,42 @@ const pieLabelPlugin = {
       else if (mode === 'pct') text = pct + '%';
       else if (mode === 'labelpct') text = label + ' (' + pct + '%)';
       
-      var textW = ctx.measureText(text).width;
       var textH = tickSz * 1.3;
       var angle = (val / total) * Math.PI * 2;
-      
       var midRadius = estRadius / 2;
       var chordLen = 2 * midRadius * Math.sin(angle / 2);
       
-      if (textW >= chordLen * 0.95 || estRadius <= textH * 1.2) {
+      var words = text.split(' ');
+      var innerAvailW = chordLen * 0.9;
+      var lines = [];
+      var curLine = words.length ? words[0] : '';
+      
+      for (var j = 1; j < words.length; j++) {
+          if (ctx.measureText(curLine + ' ' + words[j]).width <= innerAvailW) {
+              curLine += ' ' + words[j];
+          } else {
+              lines.push(curLine);
+              curLine = words[j];
+          }
+      }
+      if (curLine) lines.push(curLine);
+      
+      var totalH = lines.length * textH;
+      var maxLineW = Math.max.apply(null, lines.map(function(l) { return ctx.measureText(l).width; }));
+      var fitsInside = (maxLineW <= chordLen * 0.95) && (totalH <= estRadius * 0.85);
+      
+      if (!fitsInside) {
          needsCallout = true;
-         break;
+         var longestWordW = Math.max.apply(null, words.map(w => ctx.measureText(w).width));
+         var wrapW = Math.max(70, longestWordW + 5);
+         if (wrapW > maxCalloutW) maxCalloutW = wrapW;
       }
     }
     ctx.restore();
     
     if (needsCallout) {
-      chart.options.layout.padding = { left: 90, right: 90, top: 30, bottom: 30 };
+      var pW = Math.min(maxCalloutW + 20, chart.width / 2.5); // Add 20 for tail and spacing
+      chart.options.layout.padding = { left: pW, right: pW, top: 30, bottom: 30 };
     } else {
       chart.options.layout.padding = 10;
     }
@@ -2244,26 +2265,64 @@ const pieLabelPlugin = {
       
       ctx.save();
       ctx.font = 'bold ' + tickSz + 'pt Arial';
-      var textW = ctx.measureText(text).width;
       var textH = tickSz * 1.3;
+      var textW = ctx.measureText(text).width;
       
       var midAngle = (arc.startAngle + arc.endAngle) / 2;
       var midRadius = (arc.innerRadius + arc.outerRadius) / 2;
-      var chordLen = 2 * midRadius * Math.sin((arc.endAngle - arc.startAngle) / 2);
+      var chordLen = 2 * midRadius * Math.sin(Math.abs(arc.endAngle - arc.startAngle) / 2);
       
-      // Calculate if the text fits comfortably inside the slice
-      var fits = (textW < chordLen * 0.95) && ((arc.outerRadius - arc.innerRadius) > textH * 1.2);
-      var useCallout = cb('pieSmartCallout') && !fits;
+      var words = text.split(' ');
+      var lines = [];
+      var curLine = words.length ? words[0] : '';
+      var innerAvailW = chordLen * 0.9;
+      
+      // Attempt 1: Wrap for inside the slice
+      for (var j = 1; j < words.length; j++) {
+          if (ctx.measureText(curLine + ' ' + words[j]).width <= innerAvailW) {
+              curLine += ' ' + words[j];
+          } else {
+              lines.push(curLine);
+              curLine = words[j];
+          }
+      }
+      if (curLine) lines.push(curLine);
+      
+      var totalH = lines.length * textH;
+      var maxLineW = Math.max.apply(null, lines.map(function(l) { return ctx.measureText(l).width; }));
+      
+      // Determine if it actually fits inside
+      var fitsInside = (maxLineW <= chordLen * 0.95) && (totalH <= (arc.outerRadius - arc.innerRadius) * 0.85);
+      var useCallout = cb('pieSmartCallout') && !fitsInside;
+      
+      if (useCallout) {
+          var pad = chart.options.layout.padding;
+          var calloutAvailW = pad.left ? pad.left - 15 : 85;
+          lines = [];
+          curLine = words.length ? words[0] : '';
+          for (var j = 1; j < words.length; j++) {
+              if (ctx.measureText(curLine + ' ' + words[j]).width <= calloutAvailW) {
+                  curLine += ' ' + words[j];
+              } else {
+                  lines.push(curLine);
+                  curLine = words[j];
+              }
+          }
+          if (curLine) lines.push(curLine);
+          totalH = lines.length * textH;
+      }
       
       if (!useCallout) {
-          // Render inside the slice
           var pos = arc.tooltipPosition();
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           ctx.fillStyle = contrastColor(ds.backgroundColor[i] || '#ffffff');
-          ctx.fillText(text, pos.x, pos.y);
+          
+          var startY = pos.y - totalH / 2 + textH / 2;
+          lines.forEach(function(line, lIdx) {
+              ctx.fillText(line, pos.x, startY + lIdx * textH);
+          });
       } else {
-          // Render outside the slice using an angled callout line
           var edgeX = arc.x + Math.cos(midAngle) * arc.outerRadius;
           var edgeY = arc.y + Math.sin(midAngle) * arc.outerRadius;
           var isRight = Math.cos(midAngle) > 0;
@@ -2283,7 +2342,11 @@ const pieLabelPlugin = {
           ctx.textAlign = isRight ? 'left' : 'right';
           ctx.textBaseline = 'middle';
           ctx.fillStyle = '#1e2a3a';
-          ctx.fillText(text, tailX + (isRight ? 4 : -4), elbowY);
+          
+          var startY = elbowY - totalH / 2 + textH / 2;
+          lines.forEach(function(line, lIdx) {
+              ctx.fillText(line, tailX + (isRight ? 4 : -4), startY + lIdx * textH);
+          });
       }
       ctx.restore();
     });
