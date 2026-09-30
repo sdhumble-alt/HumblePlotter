@@ -2139,6 +2139,50 @@ const boldZeroPlugin = {
   }
 };
 
+// Add the custom pie label plugin
+const pieLabelPlugin = {
+  id: 'pieLabelPlugin',
+  afterDatasetsDraw: function(chart) {
+    var show = document.getElementById('pieGraphShow');
+    if (!show || !show.checked) return;
+    var modeInput = document.querySelector('input[name=pieLabelMode]:checked');
+    var mode = modeInput ? modeInput.value : 'none';
+    if (mode === 'none') return;
+
+    var ctx = chart.ctx;
+    var meta = chart.getDatasetMeta(0);
+    var ds = chart.data.datasets[0];
+    if (!ds || !meta) return;
+    
+    var total = ds.data.reduce(function(a, b) { return a + b; }, 0);
+    var tickSzEl = document.getElementById('tickLabelSize');
+    var tickSz = tickSzEl ? (parseInt(tickSzEl.value) || 10) : 10;
+    
+    meta.data.forEach(function(arc, i) {
+      var val = ds.data[i];
+      if (!val) return;
+      var pct = total > 0 ? Math.round((val / total) * 100) : 0;
+      var label = chart.data.labels[i] || '';
+      
+      var text = '';
+      if (mode === 'label') text = label;
+      else if (mode === 'count') text = val.toString();
+      else if (mode === 'labelcount') text = label + ' (' + val + ')';
+      else if (mode === 'pct') text = pct + '%';
+      else if (mode === 'labelpct') text = label + ' (' + pct + '%)';
+      
+      var pos = arc.tooltipPosition();
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = 'bold ' + tickSz + 'pt Arial';
+      ctx.fillStyle = contrastColor(ds.backgroundColor[i] || '#ffffff');
+      ctx.fillText(text, pos.x, pos.y);
+      ctx.restore();
+    });
+  }
+};
+
 function gv(el) { return el ? parseFloat(el.value) || 0 : 0; }
 function gt(el) { return el ? el.value.trim() : ''; }
 function gopt(id) { const el = document.getElementById(id); return el && el.value !== '' ? parseFloat(el.value) : undefined; }
@@ -3391,6 +3435,7 @@ function buildGraph() {
        }
     });
     cfg.data.datasets.push(ds);
+    cfg.plugins.push(pieLabelPlugin);
     cfg.options.plugins.legend = {
        display: cb('pieLegendShow'),
        position: 'right',
