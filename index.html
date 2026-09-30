@@ -1000,6 +1000,15 @@ input[type=radio] {
                         <label for="pieLegendShow" style="font-weight:600;">Show labels in legend</label>
                       </div>
                       <div id="pie-legend-mode" style="margin-left:22px;">
+                        <div class="field-row" style="margin-bottom: 6px; display:flex; flex-direction:row; align-items:center; gap:8px;">
+                          <label style="margin:0; font-size:9.5pt; font-weight:600;">Position:</label>
+                          <select id="pieLegendPos" style="width:auto; padding:2px 6px; font-size:9pt;" onchange="triggerLiveUpdate()">
+                            <option value="top">Top</option>
+                            <option value="right" selected>Right</option>
+                            <option value="bottom">Bottom</option>
+                            <option value="left">Left</option>
+                          </select>
+                        </div>
                         <div class="toggle-row" style="margin-bottom:2px;"><input type="radio" name="pieLegendMode" id="pieLegendNone" value="none"><label for="pieLegendNone">Nothing</label></div>
                         <div class="toggle-row" style="margin-bottom:2px;"><input type="radio" name="pieLegendMode" id="pieLegendLabel" value="label" checked><label for="pieLegendLabel">Label only</label></div>
                         <div class="toggle-row" style="margin-bottom:2px;"><input type="radio" name="pieLegendMode" id="pieLegendCount" value="count"><label for="pieLegendCount">Raw counts</label></div>
@@ -1014,6 +1023,10 @@ input[type=radio] {
                         <label for="pieGraphShow" style="font-weight:600;">Show labels on graph</label>
                       </div>
                       <div id="pie-graph-mode" style="margin-left:22px;">
+                        <div class="toggle-row" style="margin-bottom:6px; margin-top:2px;">
+                          <input type="checkbox" id="pieSmartCallout" checked onchange="triggerLiveUpdate()">
+                          <label for="pieSmartCallout" style="font-weight:600; color:var(--btn-primary-bg);">Smart callouts if label won't fit</label>
+                        </div>
                         <div class="toggle-row" style="margin-bottom:2px;"><input type="radio" name="pieLabelMode" id="pieLabelNone" value="none" checked><label for="pieLabelNone">Nothing</label></div>
                         <div class="toggle-row" style="margin-bottom:2px;"><input type="radio" name="pieLabelMode" id="pieLabelLabel" value="label"><label for="pieLabelLabel">Label only</label></div>
                         <div class="toggle-row" style="margin-bottom:2px;"><input type="radio" name="pieLabelMode" id="pieLabelCount" value="count"><label for="pieLabelCount">Raw counts</label></div>
@@ -1236,9 +1249,8 @@ const APP_DATE = '2026-09-22';
 let selT = null, curChart = null, lineSeriesCount = 0, scatterSeriesCount = 0, bwSeriesCount = 0;
 let debounceTimer = null;
 
-// Grayscale defaults first (6 shades), followed by Okabe-Ito colors and custom picker
+// Grayscale defaults first, followed by Okabe-Ito colors and custom picker
 const APP_PALETTE = [
-  { name: 'Black',           hex: '#000000' },
   { name: 'Charcoal',        hex: '#333333' },
   { name: 'Dim Gray',        hex: '#666666' },
   { name: 'Medium Gray',     hex: '#999999' },
@@ -1260,18 +1272,17 @@ const APP_PALETTE = [
 
 // Default color progression across datasets/groups/slices
 const DEFCOLORS_SERIES = [
-  '#000000', // 1. Black
-  '#333333', // 2. Charcoal
-  '#666666', // 3. Dim Gray
-  '#999999', // 4. Medium Gray
-  '#cccccc', // 5. Light Gray
-  '#eeeeee', // 6. Off-White
-  '#0072b2', // 7. Blue
-  '#e69f00', // 8. Orange
-  '#009e73', // 9. Bluish Green
-  '#d55e00', // 10. Vermilion
-  '#56b4e9', // 11. Sky Blue
-  '#cc79a7'  // 12. Reddish Purple
+  '#333333', // 1. Charcoal
+  '#666666', // 2. Dim Gray
+  '#999999', // 3. Medium Gray
+  '#cccccc', // 4. Light Gray
+  '#eeeeee', // 5. Off-White
+  '#0072b2', // 6. Blue
+  '#e69f00', // 7. Orange
+  '#009e73', // 8. Bluish Green
+  '#d55e00', // 9. Vermilion
+  '#56b4e9', // 10. Sky Blue
+  '#cc79a7'  // 11. Reddish Purple
 ];
 
 const DEFTEXTURES_BAR = ['solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'solid'];
@@ -2142,6 +2153,66 @@ const boldZeroPlugin = {
 // Add the custom pie label plugin
 const pieLabelPlugin = {
   id: 'pieLabelPlugin',
+  beforeUpdate: function(chart) {
+    if (chart.config.type !== 'pie') return;
+    var show = document.getElementById('pieGraphShow');
+    if (!show || !show.checked || !cb('pieSmartCallout')) {
+      chart.options.layout.padding = 10;
+      return;
+    }
+    var modeInput = document.querySelector('input[name=pieLabelMode]:checked');
+    var mode = modeInput ? modeInput.value : 'none';
+    if (mode === 'none') {
+      chart.options.layout.padding = 10;
+      return;
+    }
+
+    var ds = chart.data.datasets[0];
+    if (!ds || !ds.data || !ds.data.length) return;
+    var total = ds.data.reduce(function(a, b) { return a + b; }, 0);
+    var tickSzEl = document.getElementById('tickLabelSize');
+    var tickSz = tickSzEl ? (parseInt(tickSzEl.value) || 10) : 10;
+    
+    var ctx = chart.ctx;
+    ctx.save();
+    ctx.font = 'bold ' + tickSz + 'pt Arial';
+    var needsCallout = false;
+    
+    // Estimate radius if padding was 10
+    var estRadius = Math.min(chart.width - 20, chart.height - 20) / 2;
+    
+    for (var i = 0; i < ds.data.length; i++) {
+      var val = ds.data[i];
+      if (!val) continue;
+      var pct = total > 0 ? Math.round((val / total) * 100) : 0;
+      var label = chart.data.labels[i] || '';
+      var text = '';
+      if (mode === 'label') text = label;
+      else if (mode === 'count') text = val.toString();
+      else if (mode === 'labelcount') text = label + ' (' + val + ')';
+      else if (mode === 'pct') text = pct + '%';
+      else if (mode === 'labelpct') text = label + ' (' + pct + '%)';
+      
+      var textW = ctx.measureText(text).width;
+      var textH = tickSz * 1.3;
+      var angle = (val / total) * Math.PI * 2;
+      
+      var midRadius = estRadius / 2;
+      var chordLen = 2 * midRadius * Math.sin(angle / 2);
+      
+      if (textW >= chordLen * 0.95 || estRadius <= textH * 1.2) {
+         needsCallout = true;
+         break;
+      }
+    }
+    ctx.restore();
+    
+    if (needsCallout) {
+      chart.options.layout.padding = { left: 90, right: 90, top: 30, bottom: 30 };
+    } else {
+      chart.options.layout.padding = 10;
+    }
+  },
   afterDatasetsDraw: function(chart) {
     var show = document.getElementById('pieGraphShow');
     if (!show || !show.checked) return;
@@ -2171,13 +2242,49 @@ const pieLabelPlugin = {
       else if (mode === 'pct') text = pct + '%';
       else if (mode === 'labelpct') text = label + ' (' + pct + '%)';
       
-      var pos = arc.tooltipPosition();
       ctx.save();
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
       ctx.font = 'bold ' + tickSz + 'pt Arial';
-      ctx.fillStyle = contrastColor(ds.backgroundColor[i] || '#ffffff');
-      ctx.fillText(text, pos.x, pos.y);
+      var textW = ctx.measureText(text).width;
+      var textH = tickSz * 1.3;
+      
+      var midAngle = (arc.startAngle + arc.endAngle) / 2;
+      var midRadius = (arc.innerRadius + arc.outerRadius) / 2;
+      var chordLen = 2 * midRadius * Math.sin((arc.endAngle - arc.startAngle) / 2);
+      
+      // Calculate if the text fits comfortably inside the slice
+      var fits = (textW < chordLen * 0.95) && ((arc.outerRadius - arc.innerRadius) > textH * 1.2);
+      var useCallout = cb('pieSmartCallout') && !fits;
+      
+      if (!useCallout) {
+          // Render inside the slice
+          var pos = arc.tooltipPosition();
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillStyle = contrastColor(ds.backgroundColor[i] || '#ffffff');
+          ctx.fillText(text, pos.x, pos.y);
+      } else {
+          // Render outside the slice using an angled callout line
+          var edgeX = arc.x + Math.cos(midAngle) * arc.outerRadius;
+          var edgeY = arc.y + Math.sin(midAngle) * arc.outerRadius;
+          var isRight = Math.cos(midAngle) > 0;
+          var elbowLen = 15;
+          var elbowX = arc.x + Math.cos(midAngle) * (arc.outerRadius + elbowLen);
+          var elbowY = arc.y + Math.sin(midAngle) * (arc.outerRadius + elbowLen);
+          
+          ctx.beginPath();
+          ctx.moveTo(edgeX, edgeY);
+          ctx.lineTo(elbowX, elbowY);
+          var tailX = elbowX + (isRight ? 10 : -10);
+          ctx.lineTo(tailX, elbowY);
+          ctx.strokeStyle = '#64748b';
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+          
+          ctx.textAlign = isRight ? 'left' : 'right';
+          ctx.textBaseline = 'middle';
+          ctx.fillStyle = '#1e2a3a';
+          ctx.fillText(text, tailX + (isRight ? 4 : -4), elbowY);
+      }
       ctx.restore();
     });
   }
@@ -3294,6 +3401,7 @@ function buildGraph() {
     data: { labels: [], datasets: [] },
     options: {
       responsive: false, maintainAspectRatio: false, animation: false,
+      layout: { padding: 10 },
       plugins: {
         legend: { display: false },
         title: { display: !!chartTitle, text: parseHtmlFormatting(chartTitle), font: { family: 'Arial', size: Math.round(D.axLblSz * 1.15), weight: 'bold' }, color: '#1e2a3a' },
@@ -3421,7 +3529,7 @@ function buildGraph() {
   } else if (selT === 'pie') {
     cfg.type = 'pie';
     var rows = document.querySelectorAll('#pie-tbody tr');
-    var ds = { data: [], backgroundColor: [] };
+    var ds = { data: [], backgroundColor: [], borderWidth: 1.5, borderColor: '#ffffff' };
     var total = 0;
     rows.forEach(function(tr, i) {
        var lbl = tr.querySelector('input[type=text]').value || ('Slice '+(i+1));
@@ -3436,9 +3544,12 @@ function buildGraph() {
     });
     cfg.data.datasets.push(ds);
     cfg.plugins.push(pieLabelPlugin);
+    
+    var piePosEl = document.getElementById('pieLegendPos');
+    var piePos = piePosEl ? piePosEl.value : 'right';
     cfg.options.plugins.legend = {
        display: cb('pieLegendShow'),
-       position: 'right',
+       position: piePos,
        labels: {
           font: { family: 'Arial', size: D.tickSz }, color: '#1e2a3a',
           generateLabels: function(chart) {
