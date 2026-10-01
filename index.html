@@ -991,6 +991,10 @@ input[type=radio] {
                     <label for="errGlobal">Include error bars (&plusmn;)</label>
                   </div>
                   <div id="bar-labels-opt" style="display:none;" class="toggle-row"><input type="checkbox" id="showDataLabels"><label for="showDataLabels">Show data labels on bars</label></div>
+                  <div id="point-labels-opt" style="display:none;" class="toggle-row">
+                    <input type="checkbox" id="showCustomLabels" onchange="onToggleCustomLabels()">
+                    <label for="showCustomLabels">Label individual points with custom text</label>
+                  </div>
                   <div id="pct-y-opt" style="display:none;" class="toggle-row"><input type="checkbox" id="pctY"><label for="pctY">Y-axis values are percentages (%)</label></div>
                   <div id="pct-x-opt" style="display:none;" class="toggle-row"><input type="checkbox" id="pctX"><label for="pctX">X-axis values are percentages (%)</label></div>
                   <div id="pie-pct-opt" style="display:none;margin-bottom:4px;">
@@ -1379,7 +1383,7 @@ function makeLineStyleSel(uid, val) {
   const list = [
     { name: 'Solid', val: 'solid' },
     { name: 'Dashed (8 4)', val: 'dashed' },
-    { name: 'Dotted (2 3)', val: 'dotted' },
+    { name: 'Dotted (2 3)', val: 'dash' },
     { name: 'Dash-Dot (8 3 2 3)', val: 'dashdot' },
     { name: 'Long Dash (12 6)', val: 'longdash' }
   ];
@@ -1472,6 +1476,12 @@ function onToggleErrGlobal() {
   triggerLiveUpdate();
 }
 
+function onToggleCustomLabels() {
+  if (selT === 'line') rebuildLineSeriesTables();
+  else if (selT === 'scatter') rebuildScatterSeriesTables();
+  triggerLiveUpdate();
+}
+
 function setupDE() {
   ['de-bar', 'de-line', 'de-scatter', 'de-pie', 'de-histogram', 'de-boxwhisker', 'de-cartesian'].forEach(function(id) { 
     document.getElementById(id).style.display = 'none'; 
@@ -1488,7 +1498,7 @@ function setupDE() {
   document.getElementById('chart-settings-wrap').style.display = 'block';
   document.getElementById('de-datatable-wrap').style.display = 'none';
   
-  ['errbar-global-opt', 'y2-toggle-wrap', 'y2-cfg', 'y2-scale-row', 'xscale-section', 'legend-opt', 'pie-pct-opt', 'trendline-opt', 'pct-y-opt', 'pct-x-opt', 'bar-labels-opt'].forEach(function(id) { 
+  ['errbar-global-opt', 'y2-toggle-wrap', 'y2-cfg', 'y2-scale-row', 'xscale-section', 'legend-opt', 'pie-pct-opt', 'trendline-opt', 'pct-y-opt', 'pct-x-opt', 'bar-labels-opt', 'point-labels-opt'].forEach(function(id) { 
     var el = document.getElementById(id); if (el) el.style.display = 'none'; 
   });
   const gcw = document.getElementById('gridColorWrap'); 
@@ -1507,6 +1517,7 @@ function setupDE() {
     document.getElementById('de-line').style.display = 'block';
     document.getElementById('xlbl-lbl').textContent = 'X-axis label'; document.getElementById('ylbl-lbl').textContent = 'Y-axis label';
     document.getElementById('errbar-global-opt').style.display = 'flex';
+    document.getElementById('point-labels-opt').style.display = 'flex';
     document.getElementById('y2-toggle-wrap').style.display = 'flex';
     document.getElementById('xscale-section').style.display = 'block'; document.getElementById('legend-opt').style.display = 'flex';
     document.getElementById('pct-y-opt').style.display = 'flex'; document.getElementById('pct-x-opt').style.display = 'flex';
@@ -1516,6 +1527,7 @@ function setupDE() {
     document.getElementById('de-scatter').style.display = 'block';
     document.getElementById('xlbl-lbl').textContent = 'X-axis label'; document.getElementById('ylbl-lbl').textContent = 'Y-axis label';
     document.getElementById('errbar-global-opt').style.display = 'flex';
+    document.getElementById('point-labels-opt').style.display = 'flex';
     document.getElementById('y2-toggle-wrap').style.display = 'flex';
     document.getElementById('xscale-section').style.display = 'block'; document.getElementById('legend-opt').style.display = 'flex';
     document.getElementById('trendline-opt').style.display = 'flex'; document.getElementById('pct-y-opt').style.display = 'flex'; document.getElementById('pct-x-opt').style.display = 'flex';
@@ -1596,7 +1608,7 @@ function rebuildBarGroups() {
 }
 
 function rebuildBarTable() {
-  const n = nGroups(), hasErr = document.getElementById('errGlobal') ? document.getElementById('errGlobal').checked : false;
+  const n = nGroups(), hasErr = cb('errGlobal');
   const thead = document.getElementById('bar-thead');
   var dataCols = hasErr ? n * 2 : n;
   var dataColPct = Math.floor(86 / dataCols);
@@ -1620,7 +1632,7 @@ function rebuildBarTable() {
 
 function addBarRow() {
   rebuildBarTable();
-  const n = nGroups(), hasErr = document.getElementById('errGlobal') ? document.getElementById('errGlobal').checked : false;
+  const n = nGroups(), hasErr = cb('errGlobal');
   const tbody = document.getElementById('bar-tbody'), tr = document.createElement('tr');
   let c = '<td><input type="text" class="bar-cat"></td>';
   for (let g = 0; g < n; g++) c += '<td><input type="number" class="bar-val" step="any"></td>';
@@ -1780,8 +1792,8 @@ function makeSeriesBlock(idx, isLine, hasErr, useY2) {
   const tblWrap = document.createElement('div'); tblWrap.style.cssText = 'overflow-x:auto;border:1px solid var(--card-border);border-radius:6px;';
   const tbl = document.createElement('table'); tbl.className = 'dtbl';
   const thead = document.createElement('thead'), theadRow = document.createElement('tr');
-  if (isLine) theadRow.innerHTML = '<th>X label</th><th>Y value</th>' + (hasErr ? '<th>Error</th>' : '') + '<th style="width:38px;"></th>';
-  else theadRow.innerHTML = '<th>X</th><th>Y</th>' + (hasErr ? '<th>X err</th><th>Y err</th>' : '') + '<th style="width:38px;"></th>';
+  if (isLine) theadRow.innerHTML = '<th>X label</th><th>Y value</th>' + (hasErr ? '<th>Error</th>' : '') + (cb('showCustomLabels') ? '<th>Pt Label</th>' : '') + '<th style="width:38px;"></th>';
+  else theadRow.innerHTML = '<th>X</th><th>Y</th>' + (hasErr ? '<th>X err</th><th>Y err</th>' : '') + (cb('showCustomLabels') ? '<th>Pt Label</th>' : '') + '<th style="width:38px;"></th>';
   thead.appendChild(theadRow); tbl.appendChild(thead);
   const tbody = document.createElement('tbody'); tbody.className = isLine ? 'lsb' : 'ssb';
   tbl.appendChild(tbody); tblWrap.appendChild(tbl); bodyDiv.appendChild(tblWrap);
@@ -1818,7 +1830,7 @@ function seriesPastePrompt(btn, mode) {
   ta.dataset.mode = mode || 'tsv';
   if (lbl) {
     var isLine = !!btn.closest('.series-block').querySelector('.lsb');
-    var colDesc = isLine ? 'x label, y value[, ±error]' : 'x value, y value[, x±error, y±error]';
+    var colDesc = isLine ? 'x label, y value[, ±error][, label]' : 'x value, y value[, x±error, y±error][, label]';
     lbl.textContent = (mode === 'csv' ? 'Paste CSV — ' : 'Paste from Excel — ') + 'columns: ' + colDesc;
     lbl.style.display = 'block';
   }
@@ -1840,8 +1852,8 @@ function seriesImportPaste(btn) {
   var raw = ta.value; if (!raw.trim()) return;
   var blk = btn.closest('.series-block');
   var isLine = !!blk.querySelector('.lsb');
-  var errChk = document.getElementById('errGlobal');
-  var hasErr = errChk && errChk.checked;
+  var hasErr = cb('errGlobal');
+  var hasPtLbl = cb('showCustomLabels');
   var rows = raw.split(/[\r\n]+/).filter(function(r) { return r.trim(); });
   var parsed = rows.map(function(r) {
     return mode === 'csv' ? dtParseCSVLine(r) : r.split('\t').map(function(c) { return c.trim(); });
@@ -1853,9 +1865,9 @@ function seriesImportPaste(btn) {
     if (!cols.length) return;
     var tr = document.createElement('tr');
     if (isLine) {
-      tr.innerHTML = lineRowHTML(cols[0] || '', cols[1] || '', cols[2] || '', hasErr);
+      tr.innerHTML = lineRowHTML(cols[0] || '', cols[1] || '', cols[2] || '', hasErr, cols[hasErr ? 3 : 2] || '', hasPtLbl);
     } else {
-      tr.innerHTML = scatterRowHTML(cols[0] || '', cols[1] || '', cols[2] || '', cols[3] || '', hasErr);
+      tr.innerHTML = scatterRowHTML(cols[0] || '', cols[1] || '', cols[2] || '', cols[3] || '', hasErr, cols[hasErr ? 4 : 2] || '', hasPtLbl);
     }
     tbody.appendChild(tr);
   });
@@ -1866,43 +1878,46 @@ function seriesImportPaste(btn) {
 function addLineSeries(numRows) {
   numRows = numRows || 3; const idx = lineSeriesCount++;
   const list = document.getElementById('line-series-list');
-  const hasErr = document.getElementById('errGlobal') ? document.getElementById('errGlobal').checked : false;
-  const useY2 = document.getElementById('useY2Global') ? document.getElementById('useY2Global').checked : false;
+  const hasErr = cb('errGlobal');
+  const useY2 = cb('useY2Global');
   const r = makeSeriesBlock(idx, true, hasErr, useY2); list.appendChild(r.blk);
   for (let i = 0; i < numRows; i++) addLineRow(r.addBtn);
   triggerLiveUpdate();
 }
 
-function lineRowHTML(x, y, e, hasErr) {
+function lineRowHTML(x, y, e, hasErr, ptLbl, hasPtLbl) {
   return '<td><input type="text" value="' + (x || '') + '"></td>'
     + '<td><input type="number" value="' + (y || '') + '" step="any"></td>'
     + (hasErr ? '<td><input type="number" value="' + (e || '') + '" step="any" min="0"></td>' : '')
+    + (hasPtLbl ? '<td><input type="text" class="pt-lbl" value="' + (ptLbl || '') + '"></td>' : '')
     + '<td><button class="btn-danger-sm" onclick="this.closest(\'tr\').remove();triggerLiveUpdate();">✕</button></td>';
 }
 
 function addLineRow(btn) {
   const blk = btn.closest('.series-block'), tbody = blk.querySelector('.lsb');
   const tr = document.createElement('tr'); 
-  tr.innerHTML = lineRowHTML('', '', '', document.getElementById('errGlobal') ? document.getElementById('errGlobal').checked : false); 
+  tr.innerHTML = lineRowHTML('', '', '', cb('errGlobal'), '', cb('showCustomLabels')); 
   tbody.appendChild(tr);
   triggerLiveUpdate();
 }
 
 function rebuildLineSeriesTables() {
-  const hasErr = document.getElementById('errGlobal') ? document.getElementById('errGlobal').checked : false;
-  const useY2 = document.getElementById('useY2Global').checked;
+  const hasErr = cb('errGlobal'), hasPtLbl = cb('showCustomLabels'), useY2 = cb('useY2Global');
   document.querySelectorAll('#line-series-list .series-block').forEach(function(blk, bi) {
     const st = getSeriesState(blk, true);
     const rows = Array.from(blk.querySelectorAll('.lsb tr')).map(function(tr) { 
-      const ins = tr.querySelectorAll('input'); 
-      return { x: ins[0] ? ins[0].value : '', y: ins[1] ? ins[1].value : '', e: ins[2] ? ins[2].value : '' }; 
+      const x = tr.cells[0].querySelector('input').value;
+      const y = tr.cells[1].querySelector('input').value;
+      const errInp = tr.querySelector('input[min="0"]');
+      const ptInp = tr.querySelector('.pt-lbl');
+      return { x: x, y: y, e: errInp ? errInp.value : '', ptLbl: ptInp ? ptInp.value : '' }; 
     });
     blk.querySelector('.series-head').innerHTML = seriesHdrHTML(blk.dataset.sidx, true, st.nameVal, st.colorHex, useY2, st.y2checked, bi === 0, st.markerVal, st.lineStyleVal);
     const mkEl = document.getElementById('mk_true_' + blk.dataset.sidx); if (mkEl) mkEl.value = st.markerVal;
     const lsEl = document.getElementById('ls_true_' + blk.dataset.sidx); if (lsEl) lsEl.value = st.lineStyleVal;
-    blk.querySelector('thead tr').innerHTML = '<th>X label</th><th>Y value</th>' + (hasErr ? '<th>Error</th>' : '') + '<th style="width:38px;"></th>';
+    blk.querySelector('thead tr').innerHTML = '<th>X label</th><th>Y value</th>' + (hasErr ? '<th>Error</th>' : '') + (hasPtLbl ? '<th>Pt Label</th>' : '') + '<th style="width:38px;"></th>';
     const tbody = blk.querySelector('.lsb'); tbody.innerHTML = '';
-    rows.forEach(function(r) { const tr = document.createElement('tr'); tr.innerHTML = lineRowHTML(r.x, r.y, r.e, hasErr); tbody.appendChild(tr); });
+    rows.forEach(function(r) { const tr = document.createElement('tr'); tr.innerHTML = lineRowHTML(r.x, r.y, r.e, hasErr, r.ptLbl, hasPtLbl); tbody.appendChild(tr); });
   });
   triggerLiveUpdate();
 }
@@ -1910,43 +1925,49 @@ function rebuildLineSeriesTables() {
 function addScatterSeries(numRows) {
   numRows = numRows || 3; const idx = scatterSeriesCount++;
   const list = document.getElementById('scatter-series-list');
-  const hasErr = document.getElementById('errGlobal') ? document.getElementById('errGlobal').checked : false;
-  const useY2 = document.getElementById('useY2Global') ? document.getElementById('useY2Global').checked : false;
+  const hasErr = cb('errGlobal');
+  const useY2 = cb('useY2Global');
   const r = makeSeriesBlock(idx, false, hasErr, useY2); list.appendChild(r.blk);
   for (let i = 0; i < numRows; i++) addScatterRow(r.addBtn);
   triggerLiveUpdate();
 }
 
-function scatterRowHTML(x, y, xe, ye, hasErr) {
+function scatterRowHTML(x, y, xe, ye, hasErr, ptLbl, hasPtLbl) {
   return '<td><input type="number" value="' + (x || '') + '" step="any"></td>'
     + '<td><input type="number" value="' + (y || '') + '" step="any"></td>'
     + (hasErr ? '<td><input type="number" value="' + (xe || '') + '" step="any" min="0"></td>' : '')
     + (hasErr ? '<td><input type="number" value="' + (ye || '') + '" step="any" min="0"></td>' : '')
+    + (hasPtLbl ? '<td><input type="text" class="pt-lbl" value="' + (ptLbl || '') + '"></td>' : '')
     + '<td><button class="btn-danger-sm" onclick="this.closest(\'tr\').remove();triggerLiveUpdate();">✕</button></td>';
 }
 
 function addScatterRow(btn) {
   const blk = btn.closest('.series-block'), tbody = blk.querySelector('.ssb');
   const tr = document.createElement('tr'); 
-  tr.innerHTML = scatterRowHTML('', '', '', '', document.getElementById('errGlobal') ? document.getElementById('errGlobal').checked : false); 
+  tr.innerHTML = scatterRowHTML('', '', '', '', cb('errGlobal'), '', cb('showCustomLabels')); 
   tbody.appendChild(tr);
   triggerLiveUpdate();
 }
 
 function rebuildScatterSeriesTables() {
-  const hasErr = document.getElementById('errGlobal') ? document.getElementById('errGlobal').checked : false;
-  const useY2 = document.getElementById('useY2Global').checked;
+  const hasErr = cb('errGlobal'), hasPtLbl = cb('showCustomLabels'), useY2 = cb('useY2Global');
   document.querySelectorAll('#scatter-series-list .series-block').forEach(function(blk, bi) {
     const st = getSeriesState(blk, false);
     const rows = Array.from(blk.querySelectorAll('.ssb tr')).map(function(tr) { 
-      const ins = tr.querySelectorAll('input[type=number]'); 
-      return { x: ins[0] ? ins[0].value : '', y: ins[1] ? ins[1].value : '', xe: ins[2] ? ins[2].value : '', ye: ins[3] ? ins[3].value : '' }; 
+      const ins = tr.querySelectorAll('input[type=number]');
+      const errIns = tr.querySelectorAll('input[min="0"]');
+      const ptInp = tr.querySelector('.pt-lbl');
+      return { 
+        x: ins[0] ? ins[0].value : '', y: ins[1] ? ins[1].value : '', 
+        xe: errIns[0] ? errIns[0].value : '', ye: errIns[1] ? errIns[1].value : '',
+        ptLbl: ptInp ? ptInp.value : '' 
+      }; 
     });
     blk.querySelector('.series-head').innerHTML = seriesHdrHTML(blk.dataset.sidx, false, st.nameVal, st.colorHex, useY2, st.y2checked, bi === 0, st.markerVal);
     const mkEl = document.getElementById('mk_false_' + blk.dataset.sidx); if (mkEl) mkEl.value = st.markerVal;
-    blk.querySelector('thead tr').innerHTML = '<th>X</th><th>Y</th>' + (hasErr ? '<th>X err</th><th>Y err</th>' : '') + '<th style="width:38px;"></th>';
+    blk.querySelector('thead tr').innerHTML = '<th>X</th><th>Y</th>' + (hasErr ? '<th>X err</th><th>Y err</th>' : '') + (hasPtLbl ? '<th>Pt Label</th>' : '') + '<th style="width:38px;"></th>';
     const tbody = blk.querySelector('.ssb'); tbody.innerHTML = '';
-    rows.forEach(function(r) { const tr = document.createElement('tr'); tr.innerHTML = scatterRowHTML(r.x, r.y, r.xe, r.ye, hasErr); tbody.appendChild(tr); });
+    rows.forEach(function(r) { const tr = document.createElement('tr'); tr.innerHTML = scatterRowHTML(r.x, r.y, r.xe, r.ye, hasErr, r.ptLbl, hasPtLbl); tbody.appendChild(tr); });
   });
   triggerLiveUpdate();
 }
@@ -2125,6 +2146,35 @@ const axisArrowPlugin = {
     if (opts.yBot) drw(xAtZero, yS.bottom, 0, 1);
     if (opts.xRight) drw(xS.right, yAtZero, 1, 0); 
     if (opts.xLeft) drw(xS.left, yAtZero, -1, 0);
+    ctx.restore();
+  }
+};
+
+const customPtLabelPlugin = {
+  id: 'customPtLabelPlugin',
+  afterDatasetsDraw: function(chart) {
+    if (!cb('showCustomLabels')) return;
+    const ctx = chart.ctx;
+    const tickSzEl = document.getElementById('tickLabelSize');
+    const tickSz = tickSzEl ? (parseInt(tickSzEl.value) || 10) : 10;
+    
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.font = tickSz + 'pt Arial';
+    ctx.fillStyle = '#1e2a3a';
+
+    chart.data.datasets.forEach(function(ds, di) {
+      if (!ds.customLabels) return;
+      const meta = chart.getDatasetMeta(di);
+      meta.data.forEach(function(el, i) {
+        const lbl = ds.customLabels[i];
+        if (lbl) {
+          // Render slightly offset from the point
+          ctx.fillText(lbl, el.x + 6, el.y - 6);
+        }
+      });
+    });
     ctx.restore();
   }
 };
@@ -3474,7 +3524,7 @@ function buildGraph() {
       },
       scales: {}
     },
-    plugins: [axisArrowPlugin, boldZeroPlugin]
+    plugins: [axisArrowPlugin, boldZeroPlugin, customPtLabelPlugin]
   };
 
   if (selT === 'pie' && cb('pieSmartCallout')) {
@@ -3536,7 +3586,7 @@ function buildGraph() {
       var st = getSeriesState(blk, isLine);
       if (st.y2checked) hasY2 = true;
       var ds = {
-        label: st.nameVal, data: [],
+        label: st.nameVal, data: [], customLabels: [],
         borderColor: st.colorHex, backgroundColor: st.colorHex,
         borderWidth: 2, pointRadius: 4, pointStyle: st.markerVal,
         showLine: isLine, fill: false, yAxisID: st.y2checked ? 'y2' : 'y',
@@ -3546,24 +3596,30 @@ function buildGraph() {
 
       var rows = blk.querySelectorAll(isLine ? '.lsb tr' : '.ssb tr');
       rows.forEach(function(tr, pi) {
+         var ptInp = tr.querySelector('.pt-lbl');
+         var ptLbl = ptInp ? ptInp.value.trim() : '';
+
          if (isLine) {
            var ins = tr.querySelectorAll('input');
            var xl = ins[0].value, yv = parseFloat(ins[1].value), ev = parseFloat(ins[2] ? ins[2].value : 0) || 0;
            if (!globalLabels.includes(xl) && xl) globalLabels.push(xl);
            if (!isNaN(yv)) {
              ds.data.push(yv);
+             ds.customLabels.push(ptLbl);
              var yAxis = st.y2checked ? 'y2' : 'y';
              if (ev > 0) errItems.push({ di: di, pi: pi, val: yv, err: ev, yAxis: yAxis });
              var locMax = yv + ev, locMin = yv - ev;
              if (st.y2checked) { if (locMax > maxY2) maxY2 = locMax; if (locMin < minY2) minY2 = locMin; }
              else { if (locMax > maxY) maxY = locMax; if (locMin < minY) minY = locMin; }
-           } else { ds.data.push(null); }
+           } else { ds.data.push(null); ds.customLabels.push(''); }
          } else {
            var ins = tr.querySelectorAll('input[type=number]');
            var xv = parseFloat(ins[0].value), yv = parseFloat(ins[1].value);
-           var xe = parseFloat(ins[2] ? ins[2].value : 0) || 0, ye = parseFloat(ins[3] ? ins[3].value : 0) || 0;
+           var errIns = tr.querySelectorAll('input[min="0"]');
+           var xe = parseFloat(errIns[0] ? errIns[0].value : 0) || 0, ye = parseFloat(errIns[1] ? errIns[1].value : 0) || 0;
            if (!isNaN(xv) && !isNaN(yv)) {
              ds.data.push({ x: xv, y: yv });
+             ds.customLabels.push(ptLbl);
              if (xe > 0 || ye > 0) scErrItems.push({ di: di, pi: ds.data.length - 1, x: xv, y: yv, xe: xe, ye: ye, yAxis: st.y2checked ? 'y2' : 'y' });
              var lMxX = xv + xe, lMnX = xv - xe, lMxY = yv + ye, lMnY = yv - ye;
              if (lMxX > maxX) maxX = lMxX; if (lMnX < minX) minX = lMnX;
