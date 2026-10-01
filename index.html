@@ -1489,6 +1489,12 @@ function setupDE() {
   ['ax-cfg-wrap', 'scale-cfg-wrap', 'arrows-wrap', 'gridlines-wrap', 'display-opts-card', 'graph-size-wrap', 'data-input-panel'].forEach(function(id) { 
     document.getElementById(id).style.display = 'block'; 
   });
+
+  // Toggle visibility of the HTML copy button based on whether Table tool is active
+  var htmlCopyBtn = document.getElementById('copyHtmlBtn');
+  if (htmlCopyBtn) {
+    htmlCopyBtn.style.display = (selT === 'datatable') ? 'inline-flex' : 'none';
+  }
   
   var _gw2 = document.getElementById('gWidth'); if (_gw2 && (_gw2.value === '600')) _gw2.value = '450';
   var _gh2 = document.getElementById('gHeight'); if (_gh2 && (_gh2.value === '600' || _gh2.value === 'auto')) _gh2.value = '400';
