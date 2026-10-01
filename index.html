@@ -2058,20 +2058,16 @@ const scErrPlugin = {
       const meta = chart.getDatasetMeta(e.di), el = meta.data[e.pi]; if (!el) return;
       const xc = el.x, yc = el.y, yS = chart.scales[e.yAxis || 'y'], xS = chart.scales.x;
       if (e.ye > 0) {
-        const ca2 = chart.chartArea;
-        const yTraw = yS.getPixelForValue(e.y + e.ye), yBraw = yS.getPixelForValue(e.y - e.ye);
-        const yT = Math.max(yTraw, ca2.top), yB = Math.min(yBraw, ca2.bottom);
+        const yT = yS.getPixelForValue(e.y + e.ye), yB = yS.getPixelForValue(e.y - e.ye);
         ctx.beginPath(); ctx.moveTo(xc, yT); ctx.lineTo(xc, yB); ctx.stroke();
-        if (yTraw >= ca2.top) { ctx.beginPath(); ctx.moveTo(xc - cap, yT); ctx.lineTo(xc + cap, yT); }
-        if (yBraw <= ca2.bottom) { ctx.beginPath(); ctx.moveTo(xc - cap, yB); ctx.lineTo(xc + cap, yB); }
+        ctx.beginPath(); ctx.moveTo(xc - cap, yT); ctx.lineTo(xc + cap, yT); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(xc - cap, yB); ctx.lineTo(xc + cap, yB); ctx.stroke();
       }
       if (e.xe > 0) {
-        const ca = chart.chartArea;
-        const xLraw = xS.getPixelForValue(e.x - e.xe), xRraw = xS.getPixelForValue(e.x + e.xe);
-        const xL = Math.max(xLraw, ca.left), xR = Math.min(xRraw, ca.right);
+        const xL = xS.getPixelForValue(e.x - e.xe), xR = xS.getPixelForValue(e.x + e.xe);
         ctx.beginPath(); ctx.moveTo(xL, yc); ctx.lineTo(xR, yc); ctx.stroke();
-        if (xLraw >= ca.left) { ctx.beginPath(); ctx.moveTo(xL, yc - cap); ctx.lineTo(xL, yc + cap); }
-        if (xRraw <= ca.right) { ctx.beginPath(); ctx.moveTo(xR, yc - cap); ctx.lineTo(xR, yc + cap); }
+        ctx.beginPath(); ctx.moveTo(xL, yc - cap); ctx.lineTo(xL, yc + cap); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(xR, yc - cap); ctx.lineTo(xR, yc + cap); ctx.stroke();
       }
     });
     ctx.restore();
@@ -3543,7 +3539,8 @@ function buildGraph() {
         label: st.nameVal, data: [],
         borderColor: st.colorHex, backgroundColor: st.colorHex,
         borderWidth: 2, pointRadius: 4, pointStyle: st.markerVal,
-        showLine: isLine, fill: false, yAxisID: st.y2checked ? 'y2' : 'y'
+        showLine: isLine, fill: false, yAxisID: st.y2checked ? 'y2' : 'y',
+        clip: false
       };
       if (isLine) ds.borderDash = getDashPattern(st.lineStyleVal);
 
