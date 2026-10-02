@@ -2164,10 +2164,12 @@ const customPtLabelPlugin = {
     const tickSzEl = document.getElementById('tickLabelSize');
     const tickSz = tickSzEl ? (parseInt(tickSzEl.value) || 10) : 10;
     
+    // 1. Make the label slightly smaller than the standard tick size
+    const labelSz = Math.max(6, tickSz - 1.5); 
+
     ctx.save();
-    ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.font = tickSz + 'pt Arial';
+    ctx.font = labelSz + 'pt Arial';
     ctx.fillStyle = '#1e2a3a';
 
     chart.data.datasets.forEach(function(ds, di) {
@@ -2176,8 +2178,26 @@ const customPtLabelPlugin = {
       meta.data.forEach(function(el, i) {
         const lbl = ds.customLabels[i];
         if (lbl) {
-          // Render slightly offset from the point
-          ctx.fillText(lbl, el.x + 6, el.y - 6);
+          const textWidth = ctx.measureText(lbl).width;
+          
+          // 2. Increase offset to push the text further from the point
+          let xOffset = 10; 
+          let yOffset = -10;
+
+          // 3. Prevent cutoff by flipping alignment if it hits the right edge
+          if (el.x + xOffset + textWidth > chart.width - 5) {
+            ctx.textAlign = 'right';
+            xOffset = -10; // Draw to the left of the point instead
+          } else {
+            ctx.textAlign = 'left';
+          }
+
+          // Prevent cutoff if the point is too close to the top edge
+          if (el.y + yOffset < 10) {
+            yOffset = 12; // Draw below the point instead
+          }
+
+          ctx.fillText(lbl, el.x + xOffset, el.y + yOffset);
         }
       });
     });
