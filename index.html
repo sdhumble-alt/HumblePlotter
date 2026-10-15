@@ -764,7 +764,7 @@ input[type=radio] {
       </div>
     </div>
     <div class="header-right">
-      <div class="toolbar-ver">V 2.0.2 &mdash; 2026-10-07</div>
+      <div class="toolbar-ver">V 2.0.3 &mdash; 2026-10-15</div>
     </div>
   </header>
 
@@ -1248,8 +1248,8 @@ input[type=radio] {
 
 <script>
 'use strict';
-const APP_VERSION = 'V 2.0.2';
-const APP_DATE = '2026-10-07';
+const APP_VERSION = 'V 2.0.3';
+const APP_DATE = '2026-10-15';
 let selT = null, curChart = null, lineSeriesCount = 0, scatterSeriesCount = 0, bwSeriesCount = 0;
 let debounceTimer = null;
 
@@ -1490,7 +1490,6 @@ function setupDE() {
     document.getElementById(id).style.display = 'block'; 
   });
 
-  // Toggle visibility of the HTML copy button based on whether Table tool is active
   var htmlCopyBtn = document.getElementById('copyHtmlBtn');
   if (htmlCopyBtn) {
     htmlCopyBtn.style.display = (selT === 'datatable') ? 'inline-flex' : 'none';
@@ -3628,9 +3627,16 @@ function buildGraph() {
          if (isLine) {
            var ins = tr.querySelectorAll('input');
            var xl = ins[0].value, yv = parseFloat(ins[1].value), ev = parseFloat(ins[2] ? ins[2].value : 0) || 0;
+           var xv = parseFloat(xl);
            if (!globalLabels.includes(xl) && xl) globalLabels.push(xl);
            if (!isNaN(yv)) {
-             ds.data.push(yv);
+             if (!isNaN(xv) && xl.trim() !== '') {
+                 ds.data.push({ x: xv, y: yv });
+                 if (xv > maxX) maxX = xv;
+                 if (xv < minX) minX = xv;
+             } else {
+                 ds.data.push(yv);
+             }
              ds.customLabels.push(ptLbl);
              var yAxis = st.y2checked ? 'y2' : 'y';
              if (ev > 0) errItems.push({ di: di, pi: pi, val: yv, err: ev, yAxis: yAxis });
@@ -3666,8 +3672,15 @@ function buildGraph() {
     if (minY2 === Infinity) { minY2 = 0; maxY2 = 10; }
 
     if (isLine) {
-       cfg.data.labels = globalLabels.length ? globalLabels : Array.from({length: cfg.data.datasets[0]?.data.length||5}, (_, i) => i+1);
-       cfg.options.scales.x = makeXCat(xlabel, D);
+       var allNumeric = globalLabels.length > 0 && globalLabels.every(function(l) { return !isNaN(parseFloat(l)) && l.trim() !== ''; });
+       
+       if (allNumeric) {
+           if (minX === Infinity) { minX = 0; maxX = 10; }
+           cfg.options.scales.x = makeXLin(xlabel, niceScaleX(minX, maxX, gopt('xmin'), gopt('xmax'), gopt('xstep')), D, D.pctX);
+       } else {
+           cfg.data.labels = globalLabels.length ? globalLabels : Array.from({length: cfg.data.datasets[0]?.data.length||5}, (_, i) => i+1);
+           cfg.options.scales.x = makeXCat(xlabel, D);
+       }
        if (errItems.length) { cfg.plugins.push(errPlugin); cfg.options.plugins.errPlugin = { items: errItems }; }
     } else {
        cfg.options.scales.x = makeXLin(xlabel, niceScaleX(minX, maxX, gopt('xmin'), gopt('xmax'), gopt('xstep')), D, D.pctX);
