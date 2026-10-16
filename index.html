@@ -764,7 +764,7 @@ input[type=radio] {
       </div>
     </div>
     <div class="header-right">
-      <div class="toolbar-ver">V 2.0.3 &mdash; 2026-10-15</div>
+      <div class="toolbar-ver">V 2.0.4 &mdash; 2026-10-16</div>
     </div>
   </header>
 
@@ -1248,8 +1248,8 @@ input[type=radio] {
 
 <script>
 'use strict';
-const APP_VERSION = 'V 2.0.3';
-const APP_DATE = '2026-10-15';
+const APP_VERSION = 'V 2.0.4';
+const APP_DATE = '2026-10-16';
 let selT = null, curChart = null, lineSeriesCount = 0, scatterSeriesCount = 0, bwSeriesCount = 0;
 let debounceTimer = null;
 
@@ -1624,16 +1624,20 @@ function rebuildBarTable() {
   var dataColPct = Math.floor(86 / dataCols);
   var colW = dataColPct + '%';
   let h = '<th style="width:18%;">Category</th>';
-  for (let g = 0; g < n; g++) h += '<th style="width:' + colW + ';">Group ' + (g + 1) + '</th>';
-  if (hasErr) for (let g = 0; g < n; g++) h += '<th style="width:' + colW + '">&plusmn;Group ' + (g + 1) + '</th>';
+  for (let g = 0; g < n; g++) {
+    h += '<th style="width:' + colW + ';">Group ' + (g + 1) + '</th>';
+    if (hasErr) h += '<th style="width:' + colW + ';">&plusmn;Group ' + (g + 1) + '</th>';
+  }
   h += '<th style="width:38px;"></th>'; thead.innerHTML = h;
   document.getElementById('bar-tbody').querySelectorAll('tr').forEach(function(tr) {
     const cat = tr.querySelector('.bar-cat') ? tr.querySelector('.bar-cat').value : '';
     const vals = Array.from(tr.querySelectorAll('.bar-val')).map(function(i) { return i.value; });
     const errs = Array.from(tr.querySelectorAll('.bar-err')).map(function(i) { return i.value; });
     let c = '<td><input type="text" class="bar-cat" value="' + cat + '"></td>';
-    for (let g = 0; g < n; g++) c += '<td><input type="number" class="bar-val" step="any" value="' + (vals[g] || '') + '"></td>';
-    if (hasErr) for (let g = 0; g < n; g++) c += '<td><input type="number" class="bar-err" step="any" min="0" value="' + (errs[g] || '') + '"></td>';
+    for (let g = 0; g < n; g++) {
+      c += '<td><input type="number" class="bar-val" step="any" value="' + (vals[g] || '') + '"></td>';
+      if (hasErr) c += '<td><input type="number" class="bar-err" step="any" min="0" value="' + (errs[g] || '') + '"></td>';
+    }
     c += '<td><button class="btn-danger-sm" onclick="this.closest(\'tr\').remove();triggerLiveUpdate();">✕</button></td>';
     tr.innerHTML = c;
   });
@@ -1645,8 +1649,10 @@ function addBarRow() {
   const n = nGroups(), hasErr = cb('errGlobal');
   const tbody = document.getElementById('bar-tbody'), tr = document.createElement('tr');
   let c = '<td><input type="text" class="bar-cat"></td>';
-  for (let g = 0; g < n; g++) c += '<td><input type="number" class="bar-val" step="any"></td>';
-  if (hasErr) for (let g = 0; g < n; g++) c += '<td><input type="number" class="bar-err" step="any" min="0"></td>';
+  for (let g = 0; g < n; g++) {
+    c += '<td><input type="number" class="bar-val" step="any"></td>';
+    if (hasErr) c += '<td><input type="number" class="bar-err" step="any" min="0"></td>';
+  }
   c += '<td><button class="btn-danger-sm" onclick="this.closest(\'tr\').remove();triggerLiveUpdate();">✕</button></td>';
   tr.innerHTML = c; tbody.appendChild(tr);
   triggerLiveUpdate();
@@ -1803,7 +1809,7 @@ function makeSeriesBlock(idx, isLine, hasErr, useY2) {
   const tbl = document.createElement('table'); tbl.className = 'dtbl';
   const thead = document.createElement('thead'), theadRow = document.createElement('tr');
   if (isLine) theadRow.innerHTML = '<th>X label</th><th>Y value</th>' + (hasErr ? '<th>Error</th>' : '') + (cb('showCustomLabels') ? '<th>Pt Label</th>' : '') + '<th style="width:38px;"></th>';
-  else theadRow.innerHTML = '<th>X</th><th>Y</th>' + (hasErr ? '<th>X err</th><th>Y err</th>' : '') + (cb('showCustomLabels') ? '<th>Pt Label</th>' : '') + '<th style="width:38px;"></th>';
+  else theadRow.innerHTML = '<th>X</th>' + (hasErr ? '<th>X err</th>' : '') + '<th>Y</th>' + (hasErr ? '<th>Y err</th>' : '') + (cb('showCustomLabels') ? '<th>Pt Label</th>' : '') + '<th style="width:38px;"></th>';
   thead.appendChild(theadRow); tbl.appendChild(thead);
   const tbody = document.createElement('tbody'); tbody.className = isLine ? 'lsb' : 'ssb';
   tbl.appendChild(tbody); tblWrap.appendChild(tbl); bodyDiv.appendChild(tblWrap);
@@ -1840,7 +1846,10 @@ function seriesPastePrompt(btn, mode) {
   ta.dataset.mode = mode || 'tsv';
   if (lbl) {
     var isLine = !!btn.closest('.series-block').querySelector('.lsb');
-    var colDesc = isLine ? 'x label, y value[, ±error][, label]' : 'x value, y value[, x±error, y±error][, label]';
+    var hasErr = cb('errGlobal');
+    var colDesc = isLine
+      ? 'x label, y value[, ±error][, label]'
+      : (hasErr ? 'x value, x ±error, y value, y ±error[, label]' : 'x value, y value[, label]');
     lbl.textContent = (mode === 'csv' ? 'Paste CSV — ' : 'Paste from Excel — ') + 'columns: ' + colDesc;
     lbl.style.display = 'block';
   }
@@ -1877,7 +1886,11 @@ function seriesImportPaste(btn) {
     if (isLine) {
       tr.innerHTML = lineRowHTML(cols[0] || '', cols[1] || '', cols[2] || '', hasErr, cols[hasErr ? 3 : 2] || '', hasPtLbl);
     } else {
-      tr.innerHTML = scatterRowHTML(cols[0] || '', cols[1] || '', cols[2] || '', cols[3] || '', hasErr, cols[hasErr ? 4 : 2] || '', hasPtLbl);
+      if (hasErr) {
+        tr.innerHTML = scatterRowHTML(cols[0] || '', cols[2] || '', cols[1] || '', cols[3] || '', true, cols[4] || '', hasPtLbl);
+      } else {
+        tr.innerHTML = scatterRowHTML(cols[0] || '', cols[1] || '', '', '', false, cols[2] || '', hasPtLbl);
+      }
     }
     tbody.appendChild(tr);
   });
@@ -1943,10 +1956,10 @@ function addScatterSeries(numRows) {
 }
 
 function scatterRowHTML(x, y, xe, ye, hasErr, ptLbl, hasPtLbl) {
-  return '<td><input type="number" value="' + (x || '') + '" step="any"></td>'
-    + '<td><input type="number" value="' + (y || '') + '" step="any"></td>'
-    + (hasErr ? '<td><input type="number" value="' + (xe || '') + '" step="any" min="0"></td>' : '')
-    + (hasErr ? '<td><input type="number" value="' + (ye || '') + '" step="any" min="0"></td>' : '')
+  return '<td><input type="number" class="sc-x" value="' + (x || '') + '" step="any"></td>'
+    + (hasErr ? '<td><input type="number" class="sc-xe" value="' + (xe || '') + '" step="any" min="0"></td>' : '')
+    + '<td><input type="number" class="sc-y" value="' + (y || '') + '" step="any"></td>'
+    + (hasErr ? '<td><input type="number" class="sc-ye" value="' + (ye || '') + '" step="any" min="0"></td>' : '')
     + (hasPtLbl ? '<td><input type="text" class="pt-lbl" value="' + (ptLbl || '') + '"></td>' : '')
     + '<td><button class="btn-danger-sm" onclick="this.closest(\'tr\').remove();triggerLiveUpdate();">✕</button></td>';
 }
@@ -1964,18 +1977,20 @@ function rebuildScatterSeriesTables() {
   document.querySelectorAll('#scatter-series-list .series-block').forEach(function(blk, bi) {
     const st = getSeriesState(blk, false);
     const rows = Array.from(blk.querySelectorAll('.ssb tr')).map(function(tr) { 
-      const ins = tr.querySelectorAll('input[type=number]');
-      const errIns = tr.querySelectorAll('input[min="0"]');
+      const xInp = tr.querySelector('.sc-x');
+      const yInp = tr.querySelector('.sc-y');
+      const xeInp = tr.querySelector('.sc-xe');
+      const yeInp = tr.querySelector('.sc-ye');
       const ptInp = tr.querySelector('.pt-lbl');
       return { 
-        x: ins[0] ? ins[0].value : '', y: ins[1] ? ins[1].value : '', 
-        xe: errIns[0] ? errIns[0].value : '', ye: errIns[1] ? errIns[1].value : '',
+        x: xInp ? xInp.value : '', y: yInp ? yInp.value : '', 
+        xe: xeInp ? xeInp.value : '', ye: yeInp ? yeInp.value : '',
         ptLbl: ptInp ? ptInp.value : '' 
       }; 
     });
     blk.querySelector('.series-head').innerHTML = seriesHdrHTML(blk.dataset.sidx, false, st.nameVal, st.colorHex, useY2, st.y2checked, bi === 0, st.markerVal);
     const mkEl = document.getElementById('mk_false_' + blk.dataset.sidx); if (mkEl) mkEl.value = st.markerVal;
-    blk.querySelector('thead tr').innerHTML = '<th>X</th><th>Y</th>' + (hasErr ? '<th>X err</th><th>Y err</th>' : '') + (hasPtLbl ? '<th>Pt Label</th>' : '') + '<th style="width:38px;"></th>';
+    blk.querySelector('thead tr').innerHTML = '<th>X</th>' + (hasErr ? '<th>X err</th>' : '') + '<th>Y</th>' + (hasErr ? '<th>Y err</th>' : '') + (hasPtLbl ? '<th>Pt Label</th>' : '') + '<th style="width:38px;"></th>';
     const tbody = blk.querySelector('.ssb'); tbody.innerHTML = '';
     rows.forEach(function(r) { const tr = document.createElement('tr'); tr.innerHTML = scatterRowHTML(r.x, r.y, r.xe, r.ye, hasErr, r.ptLbl, hasPtLbl); tbody.appendChild(tr); });
   });
@@ -2556,7 +2571,7 @@ function parseHtmlFormatting(text) {
   if (!text) return '';
 
   const subMap = {'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉','+':'₊','-':'₋','=':'₌','(':'₍',')':'₎','a':'ₐ','e':'ₑ','h':'ₕ','i':'ᵢ','j':'ⱼ','k':'ₖ','l':'◗','m':'ₘ','n':'ₙ','o':'ₒ','p':'ₚ','r':'ᵣ','s':'ₛ','t':'ₜ','u':'ᵤ','v':'ᵥ','x':'ₓ'};
-  const supMap = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','+':'⁺','-':'⁻','=':'⁼','(':'⁽',')':'⁾','a':'ᵃ','b':'ᵇ','c':'ᶜ','d':'ᵈ','e':'ᵉ','f':'ᶠ','g':'ᵍ','h':'ʰ','i':'ⁱ','j':'ʲ','k':'ᵏ','l':'ˡ','m':'ᵐ','n':'ⁿ','o':'ᵒ','p':'ᵖ','r':'ʳ','s':'ˢ','t':'ᵗ','u':'ᵘ','v':'ᵛ','w':'ʷ','x':'ˣ','y':'ʸ','z':'ᶻ'};
+  const supMap = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','+':'⁺','-':'⁻','=':'⁼','(':'⁽',')':'⁾','a':'ᵃ','b':'ᵇ','c':'ᶜ','d':'ᵈ','e':'ᵉ','f':'ᶠ','g':'ᵍ','h':'ʰ','i':'ⁱ','j':'ʲ','k':'ᵏ','l':'ˡ','m':'ᵐ','n':'ⁿ','o':'ᵒ','p':'ᵖ','r':'ᵣ','s':'ˢ','t':'ᵗ','u':'ᵘ','v':'ᵛ','w':'ʷ','x':'ˣ','y':'ʸ','z':'ᶻ'};
 
   function toSub(str) { return str.split('').map(char => subMap[char] || char).join(''); }
   function toSup(str) { return str.split('').map(char => supMap[char] || char).join(''); }
@@ -3650,10 +3665,12 @@ function buildGraph() {
              else { if (locMax > maxY) maxY = locMax; if (locMin < minY) minY = locMin; }
            } else { ds.data.push(null); ds.customLabels.push(''); }
          } else {
-           var ins = tr.querySelectorAll('input[type=number]');
-           var xv = parseFloat(ins[0].value), yv = parseFloat(ins[1].value);
-           var errIns = tr.querySelectorAll('input[min="0"]');
-           var xe = parseFloat(errIns[0] ? errIns[0].value : 0) || 0, ye = parseFloat(errIns[1] ? errIns[1].value : 0) || 0;
+           var xInp = tr.querySelector('.sc-x');
+           var yInp = tr.querySelector('.sc-y');
+           var xeInp = tr.querySelector('.sc-xe');
+           var yeInp = tr.querySelector('.sc-ye');
+           var xv = parseFloat(xInp ? xInp.value : NaN), yv = parseFloat(yInp ? yInp.value : NaN);
+           var xe = parseFloat(xeInp ? xeInp.value : 0) || 0, ye = parseFloat(yeInp ? yeInp.value : 0) || 0;
            if (!isNaN(xv) && !isNaN(yv)) {
              ds.data.push({ x: xv, y: yv });
              ds.customLabels.push(ptLbl);
