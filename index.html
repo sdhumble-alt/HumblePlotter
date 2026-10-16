@@ -1383,7 +1383,7 @@ function makeLineStyleSel(uid, val) {
   const list = [
     { name: 'Solid', val: 'solid' },
     { name: 'Dashed (8 4)', val: 'dashed' },
-    { name: 'Dotted (2 3)', val: 'dash' },
+    { name: 'Dotted (2 3)', val: 'dotted' },
     { name: 'Dash-Dot (8 3 2 3)', val: 'dashdot' },
     { name: 'Long Dash (12 6)', val: 'longdash' }
   ];
@@ -1409,7 +1409,7 @@ function makeTextureSel(uid, val) {
 
 function getDashPattern(style) {
   if (style === 'dashed') return [8, 4];
-  if (style === 'dotted') return [2, 3];
+  if (style === 'dotted' || style === 'dash') return [2, 3];
   if (style === 'dashdot') return [8, 3, 2, 3];
   if (style === 'longdash') return [12, 6];
   return [];
@@ -1909,9 +1909,9 @@ function addLineSeries(numRows) {
 }
 
 function lineRowHTML(x, y, e, hasErr, ptLbl, hasPtLbl) {
-  return '<td><input type="text" value="' + (x || '') + '"></td>'
-    + '<td><input type="number" value="' + (y || '') + '" step="any"></td>'
-    + (hasErr ? '<td><input type="number" value="' + (e || '') + '" step="any" min="0"></td>' : '')
+  return '<td><input type="text" class="ln-x" value="' + (x || '') + '"></td>'
+    + '<td><input type="number" class="ln-y" value="' + (y || '') + '" step="any"></td>'
+    + (hasErr ? '<td><input type="number" class="ln-e" value="' + (e || '') + '" step="any" min="0"></td>' : '')
     + (hasPtLbl ? '<td><input type="text" class="pt-lbl" value="' + (ptLbl || '') + '"></td>' : '')
     + '<td><button class="btn-danger-sm" onclick="this.closest(\'tr\').remove();triggerLiveUpdate();">✕</button></td>';
 }
@@ -1929,11 +1929,16 @@ function rebuildLineSeriesTables() {
   document.querySelectorAll('#line-series-list .series-block').forEach(function(blk, bi) {
     const st = getSeriesState(blk, true);
     const rows = Array.from(blk.querySelectorAll('.lsb tr')).map(function(tr) { 
-      const x = tr.cells[0].querySelector('input').value;
-      const y = tr.cells[1].querySelector('input').value;
-      const errInp = tr.querySelector('input[min="0"]');
+      const xInp = tr.querySelector('.ln-x') || tr.cells[0].querySelector('input');
+      const yInp = tr.querySelector('.ln-y') || tr.cells[1].querySelector('input');
+      const errInp = tr.querySelector('.ln-e') || tr.querySelector('input[min="0"]');
       const ptInp = tr.querySelector('.pt-lbl');
-      return { x: x, y: y, e: errInp ? errInp.value : '', ptLbl: ptInp ? ptInp.value : '' }; 
+      return {
+        x: xInp ? xInp.value : '',
+        y: yInp ? yInp.value : '',
+        e: errInp ? errInp.value : '',
+        ptLbl: ptInp ? ptInp.value : ''
+      }; 
     });
     blk.querySelector('.series-head').innerHTML = seriesHdrHTML(blk.dataset.sidx, true, st.nameVal, st.colorHex, useY2, st.y2checked, bi === 0, st.markerVal, st.lineStyleVal);
     const mkEl = document.getElementById('mk_true_' + blk.dataset.sidx); if (mkEl) mkEl.value = st.markerVal;
@@ -2058,11 +2063,13 @@ const errPlugin = {
     opts.items.forEach(function(e) {
       if (!e || e.err == null || isNaN(e.err) || e.err === 0) return;
       const meta = chart.getDatasetMeta(e.di);
+      if (!meta || !meta.data) return;
       const el = meta.data[e.pi];
       if (!el) return;
 
       const xc = el.x;
       const yA = e.yAxis || 'y';
+      if (!chart.scales[yA]) return;
       const yT = chart.scales[yA].getPixelForValue(e.val + e.err);
       const yB = chart.scales[yA].getPixelForValue(e.val - e.err);
 
@@ -2072,24 +2079,27 @@ const errPlugin = {
       drawBarLines(xc, yT, yB);
       ctx.restore();
 
-      const barColor = (chart.data.datasets[e.di] && chart.data.datasets[e.di].backgroundColor)
-        ? (getColor('barg' + e.di) || '#111827')
-        : '#111827';
+      // Only invert error bar portion inside dark bars on bar charts
+      if (chart.config.type === 'bar' && el.width !== undefined && el.base !== undefined) {
+        const barColor = (chart.data.datasets[e.di] && chart.data.datasets[e.di].backgroundColor)
+          ? (getColor('barg' + e.di) || '#111827')
+          : '#111827';
 
-      if (typeof contrastColor === 'function' && contrastColor(barColor) === '#ffffff') {
-        const barLeft = el.x - (el.width / 2);
-        const barTop = Math.min(el.y, el.base);
-        const barHeight = Math.abs(el.base - el.y);
+        if (typeof contrastColor === 'function' && contrastColor(barColor) === '#ffffff') {
+          const barLeft = el.x - (el.width / 2);
+          const barTop = Math.min(el.y, el.base);
+          const barHeight = Math.abs(el.base - el.y);
 
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(barLeft, barTop, el.width, barHeight);
-        ctx.clip();
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(barLeft, barTop, el.width, barHeight);
+          ctx.clip();
 
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 1.5;
-        drawBarLines(xc, yT, yB);
-        ctx.restore();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.5;
+          drawBarLines(xc, yT, yB);
+          ctx.restore();
+        }
       }
     });
   }
@@ -2101,8 +2111,11 @@ const scErrPlugin = {
     if (!opts || !opts.items || !opts.items.length) return;
     const ctx = chart.ctx; ctx.save(); ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; const cap = 5;
     opts.items.forEach(function(e) {
-      const meta = chart.getDatasetMeta(e.di), el = meta.data[e.pi]; if (!el) return;
+      const meta = chart.getDatasetMeta(e.di);
+      if (!meta || !meta.data) return;
+      const el = meta.data[e.pi]; if (!el) return;
       const xc = el.x, yc = el.y, yS = chart.scales[e.yAxis || 'y'], xS = chart.scales.x;
+      if (!yS || !xS) return;
       if (e.ye > 0) {
         const yT = yS.getPixelForValue(e.y + e.ye), yB = yS.getPixelForValue(e.y - e.ye);
         ctx.beginPath(); ctx.moveTo(xc, yT); ctx.lineTo(xc, yB); ctx.stroke();
@@ -2530,19 +2543,38 @@ function linReg(pts) {
 }
 
 function niceStep(range) {
-  const rough = range / 5, pow = Math.pow(10, Math.floor(Math.log10(rough || 1))), f = rough / pow;
+  const safeRange = (range > 0 && isFinite(range)) ? range : 10;
+  const rough = safeRange / 5, pow = Math.pow(10, Math.floor(Math.log10(rough))), f = rough / pow;
   if (f < 1.5) return 1 * pow; if (f < 3.5) return 2 * pow; if (f < 7.5) return 5 * pow; return 10 * pow;
 }
 
 function niceScale(mn, mx, errMin, errMax, uMin, uMax, uStep) {
   const tMin = Math.min(mn, errMin !== undefined ? errMin : mn), tMax = Math.max(mx, errMax !== undefined ? errMax : mx);
-  const a = uMin !== undefined ? uMin : tMin, b = uMax !== undefined ? uMax : tMax, range = b - a || 1, step = uStep || niceStep(range);
-  return { min: Math.floor(a / step) * step, max: Math.ceil(b / step) * step, step: step };
+  let a = uMin !== undefined ? uMin : tMin, b = uMax !== undefined ? uMax : tMax;
+  if (b === a) {
+    if (uMin === undefined) a -= (Math.abs(a) * 0.2 || 1);
+    if (uMax === undefined) b += (Math.abs(b) * 0.2 || 1);
+  }
+  const range = Math.abs(b - a) || 10, step = (uStep && uStep > 0) ? uStep : niceStep(range);
+  return {
+    min: uMin !== undefined ? uMin : +(Math.floor(a / step) * step).toFixed(8),
+    max: uMax !== undefined ? uMax : +(Math.ceil(b / step) * step).toFixed(8),
+    step: step
+  };
 }
 
 function niceScaleX(mn, mx, uMin, uMax, uStep) {
-  const a = uMin !== undefined ? uMin : mn, b = uMax !== undefined ? uMax : mx, range = b - a || 1, step = uStep || niceStep(range);
-  return { min: uMin !== undefined ? uMin : Math.floor(a / step) * step, max: uMax !== undefined ? uMax : Math.ceil(b / step) * step, step: step };
+  let a = uMin !== undefined ? uMin : mn, b = uMax !== undefined ? uMax : mx;
+  if (b === a) {
+    if (uMin === undefined) a -= (Math.abs(a) * 0.2 || 1);
+    if (uMax === undefined) b += (Math.abs(b) * 0.2 || 1);
+  }
+  const range = Math.abs(b - a) || 10, step = (uStep && uStep > 0) ? uStep : niceStep(range);
+  return {
+    min: uMin !== undefined ? uMin : +(Math.floor(a / step) * step).toFixed(8),
+    max: uMax !== undefined ? uMax : +(Math.ceil(b / step) * step).toFixed(8),
+    step: step
+  };
 }
 
 function gridDash(style) { if (style === 'dotted') return [2, 3]; if (style === 'dashed') return [6, 4]; return []; }
@@ -2661,7 +2693,7 @@ function markerSVG(shape, color, lineStyle) {
   var s = color || '#000000';
   var dashAttr = '';
   if (lineStyle === 'dashed') dashAttr = ' stroke-dasharray="4,2"';
-  else if (lineStyle === 'dotted') dashAttr = ' stroke-dasharray="2,2"';
+  else if (lineStyle === 'dotted' || lineStyle === 'dash') dashAttr = ' stroke-dasharray="2,2"';
   else if (lineStyle === 'dashdot') dashAttr = ' stroke-dasharray="4,2,1,2"';
   else if (lineStyle === 'longdash') dashAttr = ' stroke-dasharray="6,3"';
 
@@ -3565,7 +3597,9 @@ function buildGraph() {
       plugins: {
         legend: { display: false },
         title: { display: !!chartTitle, text: parseHtmlFormatting(chartTitle), font: { family: 'Arial', size: Math.round(D.axLblSz * 1.15), weight: 'bold' }, color: '#1e2a3a' },
-        tooltip: { enabled: false }
+        tooltip: { enabled: false },
+        axisArrowPlugin: { yTop: D.arrowYTop, yBot: D.arrowYBot, xRight: D.arrowXRight, xLeft: D.arrowXLeft },
+        boldZeroPlugin: { enabled: D.boldZero }
       },
       scales: {}
     },
@@ -3622,7 +3656,7 @@ function buildGraph() {
     var isLine = selT === 'line';
     cfg.type = isLine ? 'line' : 'scatter';
     var blks = document.querySelectorAll((isLine ? '#line-series-list' : '#scatter-series-list') + ' .series-block');
-    var errItems = [], scErrItems = [];
+    var errItems = [], scErrItems = [], trendDatasets = [];
     var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     var hasY2 = false, minY2 = Infinity, maxY2 = -Infinity;
     var globalLabels = [];
@@ -3640,16 +3674,21 @@ function buildGraph() {
       if (isLine) ds.borderDash = getDashPattern(st.lineStyleVal);
 
       var rows = blk.querySelectorAll(isLine ? '.lsb tr' : '.ssb tr');
-      rows.forEach(function(tr, pi) {
+      rows.forEach(function(tr) {
          var ptInp = tr.querySelector('.pt-lbl');
          var ptLbl = ptInp ? ptInp.value.trim() : '';
 
          if (isLine) {
-           var ins = tr.querySelectorAll('input');
-           var xl = ins[0].value, yv = parseFloat(ins[1].value), ev = parseFloat(ins[2] ? ins[2].value : 0) || 0;
+           var xInp = tr.querySelector('.ln-x') || tr.cells[0].querySelector('input');
+           var yInp = tr.querySelector('.ln-y') || tr.cells[1].querySelector('input');
+           var eInp = tr.querySelector('.ln-e') || tr.querySelector('input[min="0"]');
+           var xl = xInp ? xInp.value : '';
+           var yv = parseFloat(yInp ? yInp.value : NaN);
+           var ev = parseFloat(eInp ? eInp.value : 0) || 0;
            var xv = parseFloat(xl);
            if (!globalLabels.includes(xl) && xl) globalLabels.push(xl);
            if (!isNaN(yv)) {
+             var ptIdx = ds.data.length;
              if (!isNaN(xv) && xl.trim() !== '') {
                  ds.data.push({ x: xv, y: yv });
                  if (xv > maxX) maxX = xv;
@@ -3659,11 +3698,14 @@ function buildGraph() {
              }
              ds.customLabels.push(ptLbl);
              var yAxis = st.y2checked ? 'y2' : 'y';
-             if (ev > 0) errItems.push({ di: di, pi: pi, val: yv, err: ev, yAxis: yAxis });
+             if (ev > 0) errItems.push({ di: di, pi: ptIdx, val: yv, err: ev, yAxis: yAxis });
              var locMax = yv + ev, locMin = yv - ev;
              if (st.y2checked) { if (locMax > maxY2) maxY2 = locMax; if (locMin < minY2) minY2 = locMin; }
              else { if (locMax > maxY) maxY = locMax; if (locMin < minY) minY = locMin; }
-           } else { ds.data.push(null); ds.customLabels.push(''); }
+           } else if (xl.trim() !== '') {
+             ds.data.push(null);
+             ds.customLabels.push('');
+           }
          } else {
            var xInp = tr.querySelector('.sc-x');
            var yInp = tr.querySelector('.sc-y');
@@ -3683,11 +3725,37 @@ function buildGraph() {
          }
       });
       cfg.data.datasets.push(ds);
+
+      if (!isLine && D.showTrendline && ds.data.length >= 2) {
+        var lr = linReg(ds.data);
+        if (lr) {
+          trendDatasets.push({
+            label: st.nameVal + ' Trend',
+            data: [
+              { x: lr.xMin, y: lr.m * lr.xMin + lr.b },
+              { x: lr.xMax, y: lr.m * lr.xMax + lr.b }
+            ],
+            borderColor: st.colorHex,
+            backgroundColor: 'transparent',
+            borderWidth: 1.5,
+            borderDash: [6, 4],
+            pointRadius: 0,
+            showLine: true,
+            fill: false,
+            yAxisID: st.y2checked ? 'y2' : 'y',
+            clip: false
+          });
+        }
+      }
       
       if (D.showLegend && legendDiv) {
          legendDiv.innerHTML += '<span class="leg-item" data-label="'+st.nameVal+'" data-color="'+st.colorHex+'" data-shape="'+st.markerVal+'" data-linestyle="'+(isLine?st.lineStyleVal:'solid')+'" style="display:inline-flex;align-items:center;gap:4px;">' + markerSVG(st.markerVal, st.colorHex, isLine?st.lineStyleVal:'solid') + ' ' + parseHtmlFormatting(st.nameVal) + '</span>';
       }
     });
+
+    if (trendDatasets.length) {
+      trendDatasets.forEach(function(tds) { cfg.data.datasets.push(tds); });
+    }
 
     if (minX === Infinity) { minX = 0; maxX = 10; }
     if (minY === Infinity) { minY = 0; maxY = 10; }
@@ -3697,7 +3765,6 @@ function buildGraph() {
        var allNumeric = globalLabels.length > 0 && globalLabels.every(function(l) { return !isNaN(parseFloat(l)) && l.trim() !== ''; });
        
        if (allNumeric) {
-           if (minX === Infinity) { minX = 0; maxX = 10; }
            cfg.options.scales.x = makeXLin(xlabel, niceScaleX(minX, maxX, gopt('xmin'), gopt('xmax'), gopt('xstep')), D, D.pctX);
        } else {
            cfg.data.labels = globalLabels.length ? globalLabels : Array.from({length: cfg.data.datasets[0]?.data.length||5}, (_, i) => i+1);
