@@ -1515,6 +1515,7 @@ function setupDE() {
     document.getElementById('errbar-global-opt').style.display = 'flex';
     document.getElementById('bar-labels-opt').style.display = 'flex';
     document.getElementById('pct-y-opt').style.display = 'flex';
+    document.getElementById('legend-opt').style.display = 'flex';
     var _baxr = document.getElementById('arrowXRight-row'); if (_baxr) _baxr.style.display = 'none';
     var _baxl = document.getElementById('arrowXLeft-row'); if (_baxl) _baxl.style.display = 'none';
     rebuildBarGroups(); if (!document.getElementById('bar-tbody').children.length) addBarRow();
@@ -1525,6 +1526,7 @@ function setupDE() {
     document.getElementById('point-labels-opt').style.display = 'flex';
     document.getElementById('y2-toggle-wrap').style.display = 'flex';
     document.getElementById('xscale-section').style.display = 'block'; document.getElementById('legend-opt').style.display = 'flex';
+    document.getElementById('showLegend').checked = true;
     document.getElementById('pct-y-opt').style.display = 'flex'; document.getElementById('pct-x-opt').style.display = 'flex';
     if (!document.getElementById('line-series-list').children.length) { lineSeriesCount = 0; addLineSeries(3); }
     toggleY2UI();
@@ -1535,6 +1537,7 @@ function setupDE() {
     document.getElementById('point-labels-opt').style.display = 'flex';
     document.getElementById('y2-toggle-wrap').style.display = 'flex';
     document.getElementById('xscale-section').style.display = 'block'; document.getElementById('legend-opt').style.display = 'flex';
+    document.getElementById('showLegend').checked = true;
     document.getElementById('trendline-opt').style.display = 'flex'; document.getElementById('pct-y-opt').style.display = 'flex'; document.getElementById('pct-x-opt').style.display = 'flex';
     if (!document.getElementById('scatter-series-list').children.length) { scatterSeriesCount = 0; addScatterSeries(3); }
     toggleY2UI();
@@ -1582,6 +1585,8 @@ function nGroups() { return parseInt(document.getElementById('barGroups').value)
 
 function rebuildBarGroups() {
   const n = nGroups(), cont = document.getElementById('bar-group-labels');
+  const showLegEl = document.getElementById('showLegend');
+  if (showLegEl) showLegEl.checked = (n > 1);
   const existingNames = [];
   for (let _g = 0; _g < n; _g++) { 
     var _ni = document.getElementById('barGroupName' + _g); 
