@@ -667,36 +667,36 @@ input[type=checkbox], input[type=radio] { width: 15px; height: 15px; cursor: poi
                   </div>
                   <div id="bar-group-labels"></div>
                   <div class="tbl-wrap"><table class="dtbl"><thead><tr id="bar-thead"></tr></thead><tbody id="bar-tbody"></tbody></table></div>
-                  <button class="btn-add" onclick="addBarRow()"><i class="ti ti-plus"></i> Add Category</button>
+                  <button type="button" class="btn-add" onclick="addBarRow()"><i class="ti ti-plus"></i> Add Category</button>
                 </div>
 
                 <div id="de-line" style="display:none;">
                   <div id="line-series-list"></div>
-                  <button class="btn-add" onclick="addLineSeries()" style="margin-bottom:8px;"><i class="ti ti-plus"></i> Add series</button>
+                  <button type="button" class="btn-add" onclick="addLineSeries()" style="margin-bottom:8px;"><i class="ti ti-plus"></i> Add series</button>
                 </div>
 
                 <div id="de-scatter" style="display:none;">
                   <div id="scatter-series-list"></div>
-                  <button class="btn-add" onclick="addScatterSeries()" style="margin-bottom:8px;"><i class="ti ti-plus"></i> Add series</button>
+                  <button type="button" class="btn-add" onclick="addScatterSeries()" style="margin-bottom:8px;"><i class="ti ti-plus"></i> Add series</button>
                 </div>
 
                 <div id="de-pie" style="display:none;">
                   <div class="tbl-wrap"><table class="dtbl"><thead><tr><th>Label</th><th>Value</th><th>Color</th><th style="width:34px;"></th></tr></thead><tbody id="pie-tbody"></tbody></table></div>
-                  <button class="btn-add" onclick="addPieRow()"><i class="ti ti-plus"></i> Add slice</button>
+                  <button type="button" class="btn-add" onclick="addPieRow()"><i class="ti ti-plus"></i> Add slice</button>
                 </div>
 
                 <div id="de-histogram" style="display:none;">
                   <p class="info-note">Enter each data value — bins calculated automatically, or customize below.</p>
                   <div style="margin-bottom:10px;">
                     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px;">
-                      <button class="btn btn-secondary" style="padding:4px 10px;font-size:9pt;" onclick="histPastePrompt('tsv')"><i class="ti ti-clipboard"></i> Paste Excel</button>
-                      <button class="btn btn-secondary" style="padding:4px 10px;font-size:9pt;" onclick="histPastePrompt('csv')"><i class="ti ti-file-text"></i> Paste CSV</button>
+                      <button type="button" class="btn btn-secondary" style="padding:4px 10px;font-size:9pt;" onclick="histPastePrompt('tsv')"><i class="ti ti-clipboard"></i> Paste Excel</button>
+                      <button type="button" class="btn btn-secondary" style="padding:4px 10px;font-size:9pt;" onclick="histPastePrompt('csv')"><i class="ti ti-file-text"></i> Paste CSV</button>
                     </div>
                     <div id="hist-paste-label" style="display:none;font-size:9pt;color:#555;font-style:italic;margin-bottom:2px;"></div>
                     <textarea class="paste-zone" id="histPasteZone" style="display:none;width:100%;min-height:70px;"></textarea>
                     <div id="hist-paste-btns" style="display:none;gap:6px;margin-top:4px;">
-                      <button class="btn btn-primary" style="padding:4px 10px;font-size:9pt;" onclick="importHistPaste()">&#8595; Import</button>
-                      <button class="btn btn-secondary" style="padding:4px 10px;font-size:9pt;" onclick="histCancelPaste()">Cancel</button>
+                      <button type="button" class="btn btn-primary" style="padding:4px 10px;font-size:9pt;" onclick="importHistPaste()">&#8595; Import</button>
+                      <button type="button" class="btn btn-secondary" style="padding:4px 10px;font-size:9pt;" onclick="histCancelPaste()">Cancel</button>
                     </div>
                   </div>
                   <div class="grid-2" style="gap:10px;margin-bottom:8px;">
@@ -736,7 +736,7 @@ input[type=checkbox], input[type=radio] { width: 15px; height: 15px; cursor: poi
                   </div>
                   <div class="field-row" style="max-width:220px;margin-bottom:8px;"><label>Bar color</label><div id="hist-color-wrap"></div></div>
                   <div class="tbl-wrap"><table class="dtbl"><thead><tr><th>Data value</th><th style="width:34px;"></th></tr></thead><tbody id="hist-tbody"></tbody></table></div>
-                  <button class="btn-add" onclick="addHistRow()"><i class="ti ti-plus"></i> Add value</button>
+                  <button type="button" class="btn-add" onclick="addHistRow()"><i class="ti ti-plus"></i> Add value</button>
                 </div>
                 
                 <div id="de-cartesian" style="display:none;">
@@ -815,7 +815,7 @@ input[type=checkbox], input[type=radio] { width: 15px; height: 15px; cursor: poi
                     <div class="toggle-row" style="margin-bottom:3px;"><input type="radio" name="bwOutlierMode" id="bwOutlierExclude" value="exclude"><label for="bwOutlierExclude">Exclude outliers (whiskers to IQR fence)</label></div>
                   </div>
                   <div id="bw-series-list"></div>
-                  <button class="btn-add" onclick="addBWSeries()"><i class="ti ti-plus"></i> Add group</button>
+                  <button type="button" class="btn-add" onclick="addBWSeries()"><i class="ti ti-plus"></i> Add group</button>
                 </div>
               </div>
             </div>
@@ -833,9 +833,9 @@ input[type=checkbox], input[type=radio] { width: 15px; height: 15px; cursor: poi
           
           <div class="export-tray" id="export-tray" style="display:none;">
             <div class="btn-row">
-              <button class="btn btn-primary" onclick="dlGraph()"><i class="ti ti-download"></i> Download PNG</button>
-              <button class="btn btn-green" onclick="copyGraph()" id="copyBtn"><i class="ti ti-copy"></i> Copy to clipboard</button>
-              <button class="btn btn-secondary" id="copyHtmlBtn" style="display:none;" onclick="dtCopyHTML()"><i class="ti ti-code"></i> Copy as HTML table</button>
+              <button type="button" class="btn btn-primary" onclick="dlGraph()"><i class="ti ti-download"></i> Download PNG</button>
+              <button type="button" class="btn btn-green" onclick="copyGraph()" id="copyBtn"><i class="ti ti-copy"></i> Copy to clipboard</button>
+              <button type="button" class="btn btn-secondary" id="copyHtmlBtn" style="display:none;" onclick="dtCopyHTML()"><i class="ti ti-code"></i> Copy as HTML table</button>
             </div>
             <div class="feedback-row">
               <span class="copy-feedback" id="copy-feedback"><i class="ti ti-check"></i> Copied to clipboard!</span>
@@ -846,6 +846,7 @@ input[type=checkbox], input[type=radio] { width: 15px; height: 15px; cursor: poi
     </div>
   </main>
 </div>
+
 <script>
 'use strict';
 const APP_VERSION = 'V 2.1.0';
@@ -1324,16 +1325,30 @@ function rebuildBarTable() {
   for (let g = 0; g < n; g++) h += '<th style="width:' + colW + ';">Group ' + (g + 1) + '</th>';
   if (hasErr) for (let g = 0; g < n; g++) h += '<th style="width:' + colW + '">&plusmn;Group ' + (g + 1) + '</th>';
   h += '<th style="width:34px;"></th>'; thead.innerHTML = h;
-  document.getElementById('bar-tbody').querySelectorAll('tr').forEach(function(tr) {
-    const cat = tr.querySelector('.bar-cat') ? tr.querySelector('.bar-cat').value : '';
-    const vals = Array.from(tr.querySelectorAll('.bar-val')).map(function(i) { return i.value; });
-    const errs = Array.from(tr.querySelectorAll('.bar-err')).map(function(i) { return i.value; });
-    let c = '<td><input type="text" class="bar-cat" value="' + esc(cat) + '"></td>';
-    for (let g = 0; g < n; g++) c += '<td><input type="number" class="bar-val" step="any" value="' + esc(vals[g] || '') + '"></td>';
-    if (hasErr) for (let g = 0; g < n; g++) c += '<td><input type="number" class="bar-err" step="any" min="0" value="' + esc(errs[g] || '') + '"></td>';
-    c += '<td><button type="button" class="btn-danger-sm" onclick="this.closest(\'tr\').remove();triggerLiveUpdate();">✕</button></td>';
-    tr.innerHTML = c;
+  
+  const tbody = document.getElementById('bar-tbody');
+  const existingRows = Array.from(tbody.querySelectorAll('tr')).map(function(tr) {
+    return {
+      cat: tr.querySelector('.bar-cat') ? tr.querySelector('.bar-cat').value : '',
+      vals: Array.from(tr.querySelectorAll('.bar-val')).map(function(i) { return i.value; }),
+      errs: Array.from(tr.querySelectorAll('.bar-err')).map(function(i) { return i.value; })
+    };
   });
+  
+  tbody.innerHTML = '';
+  if (!existingRows.length) {
+    addBarRow();
+  } else {
+    existingRows.forEach(function(r) {
+      const tr = document.createElement('tr');
+      let c = '<td><input type="text" class="bar-cat" value="' + esc(r.cat) + '"></td>';
+      for (let g = 0; g < n; g++) c += '<td><input type="number" class="bar-val" step="any" value="' + esc(r.vals[g] || '') + '"></td>';
+      if (hasErr) for (let g = 0; g < n; g++) c += '<td><input type="number" class="bar-err" step="any" min="0" value="' + esc(r.errs[g] || '') + '"></td>';
+      c += '<td><button type="button" class="btn-danger-sm" onclick="this.closest(\'tr\').remove();triggerLiveUpdate();">✕</button></td>';
+      tr.innerHTML = c;
+      tbody.appendChild(tr);
+    });
+  }
   triggerLiveUpdate();
 }
 
@@ -2098,7 +2113,8 @@ function loadProjectFile(ev) {
   };
   reader.readAsText(file);
 }
-  const errPlugin = {
+
+const errPlugin = {
   id: 'errPlugin',
   afterDatasetsDraw: function(chart, _, opts) {
     if (!opts || !opts.items || !opts.items.length) return;
@@ -2988,7 +3004,7 @@ function buildGraph() {
   if (selT === 'bar') {
     cfg.type = 'bar'; const n = nGroups();
     const rows = Array.from(document.querySelectorAll('#bar-tbody tr'));
-    cfg.data.labels = rows.map(function(tr) { return tr.querySelector('.bar-cat').value; });
+    cfg.data.labels = rows.map(function(tr) { const inp = tr.querySelector('.bar-cat'); return inp ? inp.value : ''; });
     const errItems = []; let maxY = -Infinity, minY = 0;
     
     for (let g = 0; g < n; g++) {
@@ -3182,7 +3198,6 @@ function buildGraph() {
   curChart = new Chart(ctx, cfg);
 }
 
-// Initial boot & Auto-save / State restoration check
 window.addEventListener('DOMContentLoaded', function() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
