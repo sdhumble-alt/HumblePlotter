@@ -1,0 +1,3854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Humble Plotter</title>
+<!-- Cartesian Grid Favicon -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231e2a3a'/%3E%3Cpath d='M6 10h20M6 22h20M10 6v20M22 6v20' stroke='%23334155' stroke-width='1' stroke-dasharray='2 2' fill='none'/%3E%3Cline x1='16' y1='4' x2='16' y2='28' stroke='%23cbd5e1' stroke-width='1.5'/%3E%3Cline x1='4' y1='16' x2='28' y2='16' stroke='%23cbd5e1' stroke-width='1.5'/%3E%3Cpolygon points='16,3 13.5,6 18.5,6' fill='%23cbd5e1'/%3E%3Cpolygon points='29,16 26,13.5 26,18.5' fill='%23cbd5e1'/%3E%3Ccircle cx='22' cy='10' r='2.5' fill='%233266ad' stroke='%23ffffff' stroke-width='1'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.31.0/webfont/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+/* --- A HUMBLE UNIFIED STYLESHEET START --- */
+:root {
+  --header-bg: #1e2a3a;
+  --header-border: #12202e;
+  --header-title: #ffffff;
+  --header-sub: rgba(255, 255, 255, 0.65);
+  --header-ver: rgba(255, 255, 255, 0.45);
+
+  --app-window-bg: #f0f2f5;
+  --app-panel-bg: #ffffff;
+  --stage-bg: #f9fafc;
+
+  --card-border: #cbd5e1;
+  --card-header-bg: #f8fafc;
+  --card-header-border: #e2e8f0;
+  --card-header-title: #475569;
+  --card-header-icon: #64748b;
+
+  --input-border: #cbd5e1;
+  --input-border-hover: #94a3b8;
+  --input-border-focus: #3266ad;
+  --input-focus-ring: rgba(50, 102, 173, 0.15);
+  --input-text: #1e2a3a;
+  --input-label: #475569;
+
+  --btn-primary-bg: #3266ad;
+  --btn-primary-hover: #185fa5;
+  --btn-primary-text: #ffffff;
+
+  --btn-secondary-bg: #ffffff;
+  --btn-secondary-border: #cbd5e1;
+  --btn-secondary-hover-bg: #f1f5f9;
+  --btn-secondary-hover-border: #94a3b8;
+  --btn-secondary-text: #334155;
+
+  --btn-green-bg: #1a7a3a;
+  --btn-green-hover: #145e2c;
+  --btn-green-text: #ffffff;
+
+  --btn-danger-bg: #b00020;
+  --btn-danger-hover: #8e001a;
+  --btn-danger-text: #ffffff;
+
+  --split-gap: 18px;
+  --split-padding: 16px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100vh;
+  overflow: hidden;
+  font-family: system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  font-size: 11pt;
+  background: var(--app-window-bg);
+  color: var(--input-text);
+  display: flex;
+  flex-direction: column;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--app-panel-bg);
+}
+
+#app-header {
+  background: var(--header-bg);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--header-border);
+  gap: 16px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon {
+  height: 34px;
+  width: 34px;
+  display: block;
+  border: 1.5px solid #ffffff;
+  border-radius: 8px;
+  padding: 1px;
+  box-sizing: border-box;
+}
+
+.header-titles {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+#app-title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 17px;
+  font-weight: bold;
+  color: var(--header-title);
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  white-space: nowrap;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+
+#app-subtitle {
+  font-family: system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  font-size: 10px;
+  color: var(--header-sub);
+  font-style: italic;
+  white-space: nowrap;
+  line-height: 1.2;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.toolbar-ver {
+  font-size: 8pt;
+  color: var(--header-ver);
+  font-family: Arial, sans-serif;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.main-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: var(--split-padding);
+  background: var(--app-panel-bg);
+  overflow: hidden;
+}
+
+.split-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: var(--split-gap);
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  align-items: stretch;
+}
+
+.split-left {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.split-right {
+  height: 100%;
+  overflow-y: auto;
+  background: var(--stage-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 14px;
+}
+
+.preview-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.canvas-wrapper {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+}
+
+#mainChart {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  background: #ffffff;
+}
+
+.empty-selection-placeholder {
+  border: 2px dashed var(--card-border);
+  border-radius: 8px;
+  padding: 32px 18px;
+  text-align: center;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+}
+
+.empty-selection-placeholder i {
+  font-size: 32px;
+  color: #94a3b8;
+}
+
+.empty-selection-placeholder p {
+  font-size: 10pt;
+  line-height: 1.4;
+}
+
+.opt-group {
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  background: var(--app-panel-bg);
+}
+
+.opt-group-header {
+  background: var(--card-header-bg);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--card-header-border);
+}
+
+.opt-group-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.opt-group-header i {
+  font-size: 14px;
+  color: var(--card-header-icon);
+}
+
+.opt-group-title {
+  font-size: 8.5pt;
+  font-weight: 700;
+  color: var(--card-header-title);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.opt-group-body {
+  padding: 12px;
+}
+
+.type-selector-bar {
+  display: grid;
+  gap: 8px;
+}
+
+.grid-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.type-btn {
+  padding: 8px 6px;
+  background: #ffffff;
+  border: 1.5px solid var(--card-border);
+  border-radius: 6px;
+  font-size: 9.5pt;
+  font-family: Arial, sans-serif;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  text-align: center;
+  transition: all .12s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.type-btn:hover {
+  border-color: var(--btn-primary-bg);
+  background: #f8fafc;
+}
+
+.type-btn.active {
+  border-color: var(--btn-primary-bg);
+  background: #eef3fb;
+  color: var(--btn-primary-bg);
+  box-shadow: 0 0 0 1.5px var(--btn-primary-bg);
+}
+
+input[type=text],
+input[type=number],
+select {
+  border: 1.5px solid var(--input-border);
+  border-radius: 6px;
+  padding: 6px 9px;
+  font-size: 10pt;
+  font-family: Arial, sans-serif;
+  background: #ffffff;
+  color: var(--input-text);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+input[type=text]:hover,
+input[type=number]:hover,
+select:hover {
+  border-color: var(--input-border-hover);
+}
+
+input[type=text]:focus,
+input[type=number]:focus,
+select:focus {
+  border-color: var(--input-border-focus);
+  border-width: 2px;
+  box-shadow: 0 0 0 3px var(--input-focus-ring);
+}
+
+.field-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.field-row label {
+  font-size: 9.5pt;
+  color: var(--input-label);
+  font-weight: 600;
+}
+
+.field-row input,
+.field-row select {
+  width: 100%;
+}
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+.sub-label {
+  font-size: 9.5pt;
+  color: #475569;
+  font-weight: 600;
+  margin: 6px 0 4px;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 6px;
+}
+
+.toggle-row label {
+  font-size: 10pt;
+  color: var(--input-text);
+  cursor: pointer;
+  user-select: none;
+}
+
+input[type=checkbox],
+input[type=radio] {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  flex-shrink: 0;
+  accent-color: var(--btn-primary-bg);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 9.5pt;
+  font-family: Arial, sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .12s ease-in-out;
+  border: none;
+  white-space: nowrap;
+}
+
+.btn-primary { background: var(--btn-primary-bg); color: var(--btn-primary-text); }
+.btn-primary:hover { background: var(--btn-primary-hover); }
+
+.btn-secondary { background: var(--btn-secondary-bg); color: var(--btn-secondary-text); border: 1.5px solid var(--btn-secondary-border); }
+.btn-secondary:hover { background: var(--btn-secondary-hover-bg); border-color: var(--btn-secondary-hover-border); }
+
+.btn-green { background: var(--btn-green-bg); color: var(--btn-green-text); }
+.btn-green:hover { background: var(--btn-green-hover); }
+
+.btn-danger-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: var(--btn-danger-bg);
+  border: 1px solid #fca5a5;
+  border-radius: 5px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  font-size: 9.5pt;
+  font-family: Arial, sans-serif;
+  cursor: pointer;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.btn-danger-sm:hover {
+  background: #fef2f2;
+}
+
+.btn-add {
+  width: 100%;
+  background: #ffffff;
+  color: var(--btn-primary-bg);
+  border: 1.5px dashed var(--btn-primary-bg);
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 10pt;
+  font-family: Arial, sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: all .12s;
+}
+
+.btn-add:hover {
+  background: #eef3fb;
+}
+
+.btn-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+.dtbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10pt;
+  table-layout: fixed;
+}
+
+.dtbl th {
+  text-align: left;
+  padding: 6px 7px;
+  font-weight: 600;
+  color: #475569;
+  font-size: 9.5pt;
+  border-bottom: 1px solid var(--card-border);
+  background: var(--card-header-bg);
+}
+
+.dtbl th:last-child {
+  width: 38px;
+  min-width: 38px;
+  text-align: center;
+  padding: 6px 2px;
+}
+
+.dtbl td {
+  padding: 3px 4px;
+  border-bottom: 1px solid #f1f5f9;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.dtbl td:last-child {
+  width: 38px;
+  min-width: 38px;
+  text-align: center;
+  padding: 3px 2px;
+  overflow: visible;
+}
+
+.dtbl tr:last-child td {
+  border-bottom: none;
+}
+
+.dtbl input[type=text],
+.dtbl input[type=number] {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 10pt;
+  font-family: Arial, sans-serif;
+  background: #ffffff;
+  color: var(--input-text);
+  outline: none;
+  box-shadow: none;
+}
+
+.dtbl input:hover {
+  border-color: var(--input-border-hover);
+}
+
+.dtbl input:focus {
+  border-color: var(--input-border-focus);
+  border-width: 1.5px;
+  box-shadow: 0 0 0 2px var(--input-focus-ring);
+}
+
+.tbl-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  margin-top: 6px;
+  width: 100%;
+}
+
+.series-block {
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.series-head {
+  background: var(--card-header-bg);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--card-header-border);
+}
+
+.series-head input[type=text] {
+  flex: 1;
+  min-width: 80px;
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  padding: 4px 7px;
+  font-size: 10pt;
+  font-family: Arial, sans-serif;
+  background: #fff;
+  color: var(--input-text);
+  outline: none;
+  box-shadow: none;
+}
+
+.series-head input[type=text]:focus {
+  border-color: var(--input-border-focus);
+  box-shadow: 0 0 0 2px var(--input-focus-ring);
+}
+
+.series-body {
+  padding: 8px 12px;
+  overflow: hidden;
+}
+
+.cpw {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.csw {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid var(--card-border);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.cpw select {
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-size: 9.5pt;
+  font-family: Arial, sans-serif;
+  background: #fff;
+  color: var(--input-text);
+  outline: none;
+}
+
+.cpw select:focus {
+  border-color: var(--input-border-focus);
+}
+
+.cpw input[type=text] {
+  width: 76px;
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-size: 9.5pt;
+  background: #fff;
+  color: var(--input-text);
+  outline: none;
+}
+
+.msel {
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-size: 9.5pt;
+  font-family: Arial, sans-serif;
+  background: #fff;
+  color: var(--input-text);
+  outline: none;
+}
+
+.msel:focus {
+  border-color: var(--input-border-focus);
+}
+
+.graph-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-bottom: 10px;
+  font-size: 10pt;
+}
+
+.export-tray {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.feedback-row {
+  min-height: 22px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copy-feedback {
+  font-size: 9.5pt;
+  color: var(--btn-green-bg);
+  font-weight: 600;
+  display: none;
+  align-items: center;
+  gap: 5px;
+}
+
+.info-note {
+  font-size: 9pt;
+  color: #64748b;
+  margin-bottom: 8px;
+  font-style: italic;
+}
+
+.paste-zone {
+  border: 1.5px solid var(--input-border);
+  border-radius: 6px;
+  padding: 6px 9px;
+  font-family: monospace;
+  font-size: 9pt;
+  background: #ffffff;
+  outline: none;
+  color: var(--input-text);
+}
+.paste-zone:focus {
+  border-color: var(--input-border-focus);
+  box-shadow: 0 0 0 3px var(--input-focus-ring);
+}
+
+@media (max-width: 900px) {
+  body { overflow: auto; }
+  #app { height: auto; overflow: visible; }
+  .content { overflow: visible; }
+  .main-pane { overflow: visible; }
+  .split-layout { grid-template-columns: 1fr; height: auto; overflow: visible; }
+  .split-left { height: auto; overflow-y: visible; padding-right: 0; }
+  .split-right { height: auto; overflow-y: visible; position: sticky; top: 10px; z-index: 10; }
+  .type-selector-bar { grid-template-columns: repeat(2, 1fr); }
+}
+/* --- A HUMBLE UNIFIED STYLESHEET END --- */
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="app-header">
+    <div class="header-left">
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231e2a3a'/%3E%3Cpath d='M6 10h20M6 22h20M10 6v20M22 6v20' stroke='%23334155' stroke-width='1' stroke-dasharray='2 2' fill='none'/%3E%3Cline x1='16' y1='4' x2='16' y2='28' stroke='%23cbd5e1' stroke-width='1.5'/%3E%3Cline x1='4' y1='16' x2='28' y2='16' stroke='%23cbd5e1' stroke-width='1.5'/%3E%3Cpolygon points='16,3 13.5,6 18.5,6' fill='%23cbd5e1'/%3E%3Cpolygon points='29,16 26,13.5 26,18.5' fill='%23cbd5e1'/%3E%3Ccircle cx='22' cy='10' r='2.5' fill='%233266ad' stroke='%23ffffff' stroke-width='1'/%3E%3C/svg%3E" alt="App Icon" class="header-icon">
+      <div class="header-titles">
+        <div id="app-title">A Humble Plotter</div>
+        <div id="app-subtitle">A Simple Graphing App for Teachers, Students, and Scientists &mdash; Built by Steven Humble</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="toolbar-ver">V 2.0.5 &mdash; 2026-10-18</div>
+    </div>
+  </header>
+
+  <main class="content">
+    <div class="main-pane">
+      <div class="split-layout">
+        <!-- LEFT PANEL -->
+        <div class="split-left" id="controls-panel">
+
+          <!-- 1. GRAPH TYPE CARD -->
+          <div class="opt-group">
+            <div class="opt-group-header">
+              <div class="opt-group-header-left"><i class="ti ti-chart-bar"></i><span class="opt-group-title">Graph Type</span></div>
+            </div>
+            <div class="opt-group-body">
+              <div class="type-selector-bar grid-cols-3">
+                <button type="button" class="type-btn" data-type="bar" onclick="selType('bar')"><i class="ti ti-chart-bar"></i> Bar</button>
+                <button type="button" class="type-btn" data-type="line" onclick="selType('line')"><i class="ti ti-chart-line"></i> Line</button>
+                <button type="button" class="type-btn" data-type="scatter" onclick="selType('scatter')"><i class="ti ti-chart-dots"></i> Scatter</button>
+                <button type="button" class="type-btn" data-type="histogram" onclick="selType('histogram')"><i class="ti ti-chart-histogram"></i> Histogram</button>
+                <button type="button" class="type-btn" data-type="pie" onclick="selType('pie')"><i class="ti ti-chart-pie"></i> Pie</button>
+                <button type="button" class="type-btn" data-type="boxwhisker" onclick="selType('boxwhisker')"><i class="ti ti-chart-candle"></i> Box &amp; Whisker</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. DATA TOOLS CARD -->
+          <div class="opt-group" style="margin-bottom:14px;">
+            <div class="opt-group-header">
+              <div class="opt-group-header-left"><i class="ti ti-tools"></i><span class="opt-group-title">Data Tools</span></div>
+            </div>
+            <div class="opt-group-body">
+              <div class="type-selector-bar grid-cols-2">
+                <button type="button" class="type-btn" data-type="datatable" onclick="selType('datatable')"><i class="ti ti-table"></i> Table</button>
+                <button type="button" class="type-btn" data-type="cartesian" onclick="selType('cartesian')"><i class="ti ti-vector-bezier-2"></i> Cartesian</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="empty-selection-placeholder" id="no-type-selected-notice">
+            <i class="ti ti-pointer"></i>
+            <div>
+              <strong style="color:#334155;font-size:10.5pt;display:block;margin-bottom:2px;">Select a Graph Type or Data Tool Above</strong>
+              <p>Choose an option above to open its settings, data tables, and custom options.</p>
+            </div>
+          </div>
+
+          <!-- Settings Container -->
+          <div id="settings-container" style="display:none;">
+            
+            <div id="de-datatable-wrap" style="display:none;margin-bottom:14px;">
+              <div class="opt-group">
+                <div class="opt-group-header">
+                  <div class="opt-group-header-left"><i class="ti ti-table"></i><span class="opt-group-title">Data Table Settings &amp; Data</span></div>
+                </div>
+                <div class="opt-group-body">
+                  <p class="info-note">Paste data from Excel or type directly into the table.</p>
+                  <div class="grid-2" style="gap:10px;margin-bottom:10px;">
+                    <div class="field-row"><label>Table width (px)</label><input type="number" id="dtWidth" value="450" min="100" max="1200" step="10"></div>
+                    <div class="field-row"><label>Font size (pt)</label><input type="number" id="dtFontSize" value="12" min="6" max="24" step="1"></div>
+                  </div>
+                  <div class="field-row" style="margin-bottom:10px;">
+                    <label>Font</label>
+                    <select id="dtFont">
+                      <option value="Arial Narrow">Arial Narrow</option>
+                      <option value="Arial">Arial</option>
+                      <option value="Helvetica">Helvetica</option>
+                      <option value="Times New Roman">Times New Roman</option>
+                      <option value="Georgia">Georgia</option>
+                      <option value="Courier New">Courier New</option>
+                      <option value="Verdana">Verdana</option>
+                      <option value="Calibri">Calibri</option>
+                    </select>
+                  </div>
+                  <div class="grid-2" style="gap:10px;margin-bottom:10px;">
+                    <div class="field-row"><label>Cell padding (px)</label><input type="number" id="dtPadding" value="6" min="2" max="20" step="1"></div>
+                    <div class="field-row"><label>Border color</label><div id="dt-border-color-wrap"></div></div>
+                  </div>
+                  <div class="grid-2" style="gap:10px;margin-bottom:10px;">
+                    <div class="field-row"><label>Header bg color</label><div id="dt-header-bg-wrap"></div></div>
+                    <div class="field-row"><label>Alt row color</label><div id="dt-alt-bg-wrap"></div></div>
+                  </div>
+                  <div class="toggle-row" style="margin-bottom:6px;"><input type="checkbox" id="dtHeaderBold" checked><label for="dtHeaderBold">Bold header row</label></div>
+                  <div class="toggle-row" style="margin-bottom:6px;"><input type="checkbox" id="dtAltRows"><label for="dtAltRows">Alternating row shading</label></div>
+                  <div class="toggle-row" style="margin-bottom:10px;"><input type="checkbox" id="dtOuterBorder" checked><label for="dtOuterBorder">Outer border</label></div>
+                  <div style="margin-bottom:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                    <button class="btn-add" style="flex:1;" onclick="dtAddRow()"><i class="ti ti-plus"></i> Add row</button>
+                    <button class="btn-add" style="flex:1;" onclick="dtAddCol()"><i class="ti ti-plus"></i> Add column</button>
+                    <button class="btn btn-secondary" style="padding:5px 10px;font-size:9pt;" onclick="dtPastePrompt('tsv')"><i class="ti ti-clipboard"></i> Paste Excel</button>
+                    <button class="btn btn-secondary" style="padding:5px 10px;font-size:9pt;" onclick="dtPastePrompt('csv')"><i class="ti ti-file-text"></i> Paste CSV</button>
+                  </div>
+                  <div id="dt-table-wrap" style="overflow:auto;border:1px solid var(--card-border);border-radius:6px;padding:6px;background:#fafafa;margin-top:4px;">
+                    <table id="dt-editor" style="border-collapse:collapse;width:100%;table-layout:auto;"></table>
+                  </div>
+                  <div id="dt-paste-label" style="display:none;font-size:9.5pt;color:#555;margin-top:8px;margin-bottom:3px;font-style:italic;"></div>
+                  <textarea id="dt-paste-zone" class="paste-zone" style="display:none;margin-top:0;min-height:80px;width:100%;"></textarea>
+                  <div id="dt-paste-btns" style="display:none;margin-top:6px;gap:8px;">
+                    <button class="btn btn-primary" onclick="dtImportPaste()">&#8595; Import</button>
+                    <button class="btn btn-secondary" onclick="dtCancelPaste()">Cancel</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="chart-settings-wrap">
+              <div class="opt-group" id="graph-size-wrap">
+                <div class="opt-group-header">
+                  <div class="opt-group-header-left"><i class="ti ti-resize"></i><span class="opt-group-title">Graph size</span></div>
+                </div>
+                <div class="opt-group-body">
+                  <div class="grid-2">
+                    <div class="field-row"><label>Width (px)</label><input type="number" id="gWidth" value="450" min="200" max="1200"></div>
+                    <div class="field-row"><label>Height (px)</label><input type="number" id="gHeight" value="400" min="200" max="1200"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="ax-cfg-wrap" class="opt-group">
+                <div class="opt-group-header">
+                  <div class="opt-group-header-left"><i class="ti ti-typography"></i><span class="opt-group-title">Labels</span></div>
+                </div>
+                <div class="opt-group-body">
+                  <div class="field-row"><label>Chart title (optional)</label><input type="text" id="chartTitle"></div>
+                  <div class="grid-2">
+                    <div class="field-row"><label id="xlbl-lbl">X-axis label</label><input type="text" id="xlabel"></div>
+                    <div class="field-row"><label id="ylbl-lbl">Y-axis label</label><input type="text" id="ylabel"></div>
+                  </div>
+                  <div id="y2-toggle-wrap" style="display:none;margin-top:4px;margin-bottom:6px;" class="toggle-row">
+                    <input type="checkbox" id="useY2Global" onchange="toggleY2UI()">
+                    <label for="useY2Global" style="font-weight:500;">Enable second Y-axis (Y2)</label>
+                  </div>
+                  <div id="y2-cfg" style="display:none;"><div class="field-row"><label>Second Y-axis label</label><input type="text" id="y2label"></div></div>
+                  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:6px;">
+                    <div class="toggle-row" style="margin:0;"><input type="checkbox" id="axisLabelBold" checked><label for="axisLabelBold">Bold axis labels</label></div>
+                    <div style="display:flex;align-items:center;gap:5px;"><label style="font-size:9.5pt;color:var(--input-label);font-weight:600;">Label size</label><input type="number" id="axisLabelSize" value="12" min="6" max="36" style="width:56px;"><span style="font-size:9.5pt;color:#64748b;">pt</span></div>
+                    <div style="display:flex;align-items:center;gap:5px;"><label style="font-size:9.5pt;color:var(--input-label);font-weight:600;">Tick size</label><input type="number" id="tickLabelSize" value="10" min="6" max="28" style="width:56px;"><span style="font-size:9.5pt;color:#64748b;">pt</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="scale-cfg-wrap" class="opt-group">
+                <div class="opt-group-header">
+                  <div class="opt-group-header-left"><i class="ti ti-ruler-measure"></i><span class="opt-group-title">Scale</span></div>
+                </div>
+                <div class="opt-group-body">
+                  <p class="info-note">Leave blank for automatic scaling, or enter custom axis limits and step sizes.</p>
+                  <div class="sub-label">Y-axis</div>
+                  <div class="grid-3">
+                    <div class="field-row"><label>Y min</label><input type="number" id="ymin"></div>
+                    <div class="field-row"><label>Y max</label><input type="number" id="ymax"></div>
+                    <div class="field-row"><label>Y step</label><input type="number" id="ystep"></div>
+                  </div>
+                  <div id="y2-scale-row" style="display:none;">
+                    <div class="sub-label">Second Y-axis</div>
+                    <div class="grid-3">
+                      <div class="field-row"><label>Y2 min</label><input type="number" id="y2min"></div>
+                      <div class="field-row"><label>Y2 max</label><input type="number" id="y2max"></div>
+                      <div class="field-row"><label>Y2 step</label><input type="number" id="y2step"></div>
+                    </div>
+                  </div>
+                  <div id="xscale-section" style="display:none;">
+                    <div class="sub-label">X-axis</div>
+                    <div class="grid-3">
+                      <div class="field-row"><label>X min</label><input type="number" id="xmin"></div>
+                      <div class="field-row"><label>X max</label><input type="number" id="xmax"></div>
+                      <div class="field-row"><label>X step</label><input type="number" id="xstep"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="gridlines-wrap" class="opt-group">
+                <div class="opt-group-header">
+                  <div class="opt-group-header-left"><i class="ti ti-grid-dots"></i><span class="opt-group-title">Gridlines</span></div>
+                </div>
+                <div class="opt-group-body">
+                  <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">
+                    <div class="toggle-row" style="margin:0;"><input type="checkbox" id="gridY" checked><label for="gridY">Y-axis gridlines</label></div>
+                    <div class="toggle-row" style="margin:0;"><input type="checkbox" id="gridX" checked><label for="gridX">X-axis gridlines</label></div>
+                    <div class="toggle-row" style="margin:0;"><input type="checkbox" id="boldZero" checked><label for="boldZero">Bold zero line</label></div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:4px;">
+                    <div style="display:flex;align-items:center;gap:8px;"><label style="font-size:9.5pt;color:var(--input-label);font-weight:600;">Color</label><div id="gridColorWrap"></div></div>
+                    <div style="display:flex;align-items:center;gap:8px;"><label style="font-size:9.5pt;color:var(--input-label);font-weight:600;">Style</label>
+                      <select id="gridLineStyle" style="width:auto;">
+                        <option value="dotted">Dotted</option>
+                        <option value="dashed">Dashed</option>
+                        <option value="solid">Solid</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="arrows-wrap" class="opt-group">
+                <div class="opt-group-header">
+                  <div class="opt-group-header-left"><i class="ti ti-arrows-maximize"></i><span class="opt-group-title">Axis arrows</span></div>
+                </div>
+                <div class="opt-group-body">
+                  <p class="info-note">Arrows appear at axis ends at the zero crossing.</p>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+                    <div class="toggle-row" style="margin:0;" id="arrowYTop-row"><input type="checkbox" id="arrowYTop"><label for="arrowYTop">Y axis top</label></div>
+                    <div class="toggle-row" style="margin:0;" id="arrowYBot-row"><input type="checkbox" id="arrowYBot"><label for="arrowYBot">Y axis bottom</label></div>
+                    <div class="toggle-row" style="margin:0;" id="arrowXRight-row"><input type="checkbox" id="arrowXRight"><label for="arrowXRight">X axis right</label></div>
+                    <div class="toggle-row" style="margin:0;" id="arrowXLeft-row"><input type="checkbox" id="arrowXLeft"><label for="arrowXLeft">X axis left</label></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="opt-group" id="display-opts-card">
+                <div class="opt-group-header">
+                  <div class="opt-group-header-left"><i class="ti ti-adjustments"></i><span class="opt-group-title">Display / Data Options</span></div>
+                </div>
+                <div class="opt-group-body">
+                  <div id="errbar-global-opt" style="display:none;" class="toggle-row">
+                    <input type="checkbox" id="errGlobal" onchange="onToggleErrGlobal()">
+                    <label for="errGlobal">Include error bars (&plusmn;)</label>
+                  </div>
+                  <div id="bar-labels-opt" style="display:none;" class="toggle-row"><input type="checkbox" id="showDataLabels"><label for="showDataLabels">Show data labels on bars</label></div>
+                  <div id="point-labels-opt" style="display:none;" class="toggle-row">
+                    <input type="checkbox" id="showCustomLabels" onchange="onToggleCustomLabels()">
+                    <label for="showCustomLabels">Label individual points with custom text</label>
+                  </div>
+                  <div id="pct-y-opt" style="display:none;" class="toggle-row"><input type="checkbox" id="pctY"><label for="pctY">Y-axis values are percentages (%)</label></div>
+                  <div id="pct-x-opt" style="display:none;" class="toggle-row"><input type="checkbox" id="pctX"><label for="pctX">X-axis values are percentages (%)</label></div>
+                  <div id="pie-pct-opt" style="display:none;margin-bottom:4px;">
+                    <div style="margin-bottom:8px;">
+                      <div class="toggle-row" style="margin-bottom:4px;">
+                        <input type="checkbox" id="pieLegendShow" checked onchange="document.getElementById('pie-legend-mode').style.display=this.checked?'block':'none'">
+                        <label for="pieLegendShow" style="font-weight:600;">Show labels in legend</label>
+                      </div>
+                      <div id="pie-legend-mode" style="margin-left:22px;">
+                        <div class="field-row" style="margin-bottom: 6px; display:flex; flex-direction:row; align-items:center; gap:8px;">
+                          <label style="margin:0; font-size:9.5pt; font-weight:600;">Position:</label>
+                          <select id="pieLegendPos" style="width:auto; padding:2px 6px; font-size:9pt;" onchange="triggerLiveUpdate()">
+                            <option value="top">Top</option>
+                            <option value="right" selected>Right</option>
+                            <option value="bottom">Bottom</option>
+                            <option value="left">Left</option>
+                          </select>
+                        </div>
+                        <div class="toggle-row" style="margin-bottom:2px;"><input type="radio" name="pieLegendMode" id="pieLegendNone" value="none"><label for="pieLegendNone">Nothing</label></div>
+                        <div class="toggle-row" style="margin-bottom:2px;"><input type="radio" name="pieLegendMode" id="pieLegendLabel" value="label" checked><label for="pieLegendLabel">Label only</label></div>
+                        <div class="toggle-row" style="margin-bottom:2px;"><input type="radio" name="pieLegendMode" id="pieLegendCount" value="count"><label for="pieLegendCount">Raw counts</label></div>
+                        <div class="toggle-row" style="margin-bottom:2px;"><input type="radio" name="pieLegendMode" id="pieLegendLabelCount" value="labelcount"><label for="pieLegendLabelCount">Raw counts + label</label></div>
+                        <div class="toggle-row" style="margin-bottom:2px;"><input type="radio" name="pieLegendMode" id="pieLegendPct" value="pct"><label for="pieLegendPct">Percentages</label></div>
+                        <div class="toggle-row" style="margin-bottom:2px;"><input type="radio" name="pieLegendMode" id="pieLegendLabelPct" value="labelpct"><label for="pieLegendLabelPct">Percentages + label</label></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="toggle-row" style="margin-bottom:4px;">
+                        <input type="checkbox" id="pieGraphShow" checked onchange="document.getElementById('pie-graph-mode').style.display=this.checked?'block':'none'">
+                        <label for="pieGraphShow" style="font-weight:600;">Show labels on graph</label>
+                      </div>
+                      <div id="pie-graph-mode" style="margin-left:22px;">
+                        <div class="toggle-row" style="margin-bottom:6px; margin-top:2px;">
+                          <input type="checkbox" id="pieSmartCallout" checked onchange="triggerLiveUpdate()">
+                          <label for="pieSmartCallout" style="font-weight:600; color:var(--btn-primary-bg);">Smart callouts if label won't fit</label>
+                        </div>
+                        <div class="toggle-row" style="margin-bottom:2px;"><input type="radio" name="pieLabelMode" id="pieLabelNone" value="none" checked><label for="pieLabelNone">Nothing</label></div>
+                        <div class="toggle-row" style="margin-bottom:2px;"><input type="radio" name="pieLabelMode" id="pieLabelLabel" value="label"><label for="pieLabelLabel">Label only</label></div>
+                        <div class="toggle-row" style="margin-bottom:2px;"><input type="radio" name="pieLabelMode" id="pieLabelCount" value="count"><label for="pieLabelCount">Raw counts</label></div>
+                        <div class="toggle-row" style="margin-bottom:2px;"><input type="radio" name="pieLabelMode" id="pieLabelLabelCount" value="labelcount"><label for="pieLabelLabelCount">Raw counts + label</label></div>
+                        <div class="toggle-row" style="margin-bottom:2px;"><input type="radio" name="pieLabelMode" id="pieLabelLabelPct" value="labelpct"><label for="pieLabelLabelPct">Percentages + label</label></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="legend-opt" style="display:none;" class="toggle-row"><input type="checkbox" id="showLegend" checked><label for="showLegend">Show legend</label></div>
+                  <div id="trendline-opt" style="display:none;" class="toggle-row"><input type="checkbox" id="showTrendline"><label for="showTrendline">Show trend line (linear regression)</label></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- DATA INPUT PANELS -->
+            <div class="opt-group" id="data-input-panel">
+              <div class="opt-group-header">
+                <div class="opt-group-header-left"><i class="ti ti-database"></i><span class="opt-group-title">Data Entry</span></div>
+              </div>
+              <div class="opt-group-body">
+                <div id="de-bar">
+                  <div class="field-row" style="margin-bottom:10px;"><label>Groups per category</label>
+                    <select id="barGroups" onchange="rebuildBarGroups()">
+                      <option value="1" selected>1 Group</option>
+                      <option value="2">2 Groups</option>
+                      <option value="3">3 Groups</option>
+                      <option value="4">4 Groups</option>
+                      <option value="5">5 Groups</option>
+                    </select>
+                  </div>
+                  <div id="bar-group-labels"></div>
+                  <div class="tbl-wrap"><table class="dtbl"><thead><tr id="bar-thead"></tr></thead><tbody id="bar-tbody"></tbody></table></div>
+                  <button class="btn-add" onclick="addBarRow()"><i class="ti ti-plus"></i> Add Category</button>
+                </div>
+
+                <div id="de-line" style="display:none;">
+                  <div id="line-series-list"></div>
+                  <button class="btn-add" onclick="addLineSeries()" style="margin-bottom:8px;"><i class="ti ti-plus"></i> Add series</button>
+                </div>
+
+                <div id="de-scatter" style="display:none;">
+                  <div id="scatter-series-list"></div>
+                  <button class="btn-add" onclick="addScatterSeries()" style="margin-bottom:8px;"><i class="ti ti-plus"></i> Add series</button>
+                </div>
+
+                <div id="de-pie" style="display:none;">
+                  <div class="tbl-wrap"><table class="dtbl"><thead><tr><th>Label</th><th>Value</th><th>Color</th><th style="width:38px;"></th></tr></thead><tbody id="pie-tbody"></tbody></table></div>
+                  <button class="btn-add" onclick="addPieRow()"><i class="ti ti-plus"></i> Add slice</button>
+                </div>
+
+                <div id="de-histogram" style="display:none;">
+                  <p class="info-note">Enter each data value - bins calculated automatically, or customize below.</p>
+                  <div style="margin-bottom:10px;">
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px;">
+                      <button class="btn btn-secondary" style="padding:4px 10px;font-size:9pt;" onclick="histPastePrompt('tsv')"><i class="ti ti-clipboard"></i> Paste Excel</button>
+                      <button class="btn btn-secondary" style="padding:4px 10px;font-size:9pt;" onclick="histPastePrompt('csv')"><i class="ti ti-file-text"></i> Paste CSV</button>
+                    </div>
+                    <div id="hist-paste-label" style="display:none;font-size:9pt;color:#555;font-style:italic;margin-bottom:2px;"></div>
+                    <textarea class="paste-zone" id="histPasteZone" style="display:none;width:100%;min-height:70px;"></textarea>
+                    <div id="hist-paste-btns" style="display:none;gap:6px;margin-top:4px;">
+                      <button class="btn btn-primary" style="padding:4px 10px;font-size:9pt;" onclick="importHistPaste()">&#8595; Import</button>
+                      <button class="btn btn-secondary" style="padding:4px 10px;font-size:9pt;" onclick="histCancelPaste()">Cancel</button>
+                    </div>
+                  </div>
+                  <div class="grid-2" style="gap:10px;margin-bottom:8px;">
+                    <div class="field-row">
+                      <label>Bin label style</label>
+                      <select id="histLabelStyle">
+                        <option value="1">Whole numbers (140–144, 145–148)</option>
+                        <option value="0.1">Tenths (140–143.9, 144–147.9)</option>
+                        <option value="0.01">Hundredths (140–143.99, 144–147.99)</option>
+                        <option value="0">Full range (140–144, 144–148)</option>
+                      </select>
+                    </div>
+                    <div class="field-row">
+                      <label>Label rotation</label>
+                      <select id="histLabelRotation">
+                        <option value="0">Horizontal (0°)</option>
+                        <option value="45">Diagonal (45°)</option>
+                        <option value="90">Vertical (90°)</option>
+                        <option value="auto">Auto-fit</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div style="margin-bottom:8px;">
+                    <div style="display:flex;gap:0;border:1.5px solid var(--card-border);border-radius:6px;overflow:hidden;max-width:320px;margin-bottom:10px;">
+                      <button id="histModeAuto" onclick="histSetMode('auto')" style="flex:1;padding:5px 10px;font-size:9pt;border:none;background:var(--btn-primary-bg);color:#fff;cursor:pointer;font-family:Arial,sans-serif;font-weight:600;">Number of Bins</button>
+                      <button id="histModeCustom" onclick="histSetMode('custom')" style="flex:1;padding:5px 10px;font-size:9pt;border:none;background:#f8fafc;color:#475569;cursor:pointer;font-family:Arial,sans-serif;font-weight:600;">Custom Start &amp; Size</button>
+                    </div>
+                    <div id="hist-mode-auto">
+                      <div class="field-row" style="max-width:160px;"><label>Number of bins</label><input type="number" id="histBins" value="5" min="1" max="100"></div>
+                    </div>
+                    <div id="hist-mode-custom" style="display:none;">
+                      <div class="grid-2" style="gap:10px;">
+                        <div class="field-row"><label>Start value</label><input type="number" id="histStart" step="any"></div>
+                        <div class="field-row"><label>Bin size</label><input type="number" id="histBinSize" step="any" min="0"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="field-row" style="max-width:200px;margin-bottom:8px;"><label>Bar color</label><div id="hist-color-wrap"></div></div>
+                  <div class="tbl-wrap"><table class="dtbl"><thead><tr><th>Data value</th><th style="width:38px;"></th></tr></thead><tbody id="hist-tbody"></tbody></table></div>
+                  <button class="btn-add" onclick="addHistRow()"><i class="ti ti-plus"></i> Add value</button>
+                </div>
+                
+                <!-- CARTESIAN SETTINGS & CONTROLS -->
+                <div id="de-cartesian" style="display:none;">
+                  <p class="info-note">Configure the coordinate plane below. No data entry needed.</p>
+                  
+                  <div class="opt-group" style="margin-bottom:12px;">
+                    <div class="opt-group-header">
+                      <div class="opt-group-header-left"><i class="ti ti-resize"></i><span class="opt-group-title">Graph size</span></div>
+                    </div>
+                    <div class="opt-group-body">
+                      <div class="grid-2">
+                        <div class="field-row"><label>Width (px)</label><input type="number" id="cpWidth" value="600" min="200" max="1400" step="10"></div>
+                        <div class="field-row"><label>Height (px)</label><input type="number" id="cpHeight" value="600" min="200" max="1400" step="10"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="field-row" style="margin-bottom:10px;"><label style="white-space:nowrap;">Graph title (optional)</label><input type="text" id="cpTitle"></div>
+                  <div class="grid-2" style="gap:10px;margin-bottom:10px;">
+                    <div>
+                      <div style="font-size:9.5pt;font-weight:600;color:var(--input-label);margin-bottom:6px;">X axis</div>
+                      <div class="field-row" style="margin-bottom:6px;"><label>Min</label><input type="number" id="cpXMin" value="-10" step="1"></div>
+                      <div class="field-row" style="margin-bottom:6px;"><label>Max</label><input type="number" id="cpXMax" value="10" step="1"></div>
+                      <div class="field-row" style="margin-bottom:6px;"><label>Step</label><input type="number" id="cpXStep" value="1" step="1" min="0.1"></div>
+                    </div>
+                    <div>
+                      <div style="font-size:9.5pt;font-weight:600;color:var(--input-label);margin-bottom:6px;">Y axis</div>
+                      <div class="field-row" style="margin-bottom:6px;"><label>Min</label><input type="number" id="cpYMin" value="-10" step="1"></div>
+                      <div class="field-row" style="margin-bottom:6px;"><label>Max</label><input type="number" id="cpYMax" value="10" step="1"></div>
+                      <div class="field-row" style="margin-bottom:6px;"><label>Step</label><input type="number" id="cpYStep" value="1" step="1" min="0.1"></div>
+                    </div>
+                  </div>
+                  <div class="toggle-row" style="margin-bottom:6px;"><input type="checkbox" id="cpShowTickLabels" checked><label for="cpShowTickLabels">Show tick labels</label></div>
+                  <div class="toggle-row" style="margin-bottom:6px;"><input type="checkbox" id="cpShowMinorGrid"><label for="cpShowMinorGrid">Show minor gridlines (half-step)</label></div>
+                  <div class="toggle-row" style="margin-bottom:6px;">
+                    <input type="checkbox" id="cpShowArrows" checked onchange="document.getElementById('cp-arrows-sub').style.display=this.checked?'block':'none';">
+                    <label for="cpShowArrows">Arrowheads on axes</label>
+                  </div>
+                  <div id="cp-arrows-sub" style="margin-left:22px;margin-bottom:6px;display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+                    <div class="toggle-row" style="margin:0;"><input type="checkbox" id="cpArrowXPos" checked><label for="cpArrowXPos">X positive (right)</label></div>
+                    <div class="toggle-row" style="margin:0;"><input type="checkbox" id="cpArrowXNeg" checked><label for="cpArrowXNeg">X negative (left)</label></div>
+                    <div class="toggle-row" style="margin:0;"><input type="checkbox" id="cpArrowYPos" checked><label for="cpArrowYPos">Y positive (top)</label></div>
+                    <div class="toggle-row" style="margin:0;"><input type="checkbox" id="cpArrowYNeg" checked><label for="cpArrowYNeg">Y negative (bottom)</label></div>
+                  </div>
+                  <div class="toggle-row" style="margin-bottom:6px;"><input type="checkbox" id="cpShowAxisLabels" checked><label for="cpShowAxisLabels">Show axis variable labels</label></div>
+                  <div class="grid-2" style="gap:10px;margin-bottom:8px;">
+                    <div class="field-row"><label>X variable</label><input type="text" id="cpXVarLabel" value="x"></div>
+                    <div class="field-row"><label>Y variable</label><input type="text" id="cpYVarLabel" value="y"></div>
+                  </div>
+                  <div class="grid-2" style="gap:10px;margin-bottom:8px;">
+                    <div class="field-row"><label>X-axis label</label><input type="text" id="cpXLabel"></div>
+                    <div class="field-row"><label>Y-axis label</label><input type="text" id="cpYLabel"></div>
+                  </div>
+                  <div class="grid-2" style="gap:10px;margin-bottom:6px;">
+                    <div class="field-row">
+                      <label>Grid line style</label>
+                      <select id="cpGridStyle">
+                        <option value="dashed">Dashed</option>
+                        <option value="dotted">Dotted</option>
+                        <option value="solid">Solid</option>
+                      </select>
+                    </div>
+                    <div class="field-row">
+                      <label>Label font size (pt)</label>
+                      <input type="number" id="cpFontSize" value="8" min="6" max="24" step="1">
+                    </div>
+                  </div>
+                </div>
+
+                <div id="de-boxwhisker" style="display:none;">
+                  <p class="info-note">Enter at least 5 raw values per group to compute quartiles.</p>
+                  <div style="margin-bottom:8px;">
+                    <div style="font-size:9.5pt;color:var(--input-label);font-weight:600;margin-bottom:4px;">Outliers</div>
+                    <div class="toggle-row" style="margin-bottom:3px;"><input type="radio" name="bwOutlierMode" id="bwOutlierAll" value="all" checked><label for="bwOutlierAll">Include all (whiskers to min/max)</label></div>
+                    <div class="toggle-row" style="margin-bottom:3px;"><input type="radio" name="bwOutlierMode" id="bwOutlierIQR" value="iqr"><label for="bwOutlierIQR">Show outliers (1.5 &times; IQR rule)</label></div>
+                    <div class="toggle-row" style="margin-bottom:3px;"><input type="radio" name="bwOutlierMode" id="bwOutlierExclude" value="exclude"><label for="bwOutlierExclude">Exclude outliers (whiskers to IQR fence)</label></div>
+                  </div>
+                  <div id="bw-series-list"></div>
+                  <button class="btn-add" onclick="addBWSeries()"><i class="ti ti-plus"></i> Add group</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="split-right" id="stage-panel">
+          <div class="preview-container">
+            <div id="graph-legend" class="graph-legend"></div>
+            <div class="canvas-wrapper">
+              <canvas id="mainChart"></canvas>
+            </div>
+          </div>
+          
+          <div class="export-tray" id="export-tray" style="display:none;">
+            <div class="btn-row">
+              <button class="btn btn-primary" onclick="dlGraph()"><i class="ti ti-download"></i> Download PNG</button>
+              <button class="btn btn-green" onclick="copyGraph()" id="copyBtn"><i class="ti ti-copy"></i> Copy to clipboard</button>
+              <button class="btn btn-secondary" id="copyHtmlBtn" style="display:none;" onclick="dtCopyHTML()"><i class="ti ti-code"></i> Copy as HTML table</button>
+            </div>
+            <div class="feedback-row">
+              <span class="copy-feedback" id="copy-feedback"><i class="ti ti-check"></i> Copied to clipboard!</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+'use strict';
+const APP_VERSION = 'V 2.0.5';
+const APP_DATE = '2026-10-18';
+let selT = null, curChart = null, lineSeriesCount = 0, scatterSeriesCount = 0, bwSeriesCount = 0, pieRowCount = 0;
+let debounceTimer = null;
+
+const APP_PALETTE = [
+  { name: 'Charcoal',        hex: '#333333' },
+  { name: 'Dim Gray',        hex: '#666666' },
+  { name: 'Medium Gray',     hex: '#999999' },
+  { name: 'Light Gray',      hex: '#cccccc' },
+  { name: 'Off-White',       hex: '#eeeeee' },
+  { name: 'Navy / Blue',     hex: '#0072b2' },
+  { name: 'Orange',          hex: '#e69f00' },
+  { name: 'Bluish Green',    hex: '#009e73' },
+  { name: 'Vermilion',       hex: '#d55e00' },
+  { name: 'Sky Blue',        hex: '#56b4e9' },
+  { name: 'Reddish Purple',  hex: '#cc79a7' },
+  { name: 'Darkened Gold',   hex: '#e5c494' },
+  { name: 'Charcoal Slate',  hex: '#4a5568' },
+  { name: 'Light Slate',     hex: '#cbd5e1' },
+  { name: 'Mid Gray',        hex: '#94a3b8' },
+  { name: 'Ghost Gray',      hex: '#e2e8f0' },
+  { name: 'Red',             hex: '#ff0000' },
+  { name: 'Blue',            hex: '#0000ff' },
+  { name: 'Yellow',          hex: '#ffff00' },
+  { name: 'Green',           hex: '#008000' },
+  { name: 'Purple',          hex: '#800080' },
+  { name: 'Brown',           hex: '#8b4513' },
+  { name: 'Custom hex',      hex: '' }
+];
+
+const DEFCOLORS_SERIES = [
+  '#333333', '#666666', '#999999', '#cccccc', '#eeeeee',
+  '#0072b2', '#e69f00', '#009e73', '#d55e00', '#56b4e9', '#cc79a7'
+];
+
+const DEFTEXTURES_BAR = ['solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'solid'];
+const DEFMARKERS_LINE = ['circle', 'rect', 'triangle', 'rectRot', 'cross', 'star', 'crossRot'];
+const DEFLINE_STYLES = ['solid', 'dashed', 'dotted', 'dashdot', 'longdash'];
+
+function triggerLiveUpdate() {
+  if (!selT) return;
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(function() {
+    buildGraph();
+  }, 250);
+}
+
+document.getElementById('controls-panel').addEventListener('input', function(e) {
+  if (e.target && e.target.id !== 'histPasteZone' && e.target.id !== 'dt-paste-zone') triggerLiveUpdate();
+});
+document.getElementById('controls-panel').addEventListener('change', function() {
+  triggerLiveUpdate();
+});
+
+function makeColorPicker(defaultHex, uid) {
+  const dh = (defaultHex || '#000000').toLowerCase();
+  let si = APP_PALETTE.findIndex(function(c) { return c.hex.toLowerCase() === dh; });
+  if (si < 0) si = APP_PALETTE.length - 1;
+  const showHex = (si === APP_PALETTE.length - 1);
+  const swColor = showHex ? dh : (APP_PALETTE[si].hex || '#000000');
+  const opts = APP_PALETTE.map(function(c, i) { 
+    return '<option value="' + c.hex + '" ' + (i === si ? 'selected' : '') + '>' + c.name + '</option>'; 
+  }).join('');
+  return '<div class="cpw" id="cpw-' + uid + '"><span class="csw" id="csw-' + uid + '" style="background:' + swColor + ';"></span>'
+    + '<select onchange="onCSel(this,\'' + uid + '\')">' + opts + '</select>'
+    + '<input type="text" placeholder="#rrggbb" id="chex-' + uid + '" value="' + (showHex ? dh : '') + '" style="display:' + (showHex ? 'inline-block' : 'none') + ';" oninput="onHexIn(this,\'' + uid + '\')"></div>';
+}
+
+function getColor(uid) {
+  const w = document.getElementById('cpw-' + uid); 
+  if (!w) return '#000000';
+  const s = w.querySelector('select');
+  if (s.value === '') { 
+    const h = (document.getElementById('chex-' + uid) || {}).value || ''; 
+    return validHex(h.trim()) ? h.trim() : '#000000'; 
+  }
+  return s.value;
+}
+
+function validHex(h) { return /^#[0-9A-Fa-f]{6}$/.test(h); }
+function escHTML(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function onCSel(sel, uid) {
+  const sw = document.getElementById('csw-' + uid), hx = document.getElementById('chex-' + uid);
+  if (sel.value === '') { 
+    if (hx) hx.style.display = 'inline-block'; 
+    const h = hx ? hx.value.trim() : ''; 
+    if (validHex(h) && sw) sw.style.background = h; 
+  } else { 
+    if (hx) hx.style.display = 'none'; 
+    if (sw) sw.style.background = sel.value; 
+  }
+  triggerLiveUpdate();
+}
+
+function onHexIn(inp, uid) {
+  const h = inp.value.trim();
+  if (validHex(h)) { 
+    const sw = document.getElementById('csw-' + uid); 
+    if (sw) sw.style.background = h; 
+    triggerLiveUpdate(); 
+  }
+}
+
+function makeMarkerSel(uid, isLine, val) {
+  const list = isLine ? [
+    { name: 'Circle', val: 'circle' }, { name: 'Square', val: 'rect' }, { name: 'Triangle', val: 'triangle' },
+    { name: 'Diamond', val: 'rectRot' }, { name: 'Cross', val: 'cross' }, { name: 'X', val: 'crossRot' },
+    { name: 'Star', val: 'star' }, { name: 'No marker', val: 'none' }
+  ] : [
+    { name: 'Circle', val: 'circle' }, { name: 'Square', val: 'rect' }, { name: 'Triangle', val: 'triangle' },
+    { name: 'Diamond', val: 'rectRot' }, { name: 'Cross', val: 'cross' }, { name: 'X', val: 'crossRot' },
+    { name: 'Star', val: 'star' }
+  ];
+  const opts = list.map(function(m) { 
+    return '<option value="' + m.val + '" ' + (m.val === (val || 'circle') ? 'selected' : '') + '>' + m.name + '</option>'; 
+  }).join('');
+  return '<select class="msel" id="' + uid + '" onchange="triggerLiveUpdate()">' + opts + '</select>';
+}
+
+function makeLineStyleSel(uid, val) {
+  const list = [
+    { name: 'Solid', val: 'solid' },
+    { name: 'Dashed (8 4)', val: 'dashed' },
+    { name: 'Dotted (2 3)', val: 'dotted' },
+    { name: 'Dash-Dot (8 3 2 3)', val: 'dashdot' },
+    { name: 'Long Dash (12 6)', val: 'longdash' }
+  ];
+  const opts = list.map(function(m) { 
+    return '<option value="' + m.val + '" ' + (m.val === (val || 'solid') ? 'selected' : '') + '>' + m.name + '</option>'; 
+  }).join('');
+  return '<select class="msel" id="' + uid + '" onchange="triggerLiveUpdate()">' + opts + '</select>';
+}
+
+function makeTextureSel(uid, val) {
+  const list = [
+    { name: 'Solid fill', val: 'solid' },
+    { name: 'Diagonal (45°)', val: 'diagonal' },
+    { name: 'Solid light tint', val: 'tint' },
+    { name: 'Crosshatch', val: 'crosshatch' },
+    { name: 'Sparse dots', val: 'dots' }
+  ];
+  const opts = list.map(function(t) { 
+    return '<option value="' + t.val + '" ' + (t.val === (val || 'solid') ? 'selected' : '') + '>' + t.name + '</option>'; 
+  }).join('');
+  return '<select class="msel" id="' + uid + '" onchange="triggerLiveUpdate()">' + opts + '</select>';
+}
+
+function getDashPattern(style) {
+  if (style === 'dashed') return [8, 4];
+  if (style === 'dotted' || style === 'dash') return [2, 3];
+  if (style === 'dashdot') return [8, 3, 2, 3];
+  if (style === 'longdash') return [12, 6];
+  return [];
+}
+
+function createTexturePattern(color, textureType, bgColor) {
+  if (!textureType || textureType === 'solid') return color;
+  const pcan = document.createElement('canvas');
+  const pctx = pcan.getContext('2d');
+  const size = 12;
+  pcan.width = size; pcan.height = size;
+  
+  if (textureType === 'tint') {
+    pctx.fillStyle = bgColor || '#ffffff';
+    pctx.fillRect(0, 0, size, size);
+    pctx.fillStyle = color;
+    pctx.globalAlpha = 0.25;
+    pctx.fillRect(0, 0, size, size);
+    return pctx.createPattern(pcan, 'repeat');
+  }
+
+  pctx.fillStyle = bgColor || '#ffffff';
+  pctx.fillRect(0, 0, size, size);
+  pctx.strokeStyle = color;
+  pctx.fillStyle = color;
+  pctx.lineWidth = 1.8;
+
+  if (textureType === 'diagonal') {
+    pctx.beginPath();
+    pctx.moveTo(0, size); pctx.lineTo(size, 0);
+    pctx.moveTo(-size / 2, size / 2); pctx.lineTo(size / 2, -size / 2);
+    pctx.moveTo(size / 2, size * 1.5); pctx.lineTo(size * 1.5, size / 2);
+    pctx.stroke();
+  } else if (textureType === 'crosshatch') {
+    pctx.beginPath();
+    pctx.moveTo(0, 0); pctx.lineTo(size, size);
+    pctx.moveTo(0, size); pctx.lineTo(size, 0);
+    pctx.stroke();
+  } else if (textureType === 'dots') {
+    pctx.beginPath();
+    pctx.arc(size / 2, size / 2, 1.8, 0, Math.PI * 2);
+    pctx.fill();
+  }
+  return pctx.createPattern(pcan, 'repeat');
+}
+
+function selType(t) { 
+  selT = t;
+  document.querySelectorAll('.type-btn').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.type === t);
+  });
+
+  document.getElementById('no-type-selected-notice').style.display = 'none';
+  document.getElementById('settings-container').style.display = 'block';
+  document.getElementById('export-tray').style.display = 'flex';
+
+  setupDE();
+}
+
+function onToggleErrGlobal() {
+  if (selT === 'bar') rebuildBarTable();
+  else if (selT === 'line') rebuildLineSeriesTables();
+  else if (selT === 'scatter') rebuildScatterSeriesTables();
+  triggerLiveUpdate();
+}
+
+function onToggleCustomLabels() {
+  if (selT === 'line') rebuildLineSeriesTables();
+  else if (selT === 'scatter') rebuildScatterSeriesTables();
+  triggerLiveUpdate();
+}
+
+function setupDE() {
+  ['de-bar', 'de-line', 'de-scatter', 'de-pie', 'de-histogram', 'de-boxwhisker', 'de-cartesian'].forEach(function(id) { 
+    document.getElementById(id).style.display = 'none'; 
+  });
+  ['ax-cfg-wrap', 'scale-cfg-wrap', 'arrows-wrap', 'gridlines-wrap', 'display-opts-card', 'graph-size-wrap', 'data-input-panel'].forEach(function(id) { 
+    document.getElementById(id).style.display = 'block'; 
+  });
+
+  var htmlCopyBtn = document.getElementById('copyHtmlBtn');
+  if (htmlCopyBtn) {
+    htmlCopyBtn.style.display = (selT === 'datatable') ? 'inline-flex' : 'none';
+  }
+  
+  var _gw2 = document.getElementById('gWidth'); if (_gw2 && (_gw2.value === '600')) _gw2.value = '450';
+  var _gh2 = document.getElementById('gHeight'); if (_gh2 && (_gh2.value === '600' || _gh2.value === 'auto')) _gh2.value = '400';
+  var _axr = document.getElementById('arrowXRight-row'); if (_axr) _axr.style.display = '';
+  var _axl = document.getElementById('arrowXLeft-row'); if (_axl) _axl.style.display = '';
+  
+  document.getElementById('chart-settings-wrap').style.display = 'block';
+  document.getElementById('de-datatable-wrap').style.display = 'none';
+  
+  ['errbar-global-opt', 'y2-toggle-wrap', 'y2-cfg', 'y2-scale-row', 'xscale-section', 'legend-opt', 'pie-pct-opt', 'trendline-opt', 'pct-y-opt', 'pct-x-opt', 'bar-labels-opt', 'point-labels-opt'].forEach(function(id) { 
+    var el = document.getElementById(id); if (el) el.style.display = 'none'; 
+  });
+  const gcw = document.getElementById('gridColorWrap'); 
+  if (!gcw.querySelector('.cpw')) gcw.innerHTML = makeColorPicker('#cbd5e1', 'gridcol');
+  
+  if (selT === 'bar') {
+    document.getElementById('de-bar').style.display = 'block';
+    document.getElementById('xlbl-lbl').textContent = 'X-axis label'; document.getElementById('ylbl-lbl').textContent = 'Y-axis label';
+    document.getElementById('errbar-global-opt').style.display = 'flex';
+    document.getElementById('bar-labels-opt').style.display = 'flex';
+    document.getElementById('pct-y-opt').style.display = 'flex';
+    document.getElementById('legend-opt').style.display = 'flex';
+    var _baxr = document.getElementById('arrowXRight-row'); if (_baxr) _baxr.style.display = 'none';
+    var _baxl = document.getElementById('arrowXLeft-row'); if (_baxl) _baxl.style.display = 'none';
+    rebuildBarGroups(); if (!document.getElementById('bar-tbody').children.length) addBarRow();
+  } else if (selT === 'line') {
+    document.getElementById('de-line').style.display = 'block';
+    document.getElementById('xlbl-lbl').textContent = 'X-axis label'; document.getElementById('ylbl-lbl').textContent = 'Y-axis label';
+    document.getElementById('errbar-global-opt').style.display = 'flex';
+    document.getElementById('point-labels-opt').style.display = 'flex';
+    document.getElementById('y2-toggle-wrap').style.display = 'flex';
+    document.getElementById('xscale-section').style.display = 'block'; document.getElementById('legend-opt').style.display = 'flex';
+    document.getElementById('showLegend').checked = true;
+    document.getElementById('pct-y-opt').style.display = 'flex'; document.getElementById('pct-x-opt').style.display = 'flex';
+    if (!document.getElementById('line-series-list').children.length) { lineSeriesCount = 0; addLineSeries(3); }
+    toggleY2UI();
+  } else if (selT === 'scatter') {
+    document.getElementById('de-scatter').style.display = 'block';
+    document.getElementById('xlbl-lbl').textContent = 'X-axis label'; document.getElementById('ylbl-lbl').textContent = 'Y-axis label';
+    document.getElementById('errbar-global-opt').style.display = 'flex';
+    document.getElementById('point-labels-opt').style.display = 'flex';
+    document.getElementById('y2-toggle-wrap').style.display = 'flex';
+    document.getElementById('xscale-section').style.display = 'block'; document.getElementById('legend-opt').style.display = 'flex';
+    document.getElementById('showLegend').checked = true;
+    document.getElementById('trendline-opt').style.display = 'flex'; document.getElementById('pct-y-opt').style.display = 'flex'; document.getElementById('pct-x-opt').style.display = 'flex';
+    if (!document.getElementById('scatter-series-list').children.length) { scatterSeriesCount = 0; addScatterSeries(3); }
+    toggleY2UI();
+  } else if (selT === 'pie') {
+    document.getElementById('de-pie').style.display = 'block';
+    ['ax-cfg-wrap', 'scale-cfg-wrap', 'arrows-wrap', 'gridlines-wrap'].forEach(function(id) { document.getElementById(id).style.display = 'none'; });
+    document.getElementById('pie-pct-opt').style.display = 'block';
+    if (!document.getElementById('pie-tbody').children.length) for (let i = 0; i < 4; i++) addPieRow();
+  } else if (selT === 'histogram') {
+    document.getElementById('de-histogram').style.display = 'block';
+    document.getElementById('xlbl-lbl').textContent = 'X-axis label'; document.getElementById('ylbl-lbl').textContent = 'Frequency';
+    document.getElementById('bar-labels-opt').style.display = 'flex';
+    const hw = document.getElementById('hist-color-wrap'); 
+    if (!hw.querySelector('.cpw')) hw.innerHTML = makeColorPicker(DEFCOLORS_SERIES[0], 'hist0');
+    if (!document.getElementById('hist-tbody').children.length) for (let i = 0; i < 8; i++) addHistRow();
+  } else if (selT === 'datatable') {
+    document.getElementById('chart-settings-wrap').style.display = 'none';
+    document.getElementById('data-input-panel').style.display = 'none';
+    document.getElementById('de-datatable-wrap').style.display = 'block';
+    if (document.getElementById('dt-editor').rows.length <= 1) dtInit();
+  } else if (selT === 'cartesian') {
+    document.getElementById('de-cartesian').style.display = 'block';
+    ['chart-settings-wrap'].forEach(function(id) { 
+      var el = document.getElementById(id); if (el) el.style.display = 'none'; 
+    });
+  } else if (selT === 'boxwhisker') {
+    document.getElementById('de-boxwhisker').style.display = 'block';
+    document.getElementById('xlbl-lbl').textContent = 'X-axis label'; document.getElementById('ylbl-lbl').textContent = 'Values';
+    if (!document.getElementById('bw-series-list').children.length) { bwSeriesCount = 0; addBWSeries(); }
+    document.getElementById('display-opts-card').style.display = 'none';
+  }
+  buildGraph();
+}
+
+function toggleY2UI() {
+  const on = (selT === 'line' || selT === 'scatter') && document.getElementById('useY2Global').checked;
+  document.getElementById('y2-cfg').style.display = on ? 'block' : 'none';
+  document.getElementById('y2-scale-row').style.display = on ? 'block' : 'none';
+  if (selT === 'line') rebuildLineSeriesTables(); 
+  if (selT === 'scatter') rebuildScatterSeriesTables();
+  triggerLiveUpdate();
+}
+
+function nGroups() { return parseInt(document.getElementById('barGroups').value) || 1; }
+
+function rebuildBarGroups() {
+  const n = nGroups(), cont = document.getElementById('bar-group-labels');
+  const showLegEl = document.getElementById('showLegend');
+  if (showLegEl) showLegEl.checked = (n > 1);
+  const existingNames = [];
+  for (let _g = 0; _g < n; _g++) { 
+    var _ni = document.getElementById('barGroupName' + _g); 
+    existingNames.push(_ni ? _ni.value : ''); 
+  }
+  const existingColors = []; for (let g = 0; g < n; g++) existingColors.push(getColor('barg' + g));
+  const existingTextures = []; for (let g = 0; g < n; g++) { 
+    var _tx = document.getElementById('bargTexture' + g); 
+    existingTextures.push(_tx ? _tx.value : DEFTEXTURES_BAR[g % DEFTEXTURES_BAR.length]); 
+  }
+  cont.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin-bottom:8px;';
+  for (let g = 0; g < n; g++) {
+    const color = (existingColors[g] && existingColors[g] !== '#000000' && g < existingColors.length) ? existingColors[g] : DEFCOLORS_SERIES[g % DEFCOLORS_SERIES.length];
+    const texture = existingTextures[g] || DEFTEXTURES_BAR[g % DEFTEXTURES_BAR.length];
+    const dv = document.createElement('div');
+    const lb = document.createElement('div'); lb.style.cssText = 'font-size:9.5pt;color:var(--input-label);font-weight:600;margin-bottom:3px;'; lb.textContent = 'Group ' + (g + 1);
+    const inp = document.createElement('input'); inp.type = 'text'; inp.id = 'barGroupName' + g; inp.value = existingNames[g] || ('Group ' + (g + 1));
+    inp.style.cssText = 'display:block;width:100%;margin-bottom:4px;';
+    inp.oninput = function() { triggerLiveUpdate(); };
+    const clr = document.createElement('div'); clr.style.cssText = 'margin-bottom:4px;'; clr.innerHTML = makeColorPicker(color, 'barg' + g);
+    const txSel = document.createElement('div'); txSel.innerHTML = makeTextureSel('bargTexture' + g, texture);
+    dv.appendChild(lb);
+    dv.appendChild(inp); dv.appendChild(clr); dv.appendChild(txSel); grid.appendChild(dv);
+  }
+  cont.appendChild(grid); rebuildBarTable();
+  triggerLiveUpdate();
+}
+
+function rebuildBarTable() {
+  const n = nGroups(), hasErr = cb('errGlobal');
+  const thead = document.getElementById('bar-thead');
+  var dataCols = hasErr ? n * 2 : n;
+  var dataColPct = Math.floor(86 / dataCols);
+  var colW = dataColPct + '%';
+  let h = '<th style="width:18%;">Category</th>';
+  for (let g = 0; g < n; g++) {
+    h += '<th style="width:' + colW + ';">Group ' + (g + 1) + '</th>';
+    if (hasErr) h += '<th style="width:' + colW + ';">&plusmn;Group ' + (g + 1) + '</th>';
+  }
+  h += '<th style="width:38px;"></th>'; thead.innerHTML = h;
+  document.getElementById('bar-tbody').querySelectorAll('tr').forEach(function(tr) {
+    const cat = tr.querySelector('.bar-cat') ? tr.querySelector('.bar-cat').value : '';
+    const vals = Array.from(tr.querySelectorAll('.bar-val')).map(function(i) { return i.value; });
+    const errs = Array.from(tr.querySelectorAll('.bar-err')).map(function(i) { return i.value; });
+    let c = '<td><input type="text" class="bar-cat" value="' + escHTML(cat) + '"></td>';
+    for (let g = 0; g < n; g++) {
+      c += '<td><input type="number" class="bar-val" step="any" value="' + (vals[g] || '') + '"></td>';
+      if (hasErr) c += '<td><input type="number" class="bar-err" step="any" min="0" value="' + (errs[g] || '') + '"></td>';
+    }
+    c += '<td><button class="btn-danger-sm" onclick="this.closest(\'tr\').remove();triggerLiveUpdate();">✕</button></td>';
+    tr.innerHTML = c;
+  });
+  triggerLiveUpdate();
+}
+
+function addBarRow() {
+  rebuildBarTable();
+  const n = nGroups(), hasErr = cb('errGlobal');
+  const tbody = document.getElementById('bar-tbody'), tr = document.createElement('tr');
+  let c = '<td><input type="text" class="bar-cat"></td>';
+  for (let g = 0; g < n; g++) {
+    c += '<td><input type="number" class="bar-val" step="any"></td>';
+    if (hasErr) c += '<td><input type="number" class="bar-err" step="any" min="0"></td>';
+  }
+  c += '<td><button class="btn-danger-sm" onclick="this.closest(\'tr\').remove();triggerLiveUpdate();">✕</button></td>';
+  tr.innerHTML = c; tbody.appendChild(tr);
+  triggerLiveUpdate();
+}
+
+function parsePasteData(text) {
+  var nums = [];
+  text.split(/[\r\n]+/).forEach(function(line) {
+    line.split(/\t/).forEach(function(cell) {
+      var v = parseFloat(cell.trim().replace(/,/g, ''));
+      if (!isNaN(v)) nums.push(v);
+    });
+  });
+  return nums;
+}
+
+function histSetMode(mode) {
+  var isAuto = mode === 'auto';
+  document.getElementById('hist-mode-auto').style.display = isAuto ? 'block' : 'none';
+  document.getElementById('hist-mode-custom').style.display = isAuto ? 'none' : 'block';
+  document.getElementById('histModeAuto').style.background = isAuto ? 'var(--btn-primary-bg)' : '#f8fafc';
+  document.getElementById('histModeAuto').style.color = isAuto ? '#fff' : '#475569';
+  document.getElementById('histModeCustom').style.background = isAuto ? '#f8fafc' : 'var(--btn-primary-bg)';
+  document.getElementById('histModeCustom').style.color = isAuto ? '#475569' : '#fff';
+  if (isAuto) {
+    var hs = document.getElementById('histStart'); if (hs) hs.value = '';
+    var hb = document.getElementById('histBinSize'); if (hb) hb.value = '';
+  }
+  triggerLiveUpdate();
+}
+
+function histPastePrompt(mode) {
+  var ta = document.getElementById('histPasteZone');
+  var lbl = document.getElementById('hist-paste-label');
+  var btns = document.getElementById('hist-paste-btns');
+  ta.dataset.histMode = mode || 'tsv';
+  if (lbl) {
+    lbl.textContent = mode === 'csv' ?
+      'Paste CSV data — one numeric value per row or comma-separated' :
+      'Paste from Excel — one value per row or tab-separated';
+    lbl.style.display = 'block';
+  }
+  ta.style.display = 'block';
+  if (btns) btns.style.display = 'flex';
+  ta.value = ''; ta.focus();
+}
+
+function histCancelPaste() {
+  var ta = document.getElementById('histPasteZone');
+  var lbl = document.getElementById('hist-paste-label');
+  var btns = document.getElementById('hist-paste-btns');
+  ta.style.display = 'none';
+  if (btns) btns.style.display = 'none';
+  if (lbl) lbl.style.display = 'none';
+}
+
+function importHistPaste() {
+  var ta = document.getElementById('histPasteZone');
+  if (!ta || !ta.value.trim()) return;
+  var mode = ta.dataset.histMode || 'tsv';
+  var nums;
+  if (mode === 'csv') {
+    nums = [];
+    ta.value.split(/[\r\n]+/).forEach(function(line) {
+      dtParseCSVLine(line).forEach(function(cell) {
+        var v = parseFloat(cell.replace(/,/g, ''));
+        if (!isNaN(v)) nums.push(v);
+      });
+    });
+  } else {
+    nums = parsePasteData(ta.value);
+  }
+  if (!nums.length) { alert('No numeric values found in pasted data.'); return; }
+  var tbody = document.getElementById('hist-tbody');
+  tbody.innerHTML = '';
+  nums.forEach(function(v) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><input type="number" value="' + v + '" step="any"></td>' + '<td><button class="btn-danger-sm" onclick="this.closest(\'tr\').remove();triggerLiveUpdate();">✕</button></td>';
+    tbody.appendChild(tr);
+  });
+  histCancelPaste();
+  triggerLiveUpdate();
+}
+
+function importBWPaste(btn) {
+  var pasteWrap = btn.closest('div');
+  var ta = pasteWrap.querySelector('textarea');
+  if (!ta || !ta.value.trim()) return;
+  var nums = parsePasteData(ta.value);
+  if (!nums.length) { alert('No numeric values found in pasted data.'); return; }
+  var blk = btn.closest('.series-block');
+  var tbody = blk.querySelector('.bwb');
+  tbody.innerHTML = '';
+  nums.forEach(function(v) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><input type="number" value="' + v + '" step="any"></td>' + '<td><button class="btn-danger-sm" onclick="this.closest(\'tr\').remove();triggerLiveUpdate();">✕</button></td>';
+    tbody.appendChild(tr);
+  });
+  ta.value = '';
+  triggerLiveUpdate();
+}
+
+function addHistRow() {
+  const tbody = document.getElementById('hist-tbody'), tr = document.createElement('tr');
+  tr.innerHTML = '<td><input type="number" step="any"></td><td><button class="btn-danger-sm" onclick="this.closest(\'tr\').remove();triggerLiveUpdate();">✕</button></td>';
+  tbody.appendChild(tr);
+  triggerLiveUpdate();
+}
+
+function seriesHdrHTML(idx, isLine, nameVal, colorHex, useY2, y2checked, isFirst, markerVal, lineStyleVal) {
+  const cpId = 'sc' + isLine + '_' + idx, mkId = 'mk_' + isLine + '_' + idx, lsId = 'ls_' + isLine + '_' + idx;
+  const mk = markerVal || (DEFMARKERS_LINE[idx % DEFMARKERS_LINE.length]);
+  const ls = lineStyleVal || (DEFLINE_STYLES[idx % DEFLINE_STYLES.length]);
+  const nameInpId = 'seriesName_' + isLine + '_' + idx;
+  let h = '<input type="text" id="' + nameInpId + '" value="' + escHTML(nameVal || ('Series ' + (idx + 1))) + '" oninput="triggerLiveUpdate()">';
+  if (isLine) {
+    h += '<span style="font-size:9.5pt;color:var(--input-label);font-weight:600;">Style</span>';
+    h += makeLineStyleSel(lsId, ls);
+  }
+  h += '<span style="font-size:9.5pt;color:var(--input-label);font-weight:600;">' + (isLine ? 'Marker' : 'Shape') + '</span>';
+  h += makeMarkerSel(mkId, isLine, mk);
+  h += '<span style="font-size:9.5pt;color:var(--input-label);font-weight:600;">Color</span>';
+  h += makeColorPicker(colorHex, cpId);
+  if (useY2) h += '<label style="font-size:9.5pt;color:var(--input-label);font-weight:600;display:flex;align-items:center;gap:3px;"><input type="checkbox" class="use-y2-series" style="width:14px;height:14px;"' + (y2checked ? ' checked' : '') + '>Y2</label>';
+  if (!isFirst) h += '<button class="btn-danger-sm" onclick="this.closest(\'.series-block\').remove();triggerLiveUpdate();">✕</button>';
+  return h;
+}
+
+function getSeriesState(blk, isLine) {
+  const hdr = blk.querySelector('.series-head');
+  const nameInp = hdr.querySelector('input[type=text]');
+  const nameVal = nameInp ? nameInp.value : 'Series';
+  const idx = blk.dataset.sidx;
+  return {
+    nameVal: nameVal, 
+    colorHex: getColor('sc' + isLine + '_' + idx),
+    markerVal: (document.getElementById('mk_' + isLine + '_' + idx) || {}).value || 'circle',
+    lineStyleVal: (document.getElementById('ls_' + isLine + '_' + idx) || {}).value || 'solid',
+    y2checked: blk.querySelector('.use-y2-series') ? blk.querySelector('.use-y2-series').checked : false
+  };
+}
+
+function makeSeriesBlock(idx, isLine, hasErr, useY2) {
+  const color = DEFCOLORS_SERIES[idx % DEFCOLORS_SERIES.length];
+  const mk = DEFMARKERS_LINE[idx % DEFMARKERS_LINE.length];
+  const ls = DEFLINE_STYLES[idx % DEFLINE_STYLES.length];
+  const isFirst = idx === 0;
+  const blk = document.createElement('div'); blk.className = 'series-block'; blk.dataset.sidx = idx;
+  const hdrDiv = document.createElement('div'); hdrDiv.className = 'series-head';
+  hdrDiv.innerHTML = seriesHdrHTML(idx, isLine, null, color, useY2, false, isFirst, mk, ls);
+  blk.appendChild(hdrDiv);
+  const bodyDiv = document.createElement('div'); bodyDiv.className = 'series-body';
+  const tblWrap = document.createElement('div'); tblWrap.style.cssText = 'overflow-x:auto;border:1px solid var(--card-border);border-radius:6px;';
+  const tbl = document.createElement('table'); tbl.className = 'dtbl';
+  const thead = document.createElement('thead'), theadRow = document.createElement('tr');
+  if (isLine) theadRow.innerHTML = '<th>X label</th><th>Y value</th>' + (hasErr ? '<th>Error</th>' : '') + (cb('showCustomLabels') ? '<th>Pt Label</th>' : '') + '<th style="width:38px;"></th>';
+  else theadRow.innerHTML = '<th>X</th>' + (hasErr ? '<th>X err</th>' : '') + '<th>Y</th>' + (hasErr ? '<th>Y err</th>' : '') + (cb('showCustomLabels') ? '<th>Pt Label</th>' : '') + '<th style="width:38px;"></th>';
+  thead.appendChild(theadRow); tbl.appendChild(thead);
+  const tbody = document.createElement('tbody'); tbody.className = isLine ? 'lsb' : 'ssb';
+  tbl.appendChild(tbody); tblWrap.appendChild(tbl); bodyDiv.appendChild(tblWrap);
+  const addBtn = document.createElement('button'); addBtn.className = 'btn-add'; addBtn.innerHTML = '<i class="ti ti-plus"></i> Add Data Point';
+  if (isLine) addBtn.onclick = function() { addLineRow(this); };
+  else addBtn.onclick = function() { addScatterRow(this); };
+  
+  var pasteWrap = document.createElement('div');
+  pasteWrap.style.cssText = 'margin-top:8px;';
+  pasteWrap.innerHTML =
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px;">'
+    + '<button class="btn btn-secondary" style="padding:4px 10px;font-size:9pt;"'
+    + ' onclick="seriesPastePrompt(this,\'tsv\')"><i class="ti ti-clipboard"></i> Paste Excel</button>'
+    + '<button class="btn btn-secondary" style="padding:4px 10px;font-size:9pt;"'
+    + ' onclick="seriesPastePrompt(this,\'csv\')"><i class="ti ti-file-text"></i> Paste CSV</button>'
+    + '</div>'
+    + '<div class="series-paste-label" style="display:none;font-size:9pt;color:#64748b;font-style:italic;margin-bottom:2px;"></div>'
+    + '<textarea class="paste-zone series-paste-zone" style="display:none;min-height:60px;width:100%;"></textarea>'
+    + '<div class="series-paste-btns" style="display:none;gap:6px;margin-top:4px;">'
+    + '<button class="btn btn-primary" style="padding:4px 10px;font-size:9pt;"'
+    + ' onclick="seriesImportPaste(this)">&#8595; Import</button>'
+    + '<button class="btn btn-secondary" style="padding:4px 10px;font-size:9pt;"'
+    + ' onclick="seriesCancelPaste(this)">Cancel</button>'
+    + '</div>';
+  bodyDiv.appendChild(addBtn); bodyDiv.appendChild(pasteWrap); blk.appendChild(bodyDiv);
+  return { blk: blk, addBtn: addBtn };
+}
+
+function seriesPastePrompt(btn, mode) {
+  var wrap = btn.closest('div').parentElement;
+  var ta = wrap.querySelector('.series-paste-zone');
+  var lbl = wrap.querySelector('.series-paste-label');
+  var btns = wrap.querySelector('.series-paste-btns');
+  ta.dataset.mode = mode || 'tsv';
+  if (lbl) {
+    var isLine = !!btn.closest('.series-block').querySelector('.lsb');
+    var hasErr = cb('errGlobal');
+    var colDesc = isLine
+      ? 'x label, y value[, ±error][, label]'
+      : (hasErr ? 'x value, x ±error, y value, y ±error[, label]' : 'x value, y value[, label]');
+    lbl.textContent = (mode === 'csv' ? 'Paste CSV — ' : 'Paste from Excel — ') + 'columns: ' + colDesc;
+    lbl.style.display = 'block';
+  }
+  ta.style.display = 'block'; btns.style.display = 'flex';
+  ta.value = ''; ta.focus();
+}
+
+function seriesCancelPaste(btn) {
+  var wrap = btn.closest('.series-paste-btns').parentElement;
+  wrap.querySelector('.series-paste-zone').style.display = 'none';
+  wrap.querySelector('.series-paste-btns').style.display = 'none';
+  var lbl = wrap.querySelector('.series-paste-label'); if (lbl) lbl.style.display = 'none';
+}
+
+function seriesImportPaste(btn) {
+  var wrap = btn.closest('.series-paste-btns').parentElement;
+  var ta = wrap.querySelector('.series-paste-zone');
+  var mode = ta.dataset.mode || 'tsv';
+  var raw = ta.value; if (!raw.trim()) return;
+  var blk = btn.closest('.series-block');
+  var isLine = !!blk.querySelector('.lsb');
+  var hasErr = cb('errGlobal');
+  var hasPtLbl = cb('showCustomLabels');
+  var rows = raw.split(/[\r\n]+/).filter(function(r) { return r.trim(); });
+  var parsed = rows.map(function(r) {
+    return mode === 'csv' ? dtParseCSVLine(r) : r.split('\t').map(function(c) { return c.trim(); });
+  });
+  if (!parsed.length) return;
+  var tbody = blk.querySelector('.lsb,.ssb');
+  tbody.innerHTML = '';
+  parsed.forEach(function(cols) {
+    if (!cols.length) return;
+    var tr = document.createElement('tr');
+    if (isLine) {
+      tr.innerHTML = lineRowHTML(cols[0] || '', cols[1] || '', cols[2] || '', hasErr, cols[hasErr ? 3 : 2] || '', hasPtLbl);
+    } else {
+      if (hasErr) {
+        tr.innerHTML = scatterRowHTML(cols[0] || '', cols[2] || '', cols[1] || '', cols[3] || '', true, cols[4] || '', hasPtLbl);
+      } else {
+        tr.innerHTML = scatterRowHTML(cols[0] || '', cols[1] || '', '', '', false, cols[2] || '', hasPtLbl);
+      }
+    }
+    tbody.appendChild(tr);
+  });
+  seriesCancelPaste(btn);
+  triggerLiveUpdate();
+}
+
+function addLineSeries(numRows) {
+  numRows = numRows || 3; const idx = lineSeriesCount++;
+  const list = document.getElementById('line-series-list');
+  const hasErr = cb('errGlobal');
+  const useY2 = cb('useY2Global');
+  const r = makeSeriesBlock(idx, true, hasErr, useY2); list.appendChild(r.blk);
+  for (let i = 0; i < numRows; i++) addLineRow(r.addBtn);
+  triggerLiveUpdate();
+}
+
+function lineRowHTML(x, y, e, hasErr, ptLbl, hasPtLbl) {
+  return '<td><input type="text" class="ln-x" value="' + escHTML(x) + '"></td>'
+    + '<td><input type="number" class="ln-y" value="' + escHTML(y) + '" step="any"></td>'
+    + (hasErr ? '<td><input type="number" class="ln-e" value="' + escHTML(e) + '" step="any" min="0"></td>' : '')
+    + (hasPtLbl ? '<td><input type="text" class="pt-lbl" value="' + escHTML(ptLbl) + '"></td>' : '')
+    + '<td><button class="btn-danger-sm" onclick="this.closest(\'tr\').remove();triggerLiveUpdate();">✕</button></td>';
+}
+
+function addLineRow(btn) {
+  const blk = btn.closest('.series-block'), tbody = blk.querySelector('.lsb');
+  const tr = document.createElement('tr'); 
+  tr.innerHTML = lineRowHTML('', '', '', cb('errGlobal'), '', cb('showCustomLabels')); 
+  tbody.appendChild(tr);
+  triggerLiveUpdate();
+}
+
+function rebuildLineSeriesTables() {
+  const hasErr = cb('errGlobal'), hasPtLbl = cb('showCustomLabels'), useY2 = cb('useY2Global');
+  document.querySelectorAll('#line-series-list .series-block').forEach(function(blk, bi) {
+    const st = getSeriesState(blk, true);
+    const rows = Array.from(blk.querySelectorAll('.lsb tr')).map(function(tr) { 
+      const xInp = tr.querySelector('.ln-x') || tr.cells[0].querySelector('input');
+      const yInp = tr.querySelector('.ln-y') || tr.cells[1].querySelector('input');
+      const errInp = tr.querySelector('.ln-e') || tr.querySelector('input[min="0"]');
+      const ptInp = tr.querySelector('.pt-lbl');
+      return {
+        x: xInp ? xInp.value : '',
+        y: yInp ? yInp.value : '',
+        e: errInp ? errInp.value : '',
+        ptLbl: ptInp ? ptInp.value : ''
+      }; 
+    });
+    blk.querySelector('.series-head').innerHTML = seriesHdrHTML(blk.dataset.sidx, true, st.nameVal, st.colorHex, useY2, st.y2checked, bi === 0, st.markerVal, st.lineStyleVal);
+    const mkEl = document.getElementById('mk_true_' + blk.dataset.sidx); if (mkEl) mkEl.value = st.markerVal;
+    const lsEl = document.getElementById('ls_true_' + blk.dataset.sidx); if (lsEl) lsEl.value = st.lineStyleVal;
+    blk.querySelector('thead tr').innerHTML = '<th>X label</th><th>Y value</th>' + (hasErr ? '<th>Error</th>' : '') + (hasPtLbl ? '<th>Pt Label</th>' : '') + '<th style="width:38px;"></th>';
+    const tbody = blk.querySelector('.lsb'); tbody.innerHTML = '';
+    rows.forEach(function(r) { const tr = document.createElement('tr'); tr.innerHTML = lineRowHTML(r.x, r.y, r.e, hasErr, r.ptLbl, hasPtLbl); tbody.appendChild(tr); });
+  });
+  triggerLiveUpdate();
+}
+
+function addScatterSeries(numRows) {
+  numRows = numRows || 3; const idx = scatterSeriesCount++;
+  const list = document.getElementById('scatter-series-list');
+  const hasErr = cb('errGlobal');
+  const useY2 = cb('useY2Global');
+  const r = makeSeriesBlock(idx, false, hasErr, useY2); list.appendChild(r.blk);
+  for (let i = 0; i < numRows; i++) addScatterRow(r.addBtn);
+  triggerLiveUpdate();
+}
+
+function scatterRowHTML(x, y, xe, ye, hasErr, ptLbl, hasPtLbl) {
+  return '<td><input type="number" class="sc-x" value="' + escHTML(x) + '" step="any"></td>'
+    + (hasErr ? '<td><input type="number" class="sc-xe" value="' + escHTML(xe) + '" step="any" min="0"></td>' : '')
+    + '<td><input type="number" class="sc-y" value="' + escHTML(y) + '" step="any"></td>'
+    + (hasErr ? '<td><input type="number" class="sc-ye" value="' + escHTML(ye) + '" step="any" min="0"></td>' : '')
+    + (hasPtLbl ? '<td><input type="text" class="pt-lbl" value="' + escHTML(ptLbl) + '"></td>' : '')
+    + '<td><button class="btn-danger-sm" onclick="this.closest(\'tr\').remove();triggerLiveUpdate();">✕</button></td>';
+}
+
+function addScatterRow(btn) {
+  const blk = btn.closest('.series-block'), tbody = blk.querySelector('.ssb');
+  const tr = document.createElement('tr'); 
+  tr.innerHTML = scatterRowHTML('', '', '', '', cb('errGlobal'), '', cb('showCustomLabels')); 
+  tbody.appendChild(tr);
+  triggerLiveUpdate();
+}
+
+function rebuildScatterSeriesTables() {
+  const hasErr = cb('errGlobal'), hasPtLbl = cb('showCustomLabels'), useY2 = cb('useY2Global');
+  document.querySelectorAll('#scatter-series-list .series-block').forEach(function(blk, bi) {
+    const st = getSeriesState(blk, false);
+    const rows = Array.from(blk.querySelectorAll('.ssb tr')).map(function(tr) { 
+      const xInp = tr.querySelector('.sc-x');
+      const yInp = tr.querySelector('.sc-y');
+      const xeInp = tr.querySelector('.sc-xe');
+      const yeInp = tr.querySelector('.sc-ye');
+      const ptInp = tr.querySelector('.pt-lbl');
+      return { 
+        x: xInp ? xInp.value : '', y: yInp ? yInp.value : '', 
+        xe: xeInp ? xeInp.value : '', ye: yeInp ? yeInp.value : '',
+        ptLbl: ptInp ? ptInp.value : '' 
+      }; 
+    });
+    blk.querySelector('.series-head').innerHTML = seriesHdrHTML(blk.dataset.sidx, false, st.nameVal, st.colorHex, useY2, st.y2checked, bi === 0, st.markerVal);
+    const mkEl = document.getElementById('mk_false_' + blk.dataset.sidx); if (mkEl) mkEl.value = st.markerVal;
+    blk.querySelector('thead tr').innerHTML = '<th>X</th>' + (hasErr ? '<th>X err</th>' : '') + '<th>Y</th>' + (hasErr ? '<th>Y err</th>' : '') + (hasPtLbl ? '<th>Pt Label</th>' : '') + '<th style="width:38px;"></th>';
+    const tbody = blk.querySelector('.ssb'); tbody.innerHTML = '';
+    rows.forEach(function(r) { const tr = document.createElement('tr'); tr.innerHTML = scatterRowHTML(r.x, r.y, r.xe, r.ye, hasErr, r.ptLbl, hasPtLbl); tbody.appendChild(tr); });
+  });
+  triggerLiveUpdate();
+}
+
+function addPieRow() {
+  const tbody = document.getElementById('pie-tbody'), idx = tbody.children.length;
+  const tr = document.createElement('tr'), cid = pieRowCount++;
+  tr.dataset.cid = cid;
+  tr.innerHTML = '<td><input type="text"></td>'
+    + '<td><input type="number" step="any" min="0"></td>'
+    + '<td>' + makeColorPicker(DEFCOLORS_SERIES[idx % DEFCOLORS_SERIES.length], 'pie' + cid) + '</td>'
+    + '<td><button class="btn-danger-sm" onclick="this.closest(\'tr\').remove();triggerLiveUpdate();">✕</button></td>';
+  tbody.appendChild(tr);
+  triggerLiveUpdate();
+}
+
+function addBWSeries() {
+  const idx = bwSeriesCount++, color = DEFCOLORS_SERIES[idx % DEFCOLORS_SERIES.length];
+  const list = document.getElementById('bw-series-list');
+  const blk = document.createElement('div'); blk.className = 'series-block'; blk.dataset.sidx = idx;
+  const isFirst = !list.children.length;
+  const hdrDiv = document.createElement('div'); hdrDiv.className = 'series-head';
+  const bwNameInpId = 'bwName_' + idx;
+  hdrDiv.innerHTML = '<input type="text" id="' + bwNameInpId + '" value="Group ' + (idx + 1) + '" oninput="triggerLiveUpdate()">'
+    + '<span style="font-size:9.5pt;color:var(--input-label);font-weight:600;">Color</span>' + makeColorPicker(color, 'bw' + idx)
+    + (!isFirst ? '<button class="btn-danger-sm" onclick="this.closest(\'.series-block\').remove();triggerLiveUpdate();">✕</button>' : '');
+  blk.appendChild(hdrDiv);
+  const bodyDiv = document.createElement('div'); bodyDiv.className = 'series-body';
+  const tblWrap = document.createElement('div'); tblWrap.style.cssText = 'overflow-x:auto;border:1px solid var(--card-border);border-radius:6px;';
+  tblWrap.innerHTML = '<table class="dtbl"><thead><tr><th>Value</th><th style="width:38px;"></th></tr></thead><tbody class="bwb"></tbody></table>';
+  const addBtn = document.createElement('button'); addBtn.className = 'btn-add'; addBtn.textContent = '+ Add value';
+  addBtn.onclick = function() { addBWRow(this); };
+  var pasteWrap = document.createElement('div');
+  pasteWrap.style.cssText = 'margin-top:8px;';
+  pasteWrap.innerHTML = '<label style="font-size:9.5pt;color:var(--input-label);font-weight:600;display:block;margin-bottom:4px;">Paste data from Excel <span style="font-weight:400;color:#64748b;font-style:italic;">(one value per row)</span></label>'
+    + '<textarea class="paste-zone" style="min-height:60px;display:block;width:100%;"></textarea>'
+    + '<button class="btn btn-secondary" onclick="importBWPaste(this)" style="margin-top:6px;padding:4px 10px;font-size:9pt;">&#8595; Import into table</button>';
+  bodyDiv.appendChild(tblWrap); bodyDiv.appendChild(addBtn); bodyDiv.appendChild(pasteWrap); blk.appendChild(bodyDiv); list.appendChild(blk);
+  for (let i = 0; i < 6; i++) addBWRow(addBtn);
+  triggerLiveUpdate();
+}
+
+function addBWRow(btn) {
+  const tbody = btn.closest('.series-block').querySelector('.bwb');
+  const tr = document.createElement('tr');
+  tr.innerHTML = '<td><input type="number" step="any"></td><td><button class="btn-danger-sm" onclick="this.closest(\'tr\').remove();triggerLiveUpdate();">✕</button></td>';
+  tbody.appendChild(tr);
+  triggerLiveUpdate();
+}
+
+const errPlugin = {
+  id: 'errPlugin',
+  afterDatasetsDraw: function(chart, _, opts) {
+    if (!opts || !opts.items || !opts.items.length) return;
+    const ctx = chart.ctx;
+    const cap = 6;
+
+    function drawBarLines(xc, yT, yB) {
+      if (isNaN(xc) || isNaN(yT) || isNaN(yB)) return;
+      ctx.beginPath(); ctx.moveTo(xc, yT); ctx.lineTo(xc, yB); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(xc - cap, yT); ctx.lineTo(xc + cap, yT); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(xc - cap, yB); ctx.lineTo(xc + cap, yB); ctx.stroke();
+    }
+
+    opts.items.forEach(function(e) {
+      if (!e || e.err == null || isNaN(e.err) || e.err <= 0) return;
+      const meta = chart.getDatasetMeta(e.di);
+      if (!meta || !meta.data || !meta.data[e.pi]) return;
+      const el = meta.data[e.pi];
+      if (isNaN(el.x) || isNaN(el.y)) return;
+
+      const xc = el.x;
+      const yA = e.yAxis || 'y';
+      const scale = chart.scales[yA];
+      if (!scale) return;
+
+      const yT = scale.getPixelForValue(e.val + e.err);
+      const yB = scale.getPixelForValue(e.val - e.err);
+      if (isNaN(yT) || isNaN(yB)) return;
+
+      ctx.save();
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 1.5;
+      drawBarLines(xc, yT, yB);
+      ctx.restore();
+
+      if (chart.config.type === 'bar' && el.width !== undefined && el.base !== undefined) {
+        const barColor = getColor('barg' + e.di) || '#111827';
+        if (typeof contrastColor === 'function' && contrastColor(barColor) === '#ffffff') {
+          const barLeft = el.x - (el.width / 2);
+          const barTop = Math.min(el.y, el.base);
+          const barHeight = Math.abs(el.base - el.y);
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(barLeft, barTop, el.width, barHeight);
+          ctx.clip();
+
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.5;
+          drawBarLines(xc, yT, yB);
+          ctx.restore();
+        }
+      }
+    });
+  }
+};
+
+const scErrPlugin = {
+  id: 'scErrPlugin',
+  afterDatasetsDraw: function(chart, _, opts) {
+    if (!opts || !opts.items || !opts.items.length) return;
+    const ctx = chart.ctx; ctx.save(); ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; const cap = 5;
+    opts.items.forEach(function(e) {
+      const meta = chart.getDatasetMeta(e.di);
+      if (!meta || !meta.data) return;
+      const el = meta.data[e.pi]; if (!el || isNaN(el.x) || isNaN(el.y)) return;
+      const xc = el.x, yc = el.y, yS = chart.scales[e.yAxis || 'y'], xS = chart.scales.x;
+      if (!yS || !xS) return;
+      if (e.ye > 0) {
+        const yT = yS.getPixelForValue(e.y + e.ye), yB = yS.getPixelForValue(e.y - e.ye);
+        if (!isNaN(yT) && !isNaN(yB)) {
+          ctx.beginPath(); ctx.moveTo(xc, yT); ctx.lineTo(xc, yB); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(xc - cap, yT); ctx.lineTo(xc + cap, yT); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(xc - cap, yB); ctx.lineTo(xc + cap, yB); ctx.stroke();
+        }
+      }
+      if (e.xe > 0) {
+        const xL = xS.getPixelForValue(e.x - e.xe), xR = xS.getPixelForValue(e.x + e.xe);
+        if (!isNaN(xL) && !isNaN(xR)) {
+          ctx.beginPath(); ctx.moveTo(xL, yc); ctx.lineTo(xR, yc); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(xL, yc - cap); ctx.lineTo(xL, yc + cap); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(xR, yc - cap); ctx.lineTo(xR, yc + cap); ctx.stroke();
+        }
+      }
+    });
+    ctx.restore();
+  }
+};
+
+const bwPlugin = {
+  id: 'bwPlugin',
+  afterDatasetsDraw: function(chart, _, opts) {
+    if (!opts || !opts.groups || !opts.groups.length) return;
+    const ctx = chart.ctx; ctx.save(); const meta = chart.getDatasetMeta(0);
+    opts.groups.forEach(function(g, i) {
+      const el = meta.data[i]; if (!el) return;
+      const bw = el.width || 40, xc = el.x, yS = chart.scales.y;
+      const wMin = g.whiskerMin !== undefined ? g.whiskerMin : g.min;
+      const wMax = g.whiskerMax !== undefined ? g.whiskerMax : g.max;
+      const yWMin = yS.getPixelForValue(wMin), yWMax = yS.getPixelForValue(wMax);
+      const yQ1 = yS.getPixelForValue(g.q1), yQ3 = yS.getPixelForValue(g.q3);
+      const yMed = yS.getPixelForValue(g.median), hw = bw / 2, ww = hw * 0.4;
+      ctx.fillStyle = g.color; ctx.strokeStyle = '#000'; ctx.lineWidth = 1.2;
+      ctx.fillRect(xc - hw, yQ3, bw, yQ1 - yQ3); ctx.strokeRect(xc - hw, yQ3, bw, yQ1 - yQ3);
+      ctx.beginPath(); ctx.moveTo(xc - hw, yMed); ctx.lineTo(xc + hw, yMed); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(xc, yQ1); ctx.lineTo(xc, yWMin); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(xc - ww, yWMin); ctx.lineTo(xc + ww, yWMin); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(xc, yQ3); ctx.lineTo(xc, yWMax); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(xc - ww, yWMax); ctx.lineTo(xc + ww, yWMax); ctx.stroke();
+      if (g.outliers && g.outliers.length) {
+        ctx.fillStyle = '#000'; ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+        g.outliers.forEach(function(v) {
+          var yO = yS.getPixelForValue(v);
+          ctx.beginPath(); ctx.arc(xc, yO, 4, 0, Math.PI * 2);
+          ctx.stroke();
+        });
+      }
+    });
+    ctx.restore();
+  }
+};
+
+const axisArrowPlugin = {
+  id: 'axisArrowPlugin',
+  afterDraw: function(chart, _, opts) {
+    if (!opts) return; const ctx = chart.ctx, AS = 9, AW = 5; ctx.save(); ctx.fillStyle = '#000';
+    const yS = chart.scales.y, xS = chart.scales.x; if (!yS || !xS) { ctx.restore(); return; }
+    let xAtZero = xS.type === 'linear' ? (xS.getPixelForValue(0) >= xS.left && xS.getPixelForValue(0) <= xS.right ? xS.getPixelForValue(0) : xS.left) : xS.left;
+    const py = yS.getPixelForValue(0), yAtZero = (py >= yS.top && py <= yS.bottom) ? py : yS.bottom;
+    function drw(x, y, dx, dy) { 
+      const px = -dy, py2 = dx; 
+      ctx.beginPath(); ctx.moveTo(x + dx * AS, y + dy * AS); 
+      ctx.lineTo(x + px * AW, y + py2 * AW); 
+      ctx.lineTo(x - px * AW, y - py2 * AW); 
+      ctx.closePath(); ctx.fill(); 
+    }
+    if (opts.yTop) drw(xAtZero, yS.top, 0, -1); 
+    if (opts.yBot) drw(xAtZero, yS.bottom, 0, 1);
+    if (opts.xRight) drw(xS.right, yAtZero, 1, 0); 
+    if (opts.xLeft) drw(xS.left, yAtZero, -1, 0);
+    ctx.restore();
+  }
+};
+
+const customPtLabelPlugin = {
+  id: 'customPtLabelPlugin',
+  afterDatasetsDraw: function(chart) {
+    if (!cb('showCustomLabels')) return;
+    const ctx = chart.ctx;
+    const tickSzEl = document.getElementById('tickLabelSize');
+    const tickSz = tickSzEl ? (parseInt(tickSzEl.value) || 10) : 10;
+    const labelSz = Math.max(6, tickSz - 1.5); 
+
+    ctx.save();
+    ctx.textBaseline = 'middle';
+    ctx.font = labelSz + 'pt Arial';
+    ctx.fillStyle = '#1e2a3a';
+
+    chart.data.datasets.forEach(function(ds, di) {
+      if (!ds.customLabels) return;
+      const meta = chart.getDatasetMeta(di);
+      meta.data.forEach(function(el, i) {
+        const lbl = ds.customLabels[i];
+        if (lbl) {
+          const textWidth = ctx.measureText(lbl).width;
+          let xOffset = 10; 
+          let yOffset = -10;
+
+          if (el.x + xOffset + textWidth > chart.width - 5) {
+            ctx.textAlign = 'right';
+            xOffset = -10;
+          } else {
+            ctx.textAlign = 'left';
+          }
+
+          if (el.y + yOffset < 10) {
+            yOffset = 12;
+          }
+
+          ctx.fillText(lbl, el.x + xOffset, el.y + yOffset);
+        }
+      });
+    });
+    ctx.restore();
+  }
+};
+
+const boldZeroPlugin = {
+  id: 'boldZeroPlugin',
+  afterDraw: function(chart, _, opts) {
+    if (!opts || !opts.enabled) return; const ctx = chart.ctx, yS = chart.scales.y, xS = chart.scales.x;
+    ctx.save(); ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
+    if (yS) { 
+      const yZ = yS.getPixelForValue(0); 
+      if (yZ >= yS.top && yZ <= yS.bottom) { 
+        ctx.beginPath(); ctx.moveTo(xS ? xS.left : chart.chartArea.left, yZ); 
+        ctx.lineTo(xS ? xS.right : chart.chartArea.right, yZ); ctx.stroke(); 
+      } 
+    }
+    if (xS && xS.type === 'linear') { 
+      const xZ = xS.getPixelForValue(0); 
+      if (xZ >= xS.left && xZ <= xS.right) { 
+        ctx.beginPath(); ctx.moveTo(xZ, yS ? yS.top : chart.chartArea.top); 
+        ctx.lineTo(xZ, yS ? yS.bottom : chart.chartArea.bottom); ctx.stroke(); 
+      } 
+    }
+    ctx.restore();
+  }
+};
+
+const pieLabelPlugin = {
+  id: 'pieLabelPlugin',
+  beforeUpdate: function(chart) {
+    if (chart.config.type !== 'pie') return;
+    var show = document.getElementById('pieGraphShow');
+    if (!show || !show.checked || !cb('pieSmartCallout')) {
+      chart.options.layout.padding = 10;
+      return;
+    }
+    var modeInput = document.querySelector('input[name=pieLabelMode]:checked');
+    var mode = modeInput ? modeInput.value : 'none';
+    if (mode === 'none') {
+      chart.options.layout.padding = 10;
+      return;
+    }
+
+    var ds = chart.data.datasets[0];
+    if (!ds || !ds.data || !ds.data.length) return;
+    var total = ds.data.reduce(function(a, b) { return a + b; }, 0);
+    var tickSzEl = document.getElementById('tickLabelSize');
+    var tickSz = tickSzEl ? (parseInt(tickSzEl.value) || 10) : 10;
+    
+    var ctx = chart.ctx;
+    ctx.save();
+    ctx.font = 'bold ' + tickSz + 'pt Arial';
+    var needsCallout = false;
+    
+    var estRadius = Math.min(chart.width - 20, chart.height - 20) / 2;
+    var maxCalloutW = 0;
+    
+    for (var i = 0; i < ds.data.length; i++) {
+      var val = ds.data[i];
+      if (!val) continue;
+      var pct = total > 0 ? Math.round((val / total) * 100) : 0;
+      var label = chart.data.labels[i] || '';
+      var text = '';
+      if (mode === 'label') text = label;
+      else if (mode === 'count') text = val.toString();
+      else if (mode === 'labelcount') text = label + ' (' + val + ')';
+      else if (mode === 'pct') text = pct + '%';
+      else if (mode === 'labelpct') text = label + ' (' + pct + '%)';
+      
+      var textH = tickSz * 1.3;
+      var angle = (val / total) * Math.PI * 2;
+      var midRadius = estRadius / 2;
+      var chordLen = 2 * midRadius * Math.sin(angle / 2);
+      
+      var words = text.split(' ');
+      var innerAvailW = chordLen * 0.9;
+      var lines = [];
+      var curLine = words.length ? words[0] : '';
+      
+      for (var j = 1; j < words.length; j++) {
+          if (ctx.measureText(curLine + ' ' + words[j]).width <= innerAvailW) {
+              curLine += ' ' + words[j];
+          } else {
+              lines.push(curLine);
+              curLine = words[j];
+          }
+      }
+      if (curLine) lines.push(curLine);
+      
+      var totalH = lines.length * textH;
+      var maxLineW = Math.max.apply(null, lines.map(function(l) { return ctx.measureText(l).width; }));
+      var fitsInside = (maxLineW <= chordLen * 0.95) && (totalH <= estRadius * 0.85);
+      
+      if (!fitsInside) {
+         needsCallout = true;
+         var longestWordW = Math.max.apply(null, words.map(w => ctx.measureText(w).width));
+         var wrapW = Math.max(70, longestWordW + 5);
+         if (wrapW > maxCalloutW) maxCalloutW = wrapW;
+      }
+    }
+    ctx.restore();
+    
+    if (needsCallout) {
+      var pW = Math.min(maxCalloutW + 20, chart.width / 2.5);
+      chart.options.layout.padding = { left: pW, right: pW, top: 30, bottom: 30 };
+    } else {
+      chart.options.layout.padding = 10;
+    }
+  },
+  afterDatasetsDraw: function(chart) {
+    var show = document.getElementById('pieGraphShow');
+    if (!show || !show.checked) return;
+    var modeInput = document.querySelector('input[name=pieLabelMode]:checked');
+    var mode = modeInput ? modeInput.value : 'none';
+    if (mode === 'none') return;
+
+    var ctx = chart.ctx;
+    var meta = chart.getDatasetMeta(0);
+    var ds = chart.data.datasets[0];
+    if (!ds || !meta) return;
+    
+    var total = ds.data.reduce(function(a, b) { return a + b; }, 0);
+    var tickSzEl = document.getElementById('tickLabelSize');
+    var tickSz = tickSzEl ? (parseInt(tickSzEl.value) || 10) : 10;
+    
+    meta.data.forEach(function(arc, i) {
+      var val = ds.data[i];
+      if (!val) return;
+      var pct = total > 0 ? Math.round((val / total) * 100) : 0;
+      var label = chart.data.labels[i] || '';
+      
+      var text = '';
+      if (mode === 'label') text = label;
+      else if (mode === 'count') text = val.toString();
+      else if (mode === 'labelcount') text = label + ' (' + val + ')';
+      else if (mode === 'pct') text = pct + '%';
+      else if (mode === 'labelpct') text = label + ' (' + pct + '%)';
+      
+      ctx.save();
+      ctx.font = 'bold ' + tickSz + 'pt Arial';
+      var textH = tickSz * 1.3;
+      var textW = ctx.measureText(text).width;
+      
+      var midAngle = (arc.startAngle + arc.endAngle) / 2;
+      var midRadius = (arc.innerRadius + arc.outerRadius) / 2;
+      var chordLen = 2 * midRadius * Math.sin(Math.abs(arc.endAngle - arc.startAngle) / 2);
+      
+      var words = text.split(' ');
+      var lines = [];
+      var curLine = words.length ? words[0] : '';
+      var innerAvailW = chordLen * 0.9;
+      
+      for (var j = 1; j < words.length; j++) {
+          if (ctx.measureText(curLine + ' ' + words[j]).width <= innerAvailW) {
+              curLine += ' ' + words[j];
+          } else {
+              lines.push(curLine);
+              curLine = words[j];
+          }
+      }
+      if (curLine) lines.push(curLine);
+      
+      var totalH = lines.length * textH;
+      var maxLineW = Math.max.apply(null, lines.map(function(l) { return ctx.measureText(l).width; }));
+      
+      var fitsInside = (maxLineW <= chordLen * 0.95) && (totalH <= (arc.outerRadius - arc.innerRadius) * 0.85);
+      var useCallout = cb('pieSmartCallout') && !fitsInside;
+      
+      if (useCallout) {
+          var pad = chart.options.layout.padding;
+          var calloutAvailW = pad.left ? pad.left - 15 : 85;
+          lines = [];
+          curLine = words.length ? words[0] : '';
+          for (var j = 1; j < words.length; j++) {
+              if (ctx.measureText(curLine + ' ' + words[j]).width <= calloutAvailW) {
+                  curLine += ' ' + words[j];
+              } else {
+                  lines.push(curLine);
+                  curLine = words[j];
+              }
+          }
+          if (curLine) lines.push(curLine);
+          totalH = lines.length * textH;
+      }
+      
+      if (!useCallout) {
+          var pos = arc.tooltipPosition();
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillStyle = contrastColor(ds.backgroundColor[i] || '#ffffff');
+          
+          var startY = pos.y - totalH / 2 + textH / 2;
+          lines.forEach(function(line, lIdx) {
+              ctx.fillText(line, pos.x, startY + lIdx * textH);
+          });
+      } else {
+          var edgeX = arc.x + Math.cos(midAngle) * arc.outerRadius;
+          var edgeY = arc.y + Math.sin(midAngle) * arc.outerRadius;
+          var isRight = Math.cos(midAngle) > 0;
+          var elbowLen = 15;
+          var elbowX = arc.x + Math.cos(midAngle) * (arc.outerRadius + elbowLen);
+          var elbowY = arc.y + Math.sin(midAngle) * (arc.outerRadius + elbowLen);
+          
+          ctx.beginPath();
+          ctx.moveTo(edgeX, edgeY);
+          ctx.lineTo(elbowX, elbowY);
+          var tailX = elbowX + (isRight ? 10 : -10);
+          ctx.lineTo(tailX, elbowY);
+          ctx.strokeStyle = '#64748b';
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+          
+          ctx.textAlign = isRight ? 'left' : 'right';
+          ctx.textBaseline = 'middle';
+          ctx.fillStyle = '#1e2a3a';
+          
+          var startY = elbowY - totalH / 2 + textH / 2;
+          lines.forEach(function(line, lIdx) {
+              ctx.fillText(line, tailX + (isRight ? 4 : -4), startY + lIdx * textH);
+          });
+      }
+      ctx.restore();
+    });
+  }
+};
+
+function gv(el) { return el ? parseFloat(el.value) || 0 : 0; }
+function gt(el) { return el ? el.value.trim() : ''; }
+function gopt(id) { const el = document.getElementById(id); return el && el.value !== '' ? parseFloat(el.value) : undefined; }
+function cb(id) { const el = document.getElementById(id); return el ? el.checked : false; }
+function gnum(id, def) { const el = document.getElementById(id); return el && el.value !== '' ? Math.max(1, parseInt(el.value) || def) : def; }
+
+function computeBoxStats(vals, outlierMode) {
+  const s = [...vals].filter(function(v) { return !isNaN(v); }).sort(function(a, b) { return a - b; });
+  if (s.length < 2) return null;
+  const n = s.length, med = n % 2 === 0 ? (s[n / 2 - 1] + s[n / 2]) / 2 : s[Math.floor(n / 2)];
+  const lh = s.slice(0, Math.floor(n / 2)), uh = s.slice(Math.ceil(n / 2));
+  const q1 = lh.length % 2 === 0 ? (lh[lh.length / 2 - 1] + lh[lh.length / 2]) / 2 : lh[Math.floor(lh.length / 2)];
+  const q3 = uh.length % 2 === 0 ? (uh[uh.length / 2 - 1] + uh[uh.length / 2]) / 2 : uh[Math.floor(uh.length / 2)];
+  const iqr = q3 - q1;
+  const lowerFence = q1 - 1.5 * iqr, upperFence = q3 + 1.5 * iqr;
+  const nonOutliers = s.filter(function(v) { return v >= lowerFence && v <= upperFence; });
+  const outlierVals = s.filter(function(v) { return v < lowerFence || v > upperFence; });
+  const whiskerMin = nonOutliers.length ? nonOutliers[0] : q1;
+  const whiskerMax = nonOutliers.length ? nonOutliers[nonOutliers.length - 1] : q3;
+  var wMin, wMax, outliers, scaleMin, scaleMax;
+  if (outlierMode === 'iqr') {
+    wMin = whiskerMin; wMax = whiskerMax;
+    outliers = outlierVals;
+    scaleMin = outlierVals.length ? s[0] : whiskerMin;
+    scaleMax = outlierVals.length ? s[n - 1] : whiskerMax;
+  } else if (outlierMode === 'exclude') {
+    wMin = whiskerMin; wMax = whiskerMax;
+    outliers = [];
+    scaleMin = whiskerMin; scaleMax = whiskerMax;
+  } else {
+    wMin = s[0]; wMax = s[n - 1];
+    outliers = [];
+    scaleMin = s[0]; scaleMax = s[n - 1];
+  }
+  return {
+    min: scaleMin, max: scaleMax, q1: q1, q3: q3, median: med,
+    whiskerMin: wMin, whiskerMax: wMax, outliers: outliers
+  };
+}
+
+function computeHistogram(values, bins, startVal, binSize, labelOffset) {
+  const clean = values.filter(function(v) { return !isNaN(v); }); if (!clean.length) return { labels: [], counts: [], binEdges: [] };
+  const mn = (startVal !== undefined && !isNaN(startVal)) ? startVal : Math.min.apply(null, clean);
+  const dataMax = Math.max.apply(null, clean);
+  const bw = (binSize !== undefined && !isNaN(binSize) && binSize > 0) ? binSize : (dataMax - mn) / bins || 1;
+  const actualBins = (binSize !== undefined && !isNaN(binSize) && binSize > 0) ? Math.ceil((dataMax - mn) / bw) : bins;
+  const edges = []; for (let i = 0; i <= actualBins; i++) edges.push(+(mn + i * bw).toFixed(8));
+  const counts = new Array(actualBins).fill(0);
+  clean.forEach(function(v) { let b = Math.floor((v - mn) / bw); if (b < 0) b = 0; if (b >= actualBins) b = actualBins - 1; counts[b]++; });
+  let lastNonEmpty = actualBins - 1;
+  while (lastNonEmpty > 0 && counts[lastNonEmpty] === 0) lastNonEmpty--;
+  const trimmedBins = lastNonEmpty + 1;
+  const trimmedCounts = counts.slice(0, trimmedBins);
+  const trimmedEdges = edges.slice(0, trimmedBins + 1);
+  var rawOffset = (labelOffset === undefined ? 1 : labelOffset);
+  var dispDec = (bw < 0.05) ? 3 : (bw < 0.5) ? 2 : (bw < 5) ? 1 : 0;
+  if (rawOffset === 0.01) dispDec = Math.max(dispDec, 2);
+  else if (rawOffset === 0.1) dispDec = Math.max(dispDec, 1);
+  return {
+    labels: trimmedEdges.slice(0, -1).map(function(e, i) {
+      var lo = +e.toFixed(10);
+      var hi = edges[i + 1];
+      var hiLabel = (rawOffset > 0) ? (+(hi - rawOffset).toFixed(10)) : +(hi.toFixed(10));
+      if (hiLabel <= lo) hiLabel = +(hi.toFixed(10));
+      function fmt(n) { return dispDec > 0 ? n.toFixed(dispDec) : String(Math.round(n)); }
+      return fmt(lo) + '–' + fmt(hiLabel);
+    }), counts: trimmedCounts, binEdges: trimmedEdges
+  };
+}
+
+function linReg(pts) {
+  const n = pts.length; if (n < 2) return null;
+  const mx = pts.reduce(function(s, p) { return s + p.x; }, 0) / n, my = pts.reduce(function(s, p) { return s + p.y; }, 0) / n;
+  let num = 0, den = 0; pts.forEach(function(p) { num += (p.x - mx) * (p.y - my); den += (p.x - mx) * (p.x - mx); });
+  if (den === 0) return null;
+  const m = num / den, b = my - m * mx, xs = pts.map(function(p) { return p.x; });
+  return { m: m, b: b, xMin: Math.min.apply(null, xs), xMax: Math.max.apply(null, xs) };
+}
+
+function niceStep(range) {
+  const safeRange = (range > 0 && isFinite(range)) ? range : 10;
+  const rough = safeRange / 5, pow = Math.pow(10, Math.floor(Math.log10(rough))), f = rough / pow;
+  if (f < 1.5) return 1 * pow; if (f < 3.5) return 2 * pow; if (f < 7.5) return 5 * pow; return 10 * pow;
+}
+
+function niceScale(mn, mx, errMin, errMax, uMin, uMax, uStep) {
+  const tMin = Math.min(mn, errMin !== undefined ? errMin : mn), tMax = Math.max(mx, errMax !== undefined ? errMax : mx);
+  let a = uMin !== undefined ? uMin : tMin, b = uMax !== undefined ? uMax : tMax;
+  if (b === a) {
+    if (uMin === undefined) a -= (Math.abs(a) * 0.2 || 1);
+    if (uMax === undefined) b += (Math.abs(b) * 0.2 || 1);
+  }
+  const range = Math.abs(b - a) || 10, step = (uStep && uStep > 0) ? uStep : niceStep(range);
+  return {
+    min: uMin !== undefined ? uMin : +(Math.floor(a / step) * step).toFixed(8),
+    max: uMax !== undefined ? uMax : +(Math.ceil(b / step) * step).toFixed(8),
+    step: step
+  };
+}
+
+function niceScaleX(mn, mx, uMin, uMax, uStep) {
+  let a = uMin !== undefined ? uMin : mn, b = uMax !== undefined ? uMax : mx;
+  if (b === a) {
+    if (uMin === undefined) a -= (Math.abs(a) * 0.2 || 1);
+    if (uMax === undefined) b += (Math.abs(b) * 0.2 || 1);
+  }
+  const range = Math.abs(b - a) || 10, step = (uStep && uStep > 0) ? uStep : niceStep(range);
+  return {
+    min: uMin !== undefined ? uMin : +(Math.floor(a / step) * step).toFixed(8),
+    max: uMax !== undefined ? uMax : +(Math.ceil(b / step) * step).toFixed(8),
+    step: step
+  };
+}
+
+function gridDash(style) { if (style === 'dotted') return [2, 3]; if (style === 'dashed') return [6, 4]; return []; }
+
+function getD() {
+  return {
+    pctY: selT !== 'histogram' && cb('pctY'), pctX: cb('pctX'), gridColor: getColor('gridcol') || '#cbd5e1',
+    gridStyle: (function() { var s = document.getElementById('gridLineStyle'); return s ? s.value : 'dotted'; })(),
+    axBold: cb('axisLabelBold'), axLblSz: gnum('axisLabelSize', 12), tickSz: gnum('tickLabelSize', 10),
+    showDataLabels: (selT === 'bar' || selT === 'histogram') && cb('showDataLabels'), gridY: cb('gridY'), gridX: cb('gridX'), boldZero: cb('boldZero'),
+    arrowYTop: cb('arrowYTop'), arrowYBot: cb('arrowYBot'), arrowXRight: selT !== 'bar' && cb('arrowXRight'), arrowXLeft: selT !== 'bar' && cb('arrowXLeft'),
+    showLegend: cb('showLegend'),
+    pieLegendMode: (function() { var r = document.querySelector('input[name=pieLegendMode]:checked'); return r ? r.value : 'pct'; })(),
+    pieLabelMode: (function() { var r = document.querySelector('input[name=pieLabelMode]:checked'); return r ? r.value : 'pct'; })(),
+    showTrendline: cb('showTrendline'),
+    gW: parseInt(document.getElementById('gWidth').value) || 450,
+    gH: parseInt(document.getElementById('gHeight').value) || 400
+  };
+}
+
+function fmtY(v, p) { const n = +parseFloat(v).toFixed(8); return p ? (n + '%') : (n + ''); }
+function fmtX(v, p) { const n = +parseFloat(v).toFixed(8); return p ? (n + '%') : (n + ''); }
+function fmtLbl(v, p) { return p ? (v + '%') : (v + ''); }
+
+function parseHtmlFormatting(text) {
+  if (!text) return '';
+
+  const subMap = {'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉','+':'₊','-':'₋','=':'₌','(':'₍',')':'₎','a':'ₐ','e':'ₑ','h':'ₕ','i':'ᵢ','j':'ⱼ','k':'ₖ','l':'◗','m':'ₘ','n':'ₙ','o':'ₒ','p':'ₚ','r':'ᵣ','s':'ₛ','t':'ₜ','u':'ᵤ','v':'ᵥ','x':'ₓ'};
+  const supMap = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','+':'⁺','-':'⁻','=':'⁼','(':'⁽',')':'⁾','a':'ᵃ','b':'ᵇ','c':'ᶜ','d':'ᵈ','e':'ᵉ','f':'ᶠ','g':'ᵍ','h':'ʰ','i':'ⁱ','j':'ʲ','k':'ᵏ','l':'ˡ','m':'ᵐ','n':'ⁿ','o':'ᵒ','p':'ᵖ','r':'ᵣ','s':'ˢ','t':'ᵗ','u':'ᵘ','v':'ᵛ','w':'ʷ','x':'ˣ','y':'ʸ','z':'ᶻ'};
+
+  function toSub(str) { return str.split('').map(char => subMap[char] || char).join(''); }
+  function toSup(str) { return str.split('').map(char => supMap[char] || char).join(''); }
+
+  let res = text.replace(/<sub>(.*?)<\/sub>/gi, (_, g) => toSub(g))
+                .replace(/<sup>(.*?)<\/sup>/gi, (_, g) => toSup(g));
+
+  res = res.replace(/\^\{([^}]+)\}/g, (_, g) => toSup(g))
+           .replace(/_\{([^}]+)\}/g, (_, g) => toSub(g));
+
+  res = res.replace(/\^([0-9a-zA-Z\+\-\=])/g, (_, g) => toSup(g))
+           .replace(/_([0-9a-zA-Z\+\-\=])/g, (_, g) => toSub(g));
+
+  return res;
+}
+
+function axFont(D) { return { family: 'Arial', size: D.axLblSz, weight: D.axBold ? 'bold' : 'normal' }; }
+function tkFont(D) { return { family: 'Arial', size: D.tickSz }; }
+
+function makeYSc(label, sc, D, pos, pct) {
+  return {
+    position: pos || 'left', title: { display: !!label, text: parseHtmlFormatting(label), font: axFont(D), color: '#475569' },
+    min: sc.min, max: sc.max, ticks: { stepSize: sc.step, font: tkFont(D), callback: function(v) { return fmtY(v, pct); } },
+    grid: { display: D.gridY, color: D.gridColor, borderDash: gridDash(D.gridStyle) }
+  };
+}
+
+function makeXCat(label, D) {
+  return {
+    title: { display: !!label, text: parseHtmlFormatting(label), font: axFont(D), color: '#475569' },
+    ticks: {
+      autoSkip: false, font: tkFont(D), maxRotation: 0, callback: function(val) {
+        const lbl = this.getLabelForValue(val); return typeof lbl === 'string' && lbl.length > 12 ? wrapLbl(lbl, 12) : lbl;
+      }
+    }, grid: { display: D.gridX, color: D.gridColor, borderDash: gridDash(D.gridStyle) }
+  };
+}
+
+function makeXLin(label, sc, D, pct) {
+  return {
+    type: 'linear', title: { display: !!label, text: parseHtmlFormatting(label), font: axFont(D), color: '#475569' },
+    min: sc.min, max: sc.max, ticks: { stepSize: sc.step, font: tkFont(D), callback: function(v) { return fmtX(v, pct); } },
+    grid: { display: D.gridX, color: D.gridColor, borderDash: gridDash(D.gridStyle) }
+  };
+}
+
+function wrapLbl(str, maxChars) {
+  const words = str.split(' '); const lines = []; let cur = '';
+  words.forEach(function(w) { 
+    if ((cur + ' ' + w).trim().length > maxChars) { if (cur) lines.push(cur); cur = w; } 
+    else cur = (cur + ' ' + w).trim(); 
+  });
+  if (cur) lines.push(cur); return lines;
+}
+
+function makeDLP(D, isXY) {
+  return {
+    id: 'dlPlugin',
+    afterDatasetsDraw: function(chart) {
+      if (!D.showDataLabels) return;
+      chart.data.datasets.forEach(function(_, di) {
+        const meta = chart.getDatasetMeta(di);
+        meta.data.forEach(function(el, i) {
+          const ds = chart.data.datasets[di];
+          const v = isXY ? (ds.data[i] && ds.data[i].y !== undefined ? ds.data[i].y : null) : ds.data[i];
+          if (v === null || v === undefined) return;
+          chart.ctx.save(); chart.ctx.textAlign = 'center'; chart.ctx.textBaseline = 'bottom';
+          chart.ctx.font = 'bold ' + D.tickSz + 'pt Arial'; chart.ctx.fillStyle = '#1e2a3a';
+          chart.ctx.fillText(fmtLbl(v, D.pctY), el.x, el.y - 6); chart.ctx.restore();
+        });
+      });
+    }
+  };
+}
+
+function markerSVG(shape, color, lineStyle) {
+  var s = color || '#000000';
+  var dashAttr = '';
+  if (lineStyle === 'dashed') dashAttr = ' stroke-dasharray="4,2"';
+  else if (lineStyle === 'dotted' || lineStyle === 'dash') dashAttr = ' stroke-dasharray="2,2"';
+  else if (lineStyle === 'dashdot') dashAttr = ' stroke-dasharray="4,2,1,2"';
+  else if (lineStyle === 'longdash') dashAttr = ' stroke-dasharray="6,3"';
+
+  if (shape === 'none') {
+    return '<svg width="22" height="12" style="vertical-align:middle;margin-right:3px;overflow:visible"><line x1="1" y1="6" x2="21" y2="6" stroke="' + s + '" stroke-width="2.5"' + dashAttr + '/></svg>';
+  }
+
+  var mkHTML = '';
+  if (shape === 'circle') mkHTML = '<circle cx="11" cy="6" r="4.5" fill="' + s + '"/>';
+  else if (shape === 'rect') mkHTML = '<rect x="7" y="2" width="8" height="8" fill="' + s + '"/>';
+  else if (shape === 'triangle') mkHTML = '<polygon points="11,1 16,10 6,10" fill="' + s + '"/>';
+  else if (shape === 'rectRot') mkHTML = '<rect x="8" y="3" width="6.5" height="6.5" fill="' + s + '" transform="rotate(45 11 6)"/>';
+  else if (shape === 'cross') mkHTML = '<line x1="11" y1="1" x2="11" y2="11" stroke="' + s + '" stroke-width="2.5"/><line x1="6" y1="6" x2="16" y2="6" stroke="' + s + '" stroke-width="2.5"/>';
+  else if (shape === 'crossRot') mkHTML = '<line x1="7.5" y1="2.5" x2="14.5" y2="9.5" stroke="' + s + '" stroke-width="2.5"/><line x1="14.5" y1="2.5" x2="7.5" y2="9.5" stroke="' + s + '" stroke-width="2.5"/>';
+  else if (shape === 'star') mkHTML = '<polygon points="11,1 12.3,4.5 16,4.5 13,6.8 14.2,10.5 11,8.2 7.8,10.5 9,6.8 6,4.5 9.7,4.5" fill="' + s + '"/>';
+  else mkHTML = '<circle cx="11" cy="6" r="4.5" fill="' + s + '"/>';
+
+  return '<svg width="22" height="12" style="vertical-align:middle;margin-right:3px;overflow:visible"><line x1="0" y1="6" x2="22" y2="6" stroke="' + s + '" stroke-width="1.8"' + dashAttr + '/>' + mkHTML + '</svg>';
+}
+
+function barTextureSVG(color, texture) {
+  var s = color || '#000000';
+  var uid = 'pat_' + Math.random().toString(36).substr(2, 6);
+  var defs = '';
+  var fill = 'url(#' + uid + ')';
+  if (!texture || texture === 'solid') return '<span style="width:14px;height:14px;border-radius:2px;background:' + s + ';border:1px solid #111;display:inline-block;flex-shrink:0;"></span>';
+  if (texture === 'tint') return '<span style="width:14px;height:14px;border-radius:2px;background:' + s + ';opacity:0.35;border:1px solid #111;display:inline-block;flex-shrink:0;"></span>';
+  
+  if (texture === 'diagonal') {
+    defs = '<defs><pattern id="' + uid + '" width="6" height="6" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="0" y2="6" stroke="' + s + '" stroke-width="2"/></pattern></defs>';
+  } else if (texture === 'crosshatch') {
+    defs = '<defs><pattern id="' + uid + '" width="6" height="6" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="0" y2="6" stroke="' + s + '" stroke-width="1.5"/><line x1="0" y1="0" x2="6" y2="0" stroke="' + s + '" stroke-width="1.5"/></pattern></defs>';
+  } else if (texture === 'dots') {
+    defs = '<defs><pattern id="' + uid + '" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.2" fill="' + s + '"/></pattern></defs>';
+  }
+  return '<svg width="14" height="14" style="vertical-align:middle;flex-shrink:0;border:1px solid #111;border-radius:2px;background:#fff;">' + defs + '<rect width="14" height="14" fill="' + fill + '"/></svg>';
+}
+
+function contrastColor(hex) {
+  var c = hex.replace('#', '');
+  if (c.length === 3) c = c[0] + c[0] + c[1] + c[1] + c[2] + c[2];
+  var r = parseInt(c.substr(0, 2), 16) / 255;
+  var g = parseInt(c.substr(2, 2), 16) / 255;
+  var b = parseInt(c.substr(4, 2), 16) / 255;
+  r = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
+  g = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
+  b = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
+  var L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return L > 0.179 ? '#1e2a3a' : '#ffffff';
+}
+
+function drawInitialPlaceholder(canvas) {
+  var W = 450, H = 400;
+  canvas.width = W; canvas.height = H;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  var ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(10, 10, W - 20, H - 20);
+
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = 'bold 12pt Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('Select a graph type or data tool to begin', W / 2, H / 2 - 12);
+
+  ctx.font = '10pt Arial';
+  ctx.fillStyle = '#cbd5e1';
+  ctx.fillText('Preview will appear here', W / 2, H / 2 + 12);
+}
+
+function buildCartesian(canvas, D) {
+  var W = parseInt(document.getElementById('cpWidth').value) || 600;
+  var H = parseInt(document.getElementById('cpHeight').value) || 600;
+
+  var xMin = parseFloat(document.getElementById('cpXMin').value);
+  var xMax = parseFloat(document.getElementById('cpXMax').value);
+  var xStep = parseFloat(document.getElementById('cpXStep').value);
+  var yMin = parseFloat(document.getElementById('cpYMin').value);
+  var yMax = parseFloat(document.getElementById('cpYMax').value);
+  var yStep = parseFloat(document.getElementById('cpYStep').value);
+  var cpTitle = ((document.getElementById('cpTitle') || {}).value || '').trim();
+  var cpXLabel = ((document.getElementById('cpXLabel') || {}).value || '').trim();
+  var cpYLabel = ((document.getElementById('cpYLabel') || {}).value || '').trim();
+  var gridStyle = (document.getElementById('cpGridStyle') || {}).value || 'dashed';
+  var showTicks = document.getElementById('cpShowTickLabels').checked;
+  var showMinor = document.getElementById('cpShowMinorGrid').checked;
+  var showArrows = document.getElementById('cpShowArrows').checked;
+  var arrowXPos = showArrows && document.getElementById('cpArrowXPos').checked;
+  var arrowXNeg = showArrows && document.getElementById('cpArrowXNeg').checked;
+  var arrowYPos = showArrows && document.getElementById('cpArrowYPos').checked;
+  var arrowYNeg = showArrows && document.getElementById('cpArrowYNeg').checked;
+  var showAxisVarLabels = document.getElementById('cpShowAxisLabels').checked;
+  var cpXVarLabel = ((document.getElementById('cpXVarLabel') || {}).value || 'x').trim() || 'x';
+  var cpYVarLabel = ((document.getElementById('cpYVarLabel') || {}).value || 'y').trim() || 'y';
+  var cpFontSizeEl = document.getElementById('cpFontSize');
+  var tickFont = cpFontSizeEl ? Math.max(6, parseInt(cpFontSizeEl.value) || 10) : 10;
+
+  if (isNaN(xMin)) xMin = -10; if (isNaN(xMax)) xMax = 10; if (isNaN(xStep) || xStep <= 0) xStep = 1;
+  if (isNaN(yMin)) yMin = -10; if (isNaN(yMax)) yMax = 10; if (isNaN(yStep) || yStep <= 0) yStep = 1;
+  if (xMax <= xMin) xMax = xMin + 10; if (yMax <= yMin) yMax = yMin + 10;
+
+  canvas.width = W; canvas.height = H;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  canvas.dataset.logicalW = W; canvas.dataset.logicalH = H;
+
+  var ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+
+  var labelFont = Math.round(tickFont * 1.2);
+  var tickLen = 5;
+  var titleFont = Math.round(labelFont * 1.15);
+
+  ctx.font = tickFont + 'pt Arial';
+  var maxYLabelW = 0;
+  if (showTicks) {
+    for (var tv = yMin; tv <= yMax + 1e-9; tv += yStep) {
+      var lw = ctx.measureText((+tv.toFixed(8)).toString()).width;
+      if (lw > maxYLabelW) maxYLabelW = lw;
+    }
+  }
+
+  var maxXLW = 0;
+  if (showTicks) {
+    for (var tv = xMin; tv <= xMax + 1e-9; tv += xStep) {
+      var lw2 = ctx.measureText((+tv.toFixed(8)).toString()).width;
+      if (lw2 > maxXLW) maxXLW = lw2;
+    }
+  }
+
+  var AS = 8;
+  var titleH = cpTitle ? (titleFont * 1.5 + 8) : 0;
+  var arrowExtra = showArrows ? 18 : 10;
+  var varLabelExtra = showAxisVarLabels ? (labelFont * 1.4 + 4) : 0;
+  var namedLabelExtraB = cpXLabel ? (labelFont * 1.4 + 4) : 0;
+  var namedLabelExtraL = cpYLabel ? (labelFont * 1.4 + 6) : 0;
+  var xVarLabelW = showAxisVarLabels ? (ctx.measureText(cpXVarLabel).width + 10) : 0;
+  var yVarLabelH = showAxisVarLabels ? (labelFont * 1.4 + 4) : 0;
+
+  var marginT = titleH + arrowExtra + yVarLabelH;
+  var marginB = (showTicks ? (tickFont * 1.5 + tickLen + 4) : 4) + varLabelExtra + namedLabelExtraB;
+  var marginL = (showTicks ? (maxYLabelW + tickLen + 6) : 4) + varLabelExtra + namedLabelExtraL;
+  var marginR = Math.max(showArrows ? AS * 2 + xVarLabelW + 6 : xVarLabelW + 6, maxXLW / 2 + 4);
+
+  var plotW = W - marginL - marginR;
+  var plotH = H - marginT - marginB;
+  if (plotW < 20) plotW = 20; if (plotH < 20) plotH = 20;
+
+  function xPx(v) { return marginL + (v - xMin) / (xMax - xMin) * plotW; }
+  function yPx(v) { return marginT + (yMax - v) / (yMax - yMin) * plotH; }
+
+  var x0 = Math.max(marginL, Math.min(marginL + plotW, xPx(0)));
+  var y0 = Math.max(marginT, Math.min(marginT + plotH, yPx(0)));
+
+  if (cpTitle) {
+    ctx.font = 'bold ' + titleFont + 'pt Arial';
+    ctx.fillStyle = '#1e2a3a'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    ctx.fillText(parseHtmlFormatting(cpTitle), W / 2, 4);
+  }
+
+  function setGridDash() {
+    if (gridStyle === 'dotted') ctx.setLineDash([1, 4]);
+    else if (gridStyle === 'dashed') ctx.setLineDash([4, 4]);
+    else ctx.setLineDash([]);
+  }
+
+  if (showMinor) {
+    ctx.strokeStyle = '#f1f5f9'; ctx.lineWidth = 0.5; ctx.setLineDash([1, 4]);
+    for (var mv = xMin + xStep / 2; mv < xMax - 1e-9; mv += xStep) {
+      var mx = xPx(mv);
+      ctx.beginPath(); ctx.moveTo(mx, marginT); ctx.lineTo(mx, marginT + plotH); ctx.stroke();
+    }
+    for (var mv = yMin + yStep / 2; mv < yMax - 1e-9; mv += yStep) {
+      var my = yPx(mv);
+      ctx.beginPath(); ctx.moveTo(marginL, my); ctx.lineTo(marginL + plotW, my); ctx.stroke();
+    }
+  }
+
+  ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 0.75; setGridDash();
+  for (var xv = xMin; xv <= xMax + 1e-9; xv += xStep) {
+    var px = xPx(xv);
+    ctx.beginPath(); ctx.moveTo(px, marginT); ctx.lineTo(px, marginT + plotH); ctx.stroke();
+  }
+  for (var yv = yMin; yv <= yMax + 1e-9; yv += yStep) {
+    var py = yPx(yv);
+    ctx.beginPath(); ctx.moveTo(marginL, py); ctx.lineTo(marginL + plotW, py); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5; ctx.fillStyle = '#000';
+  ctx.beginPath(); ctx.moveTo(marginL, y0); ctx.lineTo(marginL + plotW, y0); ctx.stroke();
+
+  function drw(x, y, dx, dy) {
+    var px = -dy, py2 = dx;
+    ctx.beginPath();
+    ctx.moveTo(x + dx * AS, y + dy * AS);
+    ctx.lineTo(x + px * 5, y + py2 * 5);
+    ctx.lineTo(x - px * 5, y - py2 * 5);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  if (arrowXPos) drw(marginL + plotW, y0, 1, 0);
+  if (arrowXNeg) drw(marginL, y0, -1, 0);
+
+  ctx.beginPath(); ctx.moveTo(x0, marginT + plotH); ctx.lineTo(x0, marginT); ctx.stroke();
+  if (arrowYPos) drw(x0, marginT, 0, -1);
+  if (arrowYNeg) drw(x0, marginT + plotH, 0, 1);
+
+  ctx.font = tickFont + 'pt Arial'; ctx.fillStyle = '#1e2a3a'; ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+  var pxPerXStep = plotW / (xMax - xMin) * xStep;
+  var xEvery = 1;
+  if (showTicks && maxXLW > 0) { while (pxPerXStep * xEvery < maxXLW + 4) xEvery++; }
+  var pyPerYStep = plotH / (yMax - yMin) * yStep;
+  var yEvery = 1;
+  if (showTicks) { while (pyPerYStep * yEvery < tickFont * 1.5 + 2) yEvery++; }
+
+  var xIdx = 0;
+  for (var xv = xMin; xv <= xMax + 1e-9; xv += xStep, xIdx++) {
+    var px = xPx(xv); var rx = +xv.toFixed(8);
+    ctx.beginPath(); ctx.moveTo(px, y0 - tickLen); ctx.lineTo(px, y0 + tickLen); ctx.stroke();
+    if (showTicks && xIdx % xEvery === 0 && Math.abs(rx) > 1e-9) {
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText(rx.toString(), px, y0 + tickLen + 2);
+    }
+  }
+  if (showTicks && x0 > marginL && x0 < marginL + plotW && y0 > marginT && y0 < marginT + plotH) {
+    ctx.font = tickFont + 'pt Arial'; ctx.fillStyle = '#1e2a3a';
+    ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+    ctx.fillText('O', x0 - tickLen - 3, y0 + tickLen + 2);
+  }
+  var yIdx = 0;
+  for (var yv = yMin; yv <= yMax + 1e-9; yv += yStep, yIdx++) {
+    var py = yPx(yv); var ry = +yv.toFixed(8);
+    ctx.beginPath(); ctx.moveTo(x0 - tickLen, py); ctx.lineTo(x0 + tickLen, py); ctx.stroke();
+    if (showTicks && yIdx % yEvery === 0 && Math.abs(ry) > 1e-9) {
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.fillText(ry.toString(), x0 - tickLen - 3, py);
+    }
+  }
+
+  if (showAxisVarLabels) {
+    ctx.font = 'italic bold ' + labelFont + 'pt Arial'; ctx.fillStyle = '#1e2a3a';
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText(parseHtmlFormatting(cpXVarLabel), marginL + plotW + (arrowXPos ? AS + 8 : 6), y0);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.fillText(parseHtmlFormatting(cpYVarLabel), x0, marginT - (arrowYPos ? AS + 4 : 2));
+  }
+
+  if (cpXLabel) {
+    ctx.font = 'bold ' + labelFont + 'pt Arial'; ctx.fillStyle = '#1e2a3a';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.fillText(parseHtmlFormatting(cpXLabel), marginL + plotW / 2, H - 2);
+  }
+  if (cpYLabel) {
+    ctx.save();
+    ctx.font = 'bold ' + labelFont + 'pt Arial'; ctx.fillStyle = '#1e2a3a';
+    ctx.translate(labelFont, marginT + plotH / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(parseHtmlFormatting(cpYLabel), 0, 0);
+    ctx.restore();
+  }
+}
+
+// Data Table Tool
+var dtRows = 4, dtCols = 3;
+
+function dtAutoSize(inp) {
+  var len = Math.max((inp.value || inp.placeholder || '').length, 6);
+  inp.size = len + 2;
+}
+
+function dtGetData() {
+  var tbl = document.getElementById('dt-editor');
+  var data = [];
+  Array.from(tbl.rows).forEach(function(tr, ri) {
+    if (ri === 0) return;
+    var row = [];
+    Array.from(tr.cells).forEach(function(td, ci) {
+      if (ci === tr.cells.length - 1) return;
+      var inp = td.querySelector('input');
+      row.push(inp ? inp.value : '');
+    });
+    data.push(row);
+  });
+  return data;
+}
+
+function dtMakeInput(val, isBold) {
+  var inp = document.createElement('input');
+  inp.type = 'text';
+  inp.value = val || '';
+  inp.style.cssText = 'border:none;background:transparent;font-family:"Arial Narrow",Arial,sans-serif;'
+    + 'font-size:11pt;padding:2px 4px;outline:none;box-sizing:border-box;'
+    + (isBold ? 'font-weight:bold;' : '');
+  inp.oninput = function() { dtAutoSize(this); triggerLiveUpdate(); };
+  dtAutoSize(inp);
+  return inp;
+}
+
+function dtAddRow() { dtRows++; dtRebuild(); triggerLiveUpdate(); }
+function dtAddCol() { dtCols++; dtRebuild(); triggerLiveUpdate(); }
+
+function dtInit() {
+  dtRows = 4; dtCols = 3;
+  dtRebuild();
+  if (!document.getElementById('dt-border-color-wrap').children.length) {
+    document.getElementById('dt-border-color-wrap').innerHTML = makeColorPicker('#cbd5e1', 'dtBorderColor');
+    document.getElementById('dt-header-bg-wrap').innerHTML = makeColorPicker('#f8fafc', 'dtHeaderBg');
+    document.getElementById('dt-alt-bg-wrap').innerHTML = makeColorPicker('#f1f5f9', 'dtAltBg');
+  }
+}
+
+function dtRebuild() {
+  var tbl = document.getElementById('dt-editor');
+  var existingAligns = [];
+  var existingHdr = tbl.rows[0];
+  if (existingHdr) {
+    Array.from(existingHdr.cells).forEach(function(td) {
+      var sel = td.querySelector('select.dt-col-align');
+      if (sel) existingAligns.push(sel.value);
+    });
+  }
+  var savedData = dtGetData();
+  tbl.innerHTML = '';
+  var hdr = document.createElement('tr');
+  for (var c = 0; c < dtCols; c++) {
+    var thd = document.createElement('td');
+    thd.style.cssText = 'background:#f8fafc;padding:4px;text-align:center;white-space:nowrap;border:1px solid var(--card-border);';
+    var btn = document.createElement('button');
+    btn.className = 'btn-danger-sm';
+    btn.style.cssText = 'font-size:8pt;padding:1px 6px;margin-bottom:2px;';
+    btn.textContent = '✕ Col ' + (c + 1);
+    (function(col) { btn.onclick = function() { dtDeleteCol(col); }; })(c);
+    var alignSel = document.createElement('select');
+    alignSel.className = 'dt-col-align';
+    alignSel.style.cssText = 'font-size:8pt;padding:1px 2px;border:1px solid var(--input-border);border-radius:3px;width:100%;margin-top:1px;';
+    alignSel.onchange = function() { triggerLiveUpdate(); };
+    ['center', 'left', 'right'].forEach(function(a) {
+      var opt = document.createElement('option');
+      opt.value = a; opt.textContent = a.charAt(0).toUpperCase() + a.slice(1);
+      if ((existingAligns[c] || 'center') === a) opt.selected = true;
+      alignSel.appendChild(opt);
+    });
+    thd.appendChild(btn);
+    thd.appendChild(document.createElement('br'));
+    thd.appendChild(alignSel);
+    hdr.appendChild(thd);
+  }
+  var cornerTd = document.createElement('td');
+  cornerTd.style.cssText = 'background:#f8fafc;padding:4px;min-width:38px;border:1px solid var(--card-border);';
+  hdr.appendChild(cornerTd);
+  tbl.appendChild(hdr);
+  for (var r = 0; r < dtRows; r++) {
+    var tr = document.createElement('tr');
+    for (var c = 0; c < dtCols; c++) {
+      var td = document.createElement('td');
+      td.style.cssText = 'border:1px solid var(--card-border);padding:1px;';
+      var defVal = (savedData[r] && savedData[r][c] !== undefined) ? savedData[r][c] : '';
+      var inp = dtMakeInput(defVal, r === 0);
+      td.appendChild(inp);
+      tr.appendChild(td);
+    }
+    var delTd = document.createElement('td');
+    delTd.style.cssText = 'padding:2px;vertical-align:middle;white-space:nowrap;text-align:center;border:1px solid var(--card-border);';
+    var delBtn = document.createElement('button');
+    delBtn.className = 'btn-danger-sm';
+    delBtn.textContent = '✕';
+    (function(row) { delBtn.onclick = function() { dtDeleteRow(row); }; })(r);
+    delTd.appendChild(delBtn);
+    tr.appendChild(delTd);
+    tbl.appendChild(tr);
+  }
+}
+
+function dtRebuildWithData(data) {
+  dtRows = data.length;
+  dtCols = data.length ? data[0].length : 1;
+  var tbl = document.getElementById('dt-editor');
+  tbl.innerHTML = '';
+  var hdr = document.createElement('tr');
+  for (var c = 0; c < dtCols; c++) {
+    var thd = document.createElement('td');
+    thd.style.cssText = 'background:#f8fafc;padding:4px;text-align:center;white-space:nowrap;border:1px solid var(--card-border);';
+    var btn = document.createElement('button');
+    btn.className = 'btn-danger-sm';
+    btn.style.cssText = 'font-size:8pt;padding:1px 6px;margin-bottom:2px;';
+    btn.textContent = '✕ Col ' + (c + 1);
+    (function(col) { btn.onclick = function() { dtDeleteCol(col); }; })(c);
+    var alignSel = document.createElement('select');
+    alignSel.className = 'dt-col-align';
+    alignSel.style.cssText = 'font-size:8pt;padding:1px 2px;border:1px solid var(--input-border);border-radius:3px;width:100%;margin-top:1px;';
+    alignSel.onchange = function() { triggerLiveUpdate(); };
+    ['center', 'left', 'right'].forEach(function(a) {
+      var opt = document.createElement('option');
+      opt.value = a; opt.textContent = a.charAt(0).toUpperCase() + a.slice(1);
+      if (a === 'center') opt.selected = true;
+      alignSel.appendChild(opt);
+    });
+    thd.appendChild(btn);
+    thd.appendChild(document.createElement('br'));
+    thd.appendChild(alignSel);
+    hdr.appendChild(thd);
+  }
+  var ct = document.createElement('td');
+  ct.style.cssText = 'background:#f8fafc;min-width:38px;border:1px solid var(--card-border);';
+  hdr.appendChild(ct); tbl.appendChild(hdr);
+  for (var r = 0; r < dtRows; r++) {
+    var tr = document.createElement('tr');
+    for (var c = 0; c < dtCols; c++) {
+      var td = document.createElement('td');
+      td.style.cssText = 'border:1px solid var(--card-border);padding:1px;';
+      var val = (data[r] && data[r][c] !== undefined) ? data[r][c] : '';
+      var inp = dtMakeInput(val, r === 0);
+      td.appendChild(inp); tr.appendChild(td);
+    }
+    var delTd = document.createElement('td');
+    delTd.style.cssText = 'padding:2px;vertical-align:middle;text-align:center;border:1px solid var(--card-border);';
+    var delBtn = document.createElement('button');
+    delBtn.className = 'btn-danger-sm';
+    delBtn.textContent = '✕';
+    (function(row) { delBtn.onclick = function() { dtDeleteRow(row); }; })(r);
+    delTd.appendChild(delBtn); tr.appendChild(delTd); tbl.appendChild(tr);
+  }
+}
+
+function dtDeleteRow(r) {
+  if (dtRows <= 1) return;
+  var data = dtGetData();
+  data.splice(r, 1);
+  dtRebuildWithData(data);
+  triggerLiveUpdate();
+}
+
+function dtDeleteCol(c) {
+  if (dtCols <= 1) return;
+  var data = dtGetData();
+  data.forEach(function(row) { row.splice(c, 1); });
+  dtRebuildWithData(data);
+  triggerLiveUpdate();
+}
+
+var _dtPasteMode = 'tsv';
+function dtPastePrompt(mode) {
+  _dtPasteMode = mode || 'tsv';
+  var pz = document.getElementById('dt-paste-zone');
+  var pb = document.getElementById('dt-paste-btns');
+  var lbl = document.getElementById('dt-paste-label');
+  if (lbl) {
+    lbl.textContent = mode === 'csv' ?
+      'Paste comma-separated (CSV) data below:' :
+      'Paste tab-separated data from Excel below:';
+    lbl.style.display = 'block';
+  }
+  pz.style.display = 'block';
+  pb.style.display = 'flex';
+  pz.value = ''; pz.focus();
+}
+
+function dtCancelPaste() {
+  document.getElementById('dt-paste-zone').style.display = 'none';
+  document.getElementById('dt-paste-btns').style.display = 'none';
+  var lbl = document.getElementById('dt-paste-label');
+  if (lbl) lbl.style.display = 'none';
+}
+
+function dtParseCSVLine(line) {
+  var cells = [], cur = '', inQ = false;
+  for (var i = 0; i < line.length; i++) {
+    var ch = line[i];
+    if (inQ) {
+      if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+      else if (ch === '"') { inQ = false; }
+      else { cur += ch; }
+    } else {
+      if (ch === '"') { inQ = true; }
+      else if (ch === ',') { cells.push(cur.trim()); cur = ''; }
+      else { cur += ch; }
+    }
+  }
+  cells.push(cur.trim());
+  return cells;
+}
+
+function dtImportPaste() {
+  var raw = document.getElementById('dt-paste-zone').value;
+  if (!raw.trim()) return;
+  var rows = raw.split(/[\r\n]+/).filter(function(r) { return r.trim(); });
+  var parsed;
+  if (_dtPasteMode === 'csv') {
+    parsed = rows.map(function(r) { return dtParseCSVLine(r); });
+  } else {
+    parsed = rows.map(function(r) { return r.split('\t').map(function(c) { return c.trim(); }); });
+  }
+  if (!parsed.length) return;
+  dtRebuildWithData(parsed);
+  dtCancelPaste();
+  triggerLiveUpdate();
+}
+
+function dtCopyHTML() {
+  var data = dtGetData();
+  if (!data.length) return;
+  var headerBold = document.getElementById('dtHeaderBold').checked;
+  var fontSize = parseFloat(document.getElementById('dtFontSize').value) || 12;
+  var W2 = parseInt(document.getElementById('dtWidth').value) || 450;
+  var dtFont2 = (document.getElementById('dtFont') || {}).value || 'Arial Narrow';
+  var _hdrRowHTML = document.querySelector('#dt-editor tr:first-child');
+  var colAlignsHTML = [];
+  if (_hdrRowHTML) {
+    Array.from(_hdrRowHTML.cells).forEach(function(td) {
+      var sel = td.querySelector('select.dt-col-align');
+      if (sel) colAlignsHTML.push(sel.value);
+    });
+  }
+  var html = '<table style="border-collapse:collapse;font-family:' + dtFont2 + ',Arial,sans-serif;font-size:' + fontSize + 'pt;width:' + W2 + 'px;min-width:' + W2 + 'px;margin:0 auto;">\n';
+  data.forEach(function(row, ri) {
+    html += '  <tr>\n';
+    row.forEach(function(cell, ci) {
+      var tag = ri === 0 ? 'th' : 'td';
+      var colAl = colAlignsHTML[ci] || 'center';
+      var style = 'border:1px solid #cbd5e1;padding:4px 8px;text-align:' + colAl + ';';
+      if (ri === 0) style += 'background:#f8fafc;' + (headerBold ? 'font-weight:bold;' : '');
+      html += '    <' + tag + ' style="' + style + '">' + cell.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</' + tag + '>\n';
+    });
+    html += '  </tr>\n';
+  });
+  html += '</table>';
+  
+  function showHTMLCopied() {
+    var btn = document.getElementById('copyHtmlBtn');
+    var fb = document.getElementById('copy-feedback');
+    if (btn) { 
+      var orig = btn.innerHTML; 
+      btn.innerHTML = '<i class="ti ti-check"></i> Copied!'; 
+      setTimeout(function() { btn.innerHTML = orig; }, 2500); 
+    }
+    if (fb) { 
+      fb.style.display = 'inline-flex'; 
+      setTimeout(function() { fb.style.display = 'none'; }, 2500); 
+    }
+  }
+
+  try {
+    var blob = new Blob([html], { type: 'text/html' });
+    var plain = data.map(function(r) { return r.join('\t'); }).join('\n');
+    var pblob = new Blob([plain], { type: 'text/plain' });
+    navigator.clipboard.write([new ClipboardItem({ 'text/html': blob, 'text/plain': pblob })])
+      .then(function() { showHTMLCopied(); });
+  } catch(e) {
+    navigator.clipboard.writeText(html).then(function() { showHTMLCopied(); });
+  }
+}
+
+function buildDataTable(D) {
+  var data = dtGetData();
+  if (!data.length) return;
+  var W = parseInt(document.getElementById('dtWidth').value) || 450;
+  var fontSize = parseFloat(document.getElementById('dtFontSize').value) || 12;
+  var dtFontFamily = (document.getElementById('dtFont') || {}).value || 'Arial Narrow';
+  var padding = parseInt(document.getElementById('dtPadding').value) || 6;
+  var headerBold = document.getElementById('dtHeaderBold').checked;
+  var altRows = document.getElementById('dtAltRows').checked;
+  var outerBorder = document.getElementById('dtOuterBorder').checked;
+  var colAligns = [];
+  var _hdrRow = document.querySelector('#dt-editor tr:first-child');
+  if (_hdrRow) {
+    Array.from(_hdrRow.cells).forEach(function(td) {
+      var sel = td.querySelector('select.dt-col-align');
+      if (sel) colAligns.push(sel.value);
+    });
+  }
+  var borderColor = getColor('dtBorderColor') || '#cbd5e1';
+  var headerBg = getColor('dtHeaderBg') || '#f8fafc';
+  var altBg = getColor('dtAltBg') || '#f1f5f9';
+  var nCols = data[0].length, nRows = data.length;
+  var border = outerBorder ? 1 : 0, innerW = W - (border * 2);
+
+  var mc = document.createElement('canvas').getContext('2d');
+  var fontPx = Math.round(fontSize * (96 / 72));
+  function setFont(bold) { mc.font = (bold ? 'bold ' : '') + fontPx + 'px "' + dtFontFamily + '",Arial,sans-serif'; }
+
+  var naturalW = new Array(nCols).fill(0);
+  data.forEach(function(row, ri) {
+    setFont(ri === 0 && headerBold);
+    row.forEach(function(cell, ci) {
+      var w = mc.measureText(cell || '').width + padding * 2 + 4;
+      if (w > naturalW[ci]) naturalW[ci] = w;
+    });
+  });
+
+  var minW = new Array(nCols).fill(padding * 2 + Math.ceil(fontSize));
+  data.forEach(function(row, ri) {
+    setFont(ri === 0 && headerBold);
+    row.forEach(function(cell, ci) {
+      (cell || '').split(' ').forEach(function(word) {
+        var w = mc.measureText(word).width + padding * 2 + 4;
+        if (w > minW[ci]) minW[ci] = w;
+      });
+    });
+  });
+
+  var totalNat = naturalW.reduce(function(a, b) { return a + b; }, 0);
+  var colWidths;
+  if (totalNat <= innerW) {
+    var extra = Math.floor((innerW - totalNat) / nCols);
+    colWidths = naturalW.map(function(v) { return Math.floor(v + extra); });
+    var used = colWidths.reduce(function(a, b) { return a + b; }, 0);
+    colWidths[nCols - 1] += (innerW - used);
+  } else {
+    colWidths = new Array(nCols).fill(0);
+    var locked = new Array(nCols).fill(false);
+    var remaining = innerW;
+    for (var iter = 0; iter < nCols; iter++) {
+      var unlocked = [], uNat = 0;
+      for (var c = 0; c < nCols; c++) if (!locked[c]) { unlocked.push(c); uNat += naturalW[c]; }
+      if (!unlocked.length) break;
+      var changed = false;
+      unlocked.forEach(function(c) {
+        var share = uNat > 0 ? Math.floor((naturalW[c] / uNat) * remaining) : Math.floor(remaining / unlocked.length);
+        if (share <= minW[c]) { colWidths[c] = Math.ceil(minW[c]); remaining -= colWidths[c]; locked[c] = true; changed = true; }
+      });
+      if (!changed) break;
+    }
+    var unlocked2 = [], uNat2 = 0;
+    for (var c = 0; c < nCols; c++) if (!locked[c]) { unlocked2.push(c); uNat2 += naturalW[c]; }
+    unlocked2.forEach(function(c) {
+      colWidths[c] = uNat2 > 0 ? Math.floor((naturalW[c] / uNat2) * remaining) : Math.floor(remaining / unlocked2.length);
+    });
+    var used2 = colWidths.reduce(function(a, b) { return a + b; }, 0);
+    if (used2 < innerW) {
+      for (var c = nCols - 1; c >= 0; c--) { if (!locked[c]) { colWidths[c] += (innerW - used2); break; } }
+    }
+  }
+
+  var lineH = Math.ceil(fontPx * 1.4);
+  function wrapText(text, cw, bold) {
+    setFont(bold);
+    var words = (text || '').split(' '), lines = [], cur = '';
+    words.forEach(function(w) {
+      var test = cur ? cur + ' ' + w : w;
+      if (mc.measureText(test).width <= cw - padding * 2 - 2) { cur = test; }
+      else { if (cur) lines.push(cur); cur = w; }
+    });
+    if (cur) lines.push(cur);
+    return lines.length ? lines : [''];
+  }
+
+  var cellLines = data.map(function(row, ri) {
+    return row.map(function(cell, ci) { return wrapText(cell, colWidths[ci], ri === 0 && headerBold); });
+  });
+  var rowHeights = cellLines.map(function(row) {
+    var mx = Math.max.apply(null, row.map(function(l) { return l.length; }));
+    return mx * lineH + padding * 2;
+  });
+  var totalH = rowHeights.reduce(function(a, b) { return a + b; }, 0) + (border * 2);
+
+  var outCanvas = document.getElementById('mainChart');
+  outCanvas.width = W; outCanvas.height = totalH;
+  outCanvas.style.width = W + 'px'; outCanvas.style.height = totalH + 'px';
+  outCanvas.dataset.logicalW = W; outCanvas.dataset.logicalH = totalH;
+  var ctx = outCanvas.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, totalH);
+
+  var yOff = border;
+  data.forEach(function(row, ri) {
+    var rh = rowHeights[ri], bold = (ri === 0 && headerBold);
+    if (ri === 0) { ctx.fillStyle = headerBg; ctx.fillRect(border, yOff, innerW, rh); }
+    else if (altRows && ri % 2 === 0) { ctx.fillStyle = altBg; ctx.fillRect(border, yOff, innerW, rh); }
+    var xOff = border;
+    row.forEach(function(cell, ci) {
+      var cw = colWidths[ci], lines = cellLines[ri][ci];
+      var totalTH = lines.length * lineH;
+      var blockTop = yOff + padding + (rh - padding * 2 - totalTH) / 2;
+      ctx.font = (bold ? 'bold ' : '') + fontPx + 'px "' + dtFontFamily + '",Arial,sans-serif';
+      var colAlign = colAligns[ci] || 'center';
+      ctx.fillStyle = '#1e2a3a'; ctx.textAlign = colAlign; ctx.textBaseline = 'middle';
+      lines.forEach(function(line, li) {
+        var lineY = blockTop + li * lineH + lineH / 2;
+        var textX = colAlign === 'center' ? (xOff + cw / 2) :
+                    colAlign === 'right' ? (xOff + cw - padding) :
+                    (xOff + padding);
+        ctx.fillText(parseHtmlFormatting(line), textX, lineY);
+      });
+      if (ci < nCols - 1) {
+        ctx.strokeStyle = borderColor; ctx.lineWidth = 0.75;
+        ctx.beginPath(); ctx.moveTo(xOff + cw, yOff); ctx.lineTo(xOff + cw, yOff + rh); ctx.stroke();
+      }
+      xOff += cw;
+    });
+    if (ri < nRows - 1) {
+      ctx.strokeStyle = borderColor; ctx.lineWidth = (ri === 0) ? 1.5 : 0.75;
+      ctx.beginPath(); ctx.moveTo(border, yOff + rh); ctx.lineTo(border + innerW, yOff + rh); ctx.stroke();
+    }
+    yOff += rh;
+  });
+
+  if (outerBorder) { ctx.strokeStyle = borderColor; ctx.lineWidth = 1.5; ctx.strokeRect(0.75, 0.75, W - 1.5, totalH - 1.5); }
+  if (curChart) { curChart.destroy(); curChart = null; }
+}
+
+function buildFlatCanvas() {
+  var srcCanvas = document.getElementById('mainChart');
+  if (selT === 'cartesian' || selT === 'datatable') {
+    var W2 = srcCanvas.dataset.logicalW ? parseInt(srcCanvas.dataset.logicalW) : srcCanvas.width;
+    var H2 = srcCanvas.dataset.logicalH ? parseInt(srcCanvas.dataset.logicalH) : srcCanvas.height;
+    var tmp2 = document.createElement('canvas'); tmp2.width = W2; tmp2.height = H2;
+    var c2 = tmp2.getContext('2d'); c2.fillStyle = '#ffffff'; c2.fillRect(0, 0, W2, H2);
+    c2.drawImage(srcCanvas, 0, 0, srcCanvas.width, srcCanvas.height, 0, 0, W2, H2);
+    return tmp2;
+  }
+  if (!curChart) return null;
+  var W = srcCanvas.dataset.logicalW ? parseInt(srcCanvas.dataset.logicalW) : srcCanvas.width;
+  var H = srcCanvas.dataset.logicalH ? parseInt(srcCanvas.dataset.logicalH) : srcCanvas.height;
+  var lb = document.getElementById('graph-legend');
+  var legendItems = [];
+  if (lb) {
+    lb.querySelectorAll('.leg-item').forEach(function(span) {
+      var label = span.dataset.label || '';
+      var color = span.dataset.color || '#000000';
+      var shape = span.dataset.shape || 'rect';
+      var lineStyle = span.dataset.linestyle || 'solid';
+      var texture = span.dataset.texture || 'solid';
+      if (label) legendItems.push({ label: label, color: color, shape: shape, lineStyle: lineStyle, texture: texture });
+    });
+  }
+  if (legendItems.length === 0) {
+    var tmp0 = document.createElement('canvas'); tmp0.width = W; tmp0.height = H;
+    var c0 = tmp0.getContext('2d'); c0.fillStyle = '#ffffff'; c0.fillRect(0, 0, W, H);
+    c0.drawImage(srcCanvas, 0, 0, srcCanvas.width, srcCanvas.height, 0, 0, W, H); return tmp0;
+  }
+  var ITEM_H = 20, ITEM_GAP = 16, PAD = 10, SW = 20, SH = 14;
+  var tmpMeasure = document.createElement('canvas').getContext('2d');
+  tmpMeasure.font = '10pt Arial';
+  var rows = [], currentRow = [], rowX = PAD;
+  legendItems.forEach(function(item) {
+    var itemW = SW + 6 + tmpMeasure.measureText(parseHtmlFormatting(item.label)).width + ITEM_GAP;
+    if (currentRow.length > 0 && rowX + itemW > W - PAD) {
+      rows.push(currentRow); currentRow = []; rowX = PAD;
+    }
+    currentRow.push(item); rowX += itemW;
+  });
+  if (currentRow.length) rows.push(currentRow);
+  var numRows = rows.length || 1;
+  var legendH = numRows * ITEM_H + PAD * 2;
+  var tmp = document.createElement('canvas'); tmp.width = W; tmp.height = H + legendH;
+  var ctx = tmp.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H + legendH);
+  rows.forEach(function(row, ri) {
+    var lx = PAD, ly = PAD + ri * ITEM_H + SH;
+    row.forEach(function(item) {
+      var cx = lx + SW / 2, cy = ly - SH / 2, cr = 5;
+      if (selT === 'bar') {
+        ctx.fillStyle = createTexturePattern(item.color, item.texture, '#ffffff');
+        ctx.strokeStyle = '#111827'; ctx.lineWidth = 1;
+        ctx.fillRect(lx, ly - SH + 2, 14, 14);
+        ctx.strokeRect(lx, ly - SH + 2, 14, 14);
+      } else {
+        ctx.save();
+        ctx.strokeStyle = item.color; ctx.lineWidth = 1.8;
+        ctx.setLineDash(getDashPattern(item.lineStyle));
+        ctx.beginPath(); ctx.moveTo(lx, cy); ctx.lineTo(lx + SW, cy); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = item.color; ctx.strokeStyle = item.color; ctx.lineWidth = 2;
+        if (item.shape === 'circle') {
+          ctx.beginPath(); ctx.arc(cx, cy, cr, 0, Math.PI * 2); ctx.fill();
+        } else if (item.shape === 'rect') {
+          ctx.fillRect(cx - 4.5, cy - 4.5, 9, 9);
+        } else if (item.shape === 'triangle') {
+          ctx.beginPath(); ctx.moveTo(cx, cy - 5); ctx.lineTo(cx + 5, cy + 5); ctx.lineTo(cx - 5, cy + 5); ctx.closePath(); ctx.fill();
+        } else if (item.shape === 'rectRot') {
+          ctx.save(); ctx.translate(cx, cy); ctx.rotate(Math.PI / 4); ctx.fillRect(-3.5, -3.5, 7, 7); ctx.restore();
+        } else if (item.shape === 'cross') {
+          ctx.lineWidth = 2.5;
+          ctx.beginPath(); ctx.moveTo(cx, cy - 5); ctx.lineTo(cx, cy + 5); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(cx - 5, cy); ctx.lineTo(cx + 5, cy); ctx.stroke();
+        } else if (item.shape === 'crossRot') {
+          ctx.lineWidth = 2.5;
+          ctx.beginPath(); ctx.moveTo(cx - 4, cy - 4); ctx.lineTo(cx + 4, cy + 4); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(cx + 4, cy - 4); ctx.lineTo(cx - 4, cy + 4); ctx.stroke();
+        } else if (item.shape === 'star') {
+          ctx.beginPath();
+          for (var si = 0; si < 10; si++) {
+            var angle = Math.PI / 5 * si - Math.PI / 2;
+            var r = (si % 2 === 0) ? cr : cr * 0.45;
+            var sx = cx + r * Math.cos(angle), sy = cy + r * Math.sin(angle);
+            if (si === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
+          }
+          ctx.closePath(); ctx.fill();
+        }
+        ctx.restore();
+      }
+      ctx.fillStyle = '#1e2a3a'; ctx.font = '10pt Arial';
+      var formattedLabel = parseHtmlFormatting(item.label);
+      ctx.fillText(formattedLabel, lx + SW + 5, ly);
+      lx += SW + 6 + tmpMeasure.measureText(formattedLabel).width + ITEM_GAP;
+    });
+  });
+  ctx.drawImage(srcCanvas, 0, 0, srcCanvas.width, srcCanvas.height, 0, legendH, W, H);
+  return tmp;
+}
+
+function dlGraph() {
+  const tmp = buildFlatCanvas(); if (!tmp) return;
+  const a = document.createElement('a'); a.href = tmp.toDataURL('image/png'); a.download = 'graph.png'; a.click();
+}
+
+async function copyGraph() {
+  const tmp = buildFlatCanvas(); if (!tmp) return;
+  const btn = document.getElementById('copyBtn'), fb = document.getElementById('copy-feedback');
+  function showCopied() {
+    fb.style.display = 'inline-flex'; 
+    const origHtml = btn.innerHTML;
+    btn.innerHTML = '<i class="ti ti-check"></i> Copied!';
+    setTimeout(function() {
+      fb.style.display = 'none';
+      btn.innerHTML = origHtml;
+    }, 2500);
+  }
+  try {
+    var dataURL = tmp.toDataURL('image/png');
+    var parts = dataURL.split(',');
+    var byteStr = atob(parts[1]);
+    var arr = new Uint8Array(byteStr.length);
+    for (var i = 0; i < byteStr.length; i++) arr[i] = byteStr.charCodeAt(i);
+    var blob = new Blob([arr], { type: 'image/png' });
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    showCopied();
+  } catch(err) {
+    fallbackCopy(tmp);
+  }
+}
+
+function fallbackCopy(tmp) {
+  if (window.self !== window.top) {
+    var btn = document.getElementById('copyBtn'), fb = document.getElementById('copy-feedback');
+    if (btn) {
+      btn.textContent = 'Not available when embedded';
+      btn.style.background = '#64748b';
+      setTimeout(function() {
+        btn.innerHTML = '<i class="ti ti-copy"></i> Copy to clipboard';
+        btn.style.background = '';
+      }, 4000);
+    }
+    if (fb) {
+      fb.innerHTML = '<i class="ti ti-alert-triangle"></i> Use Download PNG instead';
+      fb.style.display = 'inline-flex';
+      fb.style.color = '#b00020';
+      setTimeout(function() {
+        fb.style.display = 'none';
+        fb.style.color = '';
+        fb.innerHTML = '<i class="ti ti-check"></i> Copied to clipboard!';
+      }, 5000);
+    }
+    return;
+  }
+  const win = window.open('', '_blank');
+  if (win) {
+    win.document.write('<!DOCTYPE html><html><head><title>Right-click to copy image</title></head><body style="margin:20px;font-family:Arial;"><p style="margin-bottom:12px;font-size:14px;">Right-click the image and choose <strong>Copy image</strong>.</p><img src="' + tmp.toDataURL('image/png') + '" style="border:1px solid #cbd5e1;max-width:100%;"></body></html>');
+    win.document.close();
+  }
+}
+
+function buildGraph() {
+  if (!selT) return;
+  clearTimeout(debounceTimer); 
+  var D = getD();
+  var canvas = document.getElementById('mainChart');
+  if (!canvas) return;
+
+  if (selT === 'cartesian') { buildCartesian(canvas, D); return; }
+  if (selT === 'datatable') { buildDataTable(D); return; }
+
+  if (curChart) { curChart.destroy(); curChart = null; }
+
+  canvas.width = D.gW; canvas.height = D.gH;
+  canvas.style.width = D.gW + 'px'; canvas.style.height = D.gH + 'px';
+  canvas.dataset.logicalW = D.gW; canvas.dataset.logicalH = D.gH;
+  var ctx = canvas.getContext('2d');
+
+  var legendDiv = document.getElementById('graph-legend');
+  if (legendDiv) legendDiv.innerHTML = '';
+
+  var chartTitle = gt(document.getElementById('chartTitle'));
+  var xlabel = gt(document.getElementById('xlabel'));
+  var ylabel = gt(document.getElementById('ylabel'));
+
+  var cfg = {
+    type: selT === 'boxwhisker' ? 'bar' : (selT === 'histogram' ? 'bar' : selT),
+    data: { labels: [], datasets: [] },
+    options: {
+      responsive: false, maintainAspectRatio: false, animation: false,
+      layout: { padding: 10 },
+      plugins: {
+        legend: { display: false },
+        title: { display: !!chartTitle, text: parseHtmlFormatting(chartTitle), font: { family: 'Arial', size: Math.round(D.axLblSz * 1.15), weight: 'bold' }, color: '#1e2a3a' },
+        tooltip: { enabled: false },
+        axisArrowPlugin: { yTop: D.arrowYTop, yBot: D.arrowYBot, xRight: D.arrowXRight, xLeft: D.arrowXLeft },
+        boldZeroPlugin: { enabled: D.boldZero }
+      },
+      scales: {}
+    },
+    plugins: [axisArrowPlugin, boldZeroPlugin, customPtLabelPlugin]
+  };
+
+  if (selT === 'pie' && cb('pieSmartCallout')) {
+    cfg.options.layout = { padding: { left: 100, right: 100, top: 40, bottom: 40 } };
+  } else if (selT === 'pie') {
+    cfg.options.layout = { padding: 10 };
+  }
+
+  if (selT === 'bar') {
+    cfg.type = 'bar';
+    var n = nGroups();
+    var rows = Array.from(document.querySelectorAll('#bar-tbody tr'));
+    cfg.data.labels = rows.map(function(tr) { return tr.querySelector('.bar-cat').value; });
+    var errItems = [];
+    var maxY = -Infinity, minY = 0;
+    
+    for (var g = 0; g < n; g++) {
+      var col = getColor('barg' + g);
+      var lbl = gt(document.getElementById('barGroupName' + g)) || ('Group ' + (g+1));
+      var tex = (document.getElementById('bargTexture'+g) || {}).value || 'solid';
+      var ds = { label: lbl, data: [], backgroundColor: createTexturePattern(col, tex, '#ffffff'), borderColor: '#111827', borderWidth: 1 };
+      
+      rows.forEach(function(tr, pi) {
+        var vals = tr.querySelectorAll('.bar-val'), errs = tr.querySelectorAll('.bar-err');
+        var v = parseFloat(vals[g] ? vals[g].value : 0) || 0;
+        ds.data.push(v);
+        var e = 0;
+        if (errs.length > g && errs[g]) e = parseFloat(errs[g].value) || 0;
+        if (e > 0) errItems.push({ di: g, pi: pi, val: v, err: e, yAxis: 'y' });
+        if (v + e > maxY) maxY = v + e;
+        if (v - e < minY) minY = v - e;
+      });
+      cfg.data.datasets.push(ds);
+      
+      if (D.showLegend && legendDiv) {
+         legendDiv.innerHTML += '<span class="leg-item" data-label="'+escHTML(lbl)+'" data-color="'+col+'" data-texture="'+tex+'" style="display:inline-flex;align-items:center;gap:4px;">' + barTextureSVG(col, tex) + ' ' + escHTML(parseHtmlFormatting(lbl)) + '</span>';
+      }
+    }
+    
+    if (maxY === -Infinity) maxY = 10;
+    cfg.options.scales.x = makeXCat(xlabel, D);
+    cfg.options.scales.y = makeYSc(ylabel, niceScale(minY, maxY, undefined, undefined, gopt('ymin'), gopt('ymax'), gopt('ystep')), D, 'left', D.pctY);
+    if (errItems.length) {
+      cfg.plugins.push(errPlugin);
+      cfg.options.plugins.errPlugin = { items: errItems };
+    }
+    cfg.plugins.push(makeDLP(D, false));
+    
+  } else if (selT === 'line' || selT === 'scatter') {
+    var isLine = selT === 'line';
+    cfg.type = isLine ? 'line' : 'scatter';
+    var blks = document.querySelectorAll((isLine ? '#line-series-list' : '#scatter-series-list') + ' .series-block');
+    var errItems = [], scErrItems = [], trendDatasets = [];
+    var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    var hasY2 = false, minY2 = Infinity, maxY2 = -Infinity;
+    var validNumericXFound = false;
+    var validStringXFound = false;
+
+    blks.forEach(function(blk, di) {
+      var st = getSeriesState(blk, isLine);
+      if (st.y2checked) hasY2 = true;
+      var ds = {
+        label: st.nameVal, data: [], customLabels: [],
+        borderColor: st.colorHex, backgroundColor: st.colorHex,
+        borderWidth: 2, pointRadius: st.markerVal === 'none' ? 0 : 4, pointStyle: st.markerVal === 'none' ? false : st.markerVal,
+        showLine: isLine, fill: false, yAxisID: st.y2checked ? 'y2' : 'y',
+        clip: false
+      };
+      if (isLine) ds.borderDash = getDashPattern(st.lineStyleVal);
+
+      var rows = blk.querySelectorAll(isLine ? '.lsb tr' : '.ssb tr');
+      rows.forEach(function(tr) {
+         var ptInp = tr.querySelector('.pt-lbl');
+         var ptLbl = ptInp ? ptInp.value.trim() : '';
+
+         if (isLine) {
+           var xInp = tr.querySelector('.ln-x') || tr.cells[0].querySelector('input');
+           var yInp = tr.querySelector('.ln-y') || tr.cells[1].querySelector('input');
+           var eInp = tr.querySelector('.ln-e') || tr.querySelector('input[min="0"]');
+           var xl = xInp ? xInp.value.trim() : '';
+           var yRaw = yInp ? yInp.value.trim() : '';
+
+           if (!xl || !yRaw) return;
+
+           var yv = parseFloat(yRaw);
+           if (isNaN(yv)) return;
+
+           var ev = parseFloat(eInp ? eInp.value : 0) || 0;
+           var xv = parseFloat(xl);
+
+           var ptIdx = ds.data.length;
+           if (!isNaN(xv) && !isNaN(Number(xl))) {
+             ds.data.push({ x: xv, y: yv });
+             validNumericXFound = true;
+             if (xv > maxX) maxX = xv;
+             if (xv < minX) minX = xv;
+           } else {
+             ds.data.push({ x: xl, y: yv });
+             validStringXFound = true;
+           }
+
+           ds.customLabels.push(ptLbl);
+           var yAxis = st.y2checked ? 'y2' : 'y';
+           if (ev > 0) errItems.push({ di: di, pi: ptIdx, val: yv, err: ev, yAxis: yAxis });
+           var locMax = yv + ev, locMin = yv - ev;
+           if (st.y2checked) { if (locMax > maxY2) maxY2 = locMax; if (locMin < minY2) minY2 = locMin; }
+           else { if (locMax > maxY) maxY = locMax; if (locMin < minY) minY = locMin; }
+
+         } else {
+           var xInp = tr.querySelector('.sc-x');
+           var yInp = tr.querySelector('.sc-y');
+           var xeInp = tr.querySelector('.sc-xe');
+           var yeInp = tr.querySelector('.sc-ye');
+           var xRaw = xInp ? xInp.value.trim() : '';
+           var yRaw = yInp ? yInp.value.trim() : '';
+           
+           if (!xRaw || !yRaw) return;
+
+           var xv = parseFloat(xRaw), yv = parseFloat(yRaw);
+           if (isNaN(xv) || isNaN(yv)) return;
+
+           var xe = parseFloat(xeInp ? xeInp.value : 0) || 0, ye = parseFloat(yeInp ? yeInp.value : 0) || 0;
+           ds.data.push({ x: xv, y: yv });
+           ds.customLabels.push(ptLbl);
+           if (xe > 0 || ye > 0) scErrItems.push({ di: di, pi: ds.data.length - 1, x: xv, y: yv, xe: xe, ye: ye, yAxis: st.y2checked ? 'y2' : 'y' });
+           var lMxX = xv + xe, lMnX = xv - xe, lMxY = yv + ye, lMnY = yv - ye;
+           if (lMxX > maxX) maxX = lMxX; if (lMnX < minX) minX = lMnX;
+           if (st.y2checked) { if (lMxY > maxY2) maxY2 = lMxY; if (lMnY < minY2) minY2 = lMnY; }
+           else { if (lMxY > maxY) maxY = lMxY; if (lMnY < minY) minY = lMnY; }
+         }
+      });
+      cfg.data.datasets.push(ds);
+
+      if (!isLine && D.showTrendline && ds.data.length >= 2) {
+        var lr = linReg(ds.data);
+        if (lr) {
+          trendDatasets.push({
+            label: st.nameVal + ' Trend',
+            data: [
+              { x: lr.xMin, y: lr.m * lr.xMin + lr.b },
+              { x: lr.xMax, y: lr.m * lr.xMax + lr.b }
+            ],
+            borderColor: st.colorHex,
+            backgroundColor: 'transparent',
+            borderWidth: 1.5,
+            borderDash: [6, 4],
+            pointRadius: 0,
+            showLine: true,
+            fill: false,
+            yAxisID: st.y2checked ? 'y2' : 'y',
+            clip: false
+          });
+        }
+      }
+      
+      if (D.showLegend && legendDiv) {
+         legendDiv.innerHTML += '<span class="leg-item" data-label="'+escHTML(st.nameVal)+'" data-color="'+st.colorHex+'" data-shape="'+st.markerVal+'" data-linestyle="'+(isLine?st.lineStyleVal:'solid')+'" style="display:inline-flex;align-items:center;gap:4px;">' + markerSVG(st.markerVal, st.colorHex, isLine?st.lineStyleVal:'solid') + ' ' + escHTML(parseHtmlFormatting(st.nameVal)) + '</span>';
+      }
+    });
+
+    if (trendDatasets.length) {
+      trendDatasets.forEach(function(tds) { cfg.data.datasets.push(tds); });
+    }
+
+    if (minX === Infinity) { minX = 0; maxX = 10; }
+    if (minY === Infinity) { minY = 0; maxY = 10; }
+    if (minY2 === Infinity) { minY2 = 0; maxY2 = 10; }
+
+    if (isLine) {
+       var useLinear = validNumericXFound && !validStringXFound;
+       if (useLinear) {
+           cfg.options.scales.x = makeXLin(xlabel, niceScaleX(minX, maxX, gopt('xmin'), gopt('xmax'), gopt('xstep')), D, D.pctX);
+       } else {
+           cfg.options.scales.x = makeXCat(xlabel, D);
+       }
+       if (errItems.length) { cfg.plugins.push(errPlugin); cfg.options.plugins.errPlugin = { items: errItems }; }
+    } else {
+       cfg.options.scales.x = makeXLin(xlabel, niceScaleX(minX, maxX, gopt('xmin'), gopt('xmax'), gopt('xstep')), D, D.pctX);
+       if (scErrItems.length) { cfg.plugins.push(scErrPlugin); cfg.options.plugins.scErrPlugin = { items: scErrItems }; }
+    }
+    cfg.options.scales.y = makeYSc(ylabel, niceScale(minY, maxY, undefined, undefined, gopt('ymin'), gopt('ymax'), gopt('ystep')), D, 'left', D.pctY);
+    if (hasY2) {
+       cfg.options.scales.y2 = makeYSc(gt(document.getElementById('y2label')), niceScale(minY2, maxY2, undefined, undefined, gopt('y2min'), gopt('y2max'), gopt('y2step')), D, 'right', D.pctY);
+       cfg.options.scales.y2.grid.display = false;
+    }
+    cfg.plugins.push(makeDLP(D, true));
+    
+  } else if (selT === 'pie') {
+    cfg.type = 'pie';
+    var rows = document.querySelectorAll('#pie-tbody tr');
+    var ds = { data: [], backgroundColor: [], borderWidth: 1.5, borderColor: '#ffffff' };
+    var total = 0;
+    rows.forEach(function(tr, i) {
+       var lbl = tr.querySelector('input[type=text]').value || ('Slice '+(i+1));
+       var val = parseFloat(tr.querySelector('input[type=number]').value) || 0;
+       var col = getColor('pie' + tr.dataset.cid);
+       if (val > 0) {
+         cfg.data.labels.push(lbl);
+         ds.data.push(val);
+         ds.backgroundColor.push(col);
+         total += val;
+       }
+    });
+    cfg.data.datasets.push(ds);
+    cfg.plugins.push(pieLabelPlugin);
+    
+    var piePosEl = document.getElementById('pieLegendPos');
+    var piePos = piePosEl ? piePosEl.value : 'right';
+    cfg.options.plugins.legend = {
+       display: cb('pieLegendShow'),
+       position: piePos,
+       labels: {
+          font: { family: 'Arial', size: D.tickSz }, color: '#1e2a3a',
+          generateLabels: function(chart) {
+             var data = chart.data;
+             if (data.labels.length && data.datasets.length) {
+                return data.labels.map(function(label, i) {
+                   var ds = data.datasets[0];
+                   var val = ds.data[i];
+                   var pct = total > 0 ? Math.round((val / total) * 100) : 0;
+                   var text = label;
+                   if (D.pieLegendMode === 'count') text = val;
+                   else if (D.pieLegendMode === 'labelcount') text = label + ' (' + val + ')';
+                   else if (D.pieLegendMode === 'pct') text = pct + '%';
+                   else if (D.pieLegendMode === 'labelpct') text = label + ' (' + pct + '%)';
+                   else if (D.pieLegendMode === 'none') text = '';
+                   return { text: text, fillStyle: ds.backgroundColor[i], hidden: false, index: i };
+                });
+             }
+             return [];
+          }
+       }
+    };
+    
+  } else if (selT === 'histogram') {
+    cfg.type = 'bar';
+    var rows = document.querySelectorAll('#hist-tbody tr');
+    var vals = [];
+    rows.forEach(function(tr) { var v = parseFloat(tr.querySelector('input').value); if (!isNaN(v)) vals.push(v); });
+    var bins = gnum('histBins', 5);
+    var start = gopt('histStart');
+    var bsize = gopt('histBinSize');
+    var lblMode = parseFloat(document.getElementById('histLabelStyle').value) || 1;
+    var hist = computeHistogram(vals, bins, start, bsize, lblMode);
+    var col = getColor('hist0');
+    cfg.data.labels = hist.labels;
+    cfg.data.datasets.push({ label: 'Frequency', data: hist.counts, backgroundColor: col, borderColor: '#111827', borderWidth: 1, barPercentage: 1.0, categoryPercentage: 1.0 });
+    var maxY = Math.max.apply(null, hist.counts.length ? hist.counts : [10]);
+    cfg.options.scales.x = makeXCat(xlabel, D);
+    var rot = document.getElementById('histLabelRotation').value;
+    if (rot !== 'auto') {
+       cfg.options.scales.x.ticks.maxRotation = parseInt(rot);
+       cfg.options.scales.x.ticks.minRotation = parseInt(rot);
+    }
+    cfg.options.scales.y = makeYSc(ylabel, niceScale(0, Math.max(1, maxY), undefined, undefined, gopt('ymin'), gopt('ymax'), gopt('ystep')), D, 'left', false);
+    cfg.plugins.push(makeDLP(D, false));
+    
+  } else if (selT === 'boxwhisker') {
+    cfg.type = 'bar'; 
+    var blks = document.querySelectorAll('#bw-series-list .series-block');
+    var groups = [];
+    var minVal = Infinity, maxVal = -Infinity;
+    var outlierMode = document.querySelector('input[name=bwOutlierMode]:checked').value;
+    
+    blks.forEach(function(blk, i) {
+       var sid = blk.dataset.sidx;
+       var lbl = gt(document.getElementById('bwName_' + sid)) || ('Group '+(i+1));
+       var col = getColor('bw' + sid);
+       var rows = blk.querySelectorAll('.bwb tr');
+       var vals = [];
+       rows.forEach(function(tr) { var v = parseFloat(tr.querySelector('input').value); if (!isNaN(v)) vals.push(v); });
+       var stats = computeBoxStats(vals, outlierMode);
+       if (stats) {
+         stats.label = lbl; stats.color = col; groups.push(stats);
+         if (stats.min < minVal) minVal = stats.min;
+         if (stats.max > maxVal) maxVal = stats.max;
+         cfg.data.labels.push(lbl);
+ 
+       }
+    });
+    
+    if (minVal === Infinity) { minVal = 0; maxVal = 10; }
+    // One placeholder dataset with a slot per group, so bwPlugin gets an x-position for every box
+    cfg.data.datasets.push({ label: 'Groups', data: groups.map(function() { return 0; }), backgroundColor: 'transparent', borderColor: 'transparent' });
+    cfg.options.scales.x = makeXCat(xlabel, D);
+    cfg.options.scales.y = makeYSc(ylabel, niceScale(minVal, maxVal, undefined, undefined, gopt('ymin'), gopt('ymax'), gopt('ystep')), D, 'left', false);
+    cfg.plugins.push(bwPlugin);
+    cfg.options.plugins.bwPlugin = { groups: groups };
+  }
+
+  curChart = new Chart(ctx, cfg);
+}
+
+drawInitialPlaceholder(document.getElementById('mainChart'));
+</script>
+</body>
+</html>
