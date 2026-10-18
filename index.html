@@ -2055,23 +2055,27 @@ const errPlugin = {
     const cap = 6;
 
     function drawBarLines(xc, yT, yB) {
+      if (isNaN(xc) || isNaN(yT) || isNaN(yB)) return;
       ctx.beginPath(); ctx.moveTo(xc, yT); ctx.lineTo(xc, yB); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(xc - cap, yT); ctx.lineTo(xc + cap, yT); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(xc - cap, yB); ctx.lineTo(xc + cap, yB); ctx.stroke();
     }
 
     opts.items.forEach(function(e) {
-      if (!e || e.err == null || isNaN(e.err) || e.err === 0) return;
+      if (!e || e.err == null || isNaN(e.err) || e.err <= 0) return;
       const meta = chart.getDatasetMeta(e.di);
-      if (!meta || !meta.data) return;
+      if (!meta || !meta.data || !meta.data[e.pi]) return;
       const el = meta.data[e.pi];
-      if (!el) return;
+      if (isNaN(el.x) || isNaN(el.y)) return;
 
       const xc = el.x;
       const yA = e.yAxis || 'y';
-      if (!chart.scales[yA]) return;
-      const yT = chart.scales[yA].getPixelForValue(e.val + e.err);
-      const yB = chart.scales[yA].getPixelForValue(e.val - e.err);
+      const scale = chart.scales[yA];
+      if (!scale) return;
+
+      const yT = scale.getPixelForValue(e.val + e.err);
+      const yB = scale.getPixelForValue(e.val - e.err);
+      if (isNaN(yT) || isNaN(yB)) return;
 
       ctx.save();
       ctx.strokeStyle = '#000000';
@@ -2081,10 +2085,7 @@ const errPlugin = {
 
       // Only invert error bar portion inside dark bars on bar charts
       if (chart.config.type === 'bar' && el.width !== undefined && el.base !== undefined) {
-        const barColor = (chart.data.datasets[e.di] && chart.data.datasets[e.di].backgroundColor)
-          ? (getColor('barg' + e.di) || '#111827')
-          : '#111827';
-
+        const barColor = getColor('barg' + e.di) || '#111827';
         if (typeof contrastColor === 'function' && contrastColor(barColor) === '#ffffff') {
           const barLeft = el.x - (el.width / 2);
           const barTop = Math.min(el.y, el.base);
@@ -2113,20 +2114,24 @@ const scErrPlugin = {
     opts.items.forEach(function(e) {
       const meta = chart.getDatasetMeta(e.di);
       if (!meta || !meta.data) return;
-      const el = meta.data[e.pi]; if (!el) return;
+      const el = meta.data[e.pi]; if (!el || isNaN(el.x) || isNaN(el.y)) return;
       const xc = el.x, yc = el.y, yS = chart.scales[e.yAxis || 'y'], xS = chart.scales.x;
       if (!yS || !xS) return;
       if (e.ye > 0) {
         const yT = yS.getPixelForValue(e.y + e.ye), yB = yS.getPixelForValue(e.y - e.ye);
-        ctx.beginPath(); ctx.moveTo(xc, yT); ctx.lineTo(xc, yB); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(xc - cap, yT); ctx.lineTo(xc + cap, yT); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(xc - cap, yB); ctx.lineTo(xc + cap, yB); ctx.stroke();
+        if (!isNaN(yT) && !isNaN(yB)) {
+          ctx.beginPath(); ctx.moveTo(xc, yT); ctx.lineTo(xc, yB); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(xc - cap, yT); ctx.lineTo(xc + cap, yT); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(xc - cap, yB); ctx.lineTo(xc + cap, yB); ctx.stroke();
+        }
       }
       if (e.xe > 0) {
         const xL = xS.getPixelForValue(e.x - e.xe), xR = xS.getPixelForValue(e.x + e.xe);
-        ctx.beginPath(); ctx.moveTo(xL, yc); ctx.lineTo(xR, yc); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(xL, yc - cap); ctx.lineTo(xL, yc + cap); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(xR, yc - cap); ctx.lineTo(xR, yc + cap); ctx.stroke();
+        if (!isNaN(xL) && !isNaN(xR)) {
+          ctx.beginPath(); ctx.moveTo(xL, yc); ctx.lineTo(xR, yc); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(xL, yc - cap); ctx.lineTo(xL, yc + cap); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(xR, yc - cap); ctx.lineTo(xR, yc + cap); ctx.stroke();
+        }
       }
     });
     ctx.restore();
@@ -3563,7 +3568,7 @@ function fallbackCopy(tmp) {
   }
 }
 
-// --- RESTORED CORE RENDER LOGIC ---
+// --- RESTORED & HARDENED CORE RENDER LOGIC ---
 function buildGraph() {
   if (!selT) return;
   clearTimeout(debounceTimer); 
@@ -3682,19 +3687,26 @@ function buildGraph() {
            var xInp = tr.querySelector('.ln-x') || tr.cells[0].querySelector('input');
            var yInp = tr.querySelector('.ln-y') || tr.cells[1].querySelector('input');
            var eInp = tr.querySelector('.ln-e') || tr.querySelector('input[min="0"]');
-           var xl = xInp ? xInp.value : '';
-           var yv = parseFloat(yInp ? yInp.value : NaN);
+           var xl = xInp ? xInp.value.trim() : '';
+           var yRaw = yInp ? yInp.value.trim() : '';
+
+           // Skip row if completely empty
+           if (!xl && !yRaw) return;
+
+           var yv = parseFloat(yRaw);
            var ev = parseFloat(eInp ? eInp.value : 0) || 0;
            var xv = parseFloat(xl);
-           if (!globalLabels.includes(xl) && xl) globalLabels.push(xl);
+
+           if (xl && !globalLabels.includes(xl)) globalLabels.push(xl);
+
            if (!isNaN(yv)) {
              var ptIdx = ds.data.length;
-             if (!isNaN(xv) && xl.trim() !== '') {
+             if (!isNaN(xv) && xl !== '') {
                  ds.data.push({ x: xv, y: yv });
                  if (xv > maxX) maxX = xv;
                  if (xv < minX) minX = xv;
              } else {
-                 ds.data.push(yv);
+                 ds.data.push({ x: xl, y: yv });
              }
              ds.customLabels.push(ptLbl);
              var yAxis = st.y2checked ? 'y2' : 'y';
@@ -3702,16 +3714,18 @@ function buildGraph() {
              var locMax = yv + ev, locMin = yv - ev;
              if (st.y2checked) { if (locMax > maxY2) maxY2 = locMax; if (locMin < minY2) minY2 = locMin; }
              else { if (locMax > maxY) maxY = locMax; if (locMin < minY) minY = locMin; }
-           } else if (xl.trim() !== '') {
-             ds.data.push(null);
-             ds.customLabels.push('');
            }
          } else {
            var xInp = tr.querySelector('.sc-x');
            var yInp = tr.querySelector('.sc-y');
            var xeInp = tr.querySelector('.sc-xe');
            var yeInp = tr.querySelector('.sc-ye');
-           var xv = parseFloat(xInp ? xInp.value : NaN), yv = parseFloat(yInp ? yInp.value : NaN);
+           var xRaw = xInp ? xInp.value.trim() : '';
+           var yRaw = yInp ? yInp.value.trim() : '';
+           
+           if (!xRaw && !yRaw) return;
+
+           var xv = parseFloat(xRaw), yv = parseFloat(yRaw);
            var xe = parseFloat(xeInp ? xeInp.value : 0) || 0, ye = parseFloat(yeInp ? yeInp.value : 0) || 0;
            if (!isNaN(xv) && !isNaN(yv)) {
              ds.data.push({ x: xv, y: yv });
@@ -3763,11 +3777,14 @@ function buildGraph() {
 
     if (isLine) {
        var allNumeric = globalLabels.length > 0 && globalLabels.every(function(l) { return !isNaN(parseFloat(l)) && l.trim() !== ''; });
+       cfg.data.labels = globalLabels;
        
        if (allNumeric) {
            cfg.options.scales.x = makeXLin(xlabel, niceScaleX(minX, maxX, gopt('xmin'), gopt('xmax'), gopt('xstep')), D, D.pctX);
        } else {
-           cfg.data.labels = globalLabels.length ? globalLabels : Array.from({length: cfg.data.datasets[0]?.data.length||5}, (_, i) => i+1);
+           if (!cfg.data.labels.length) {
+             cfg.data.labels = Array.from({length: cfg.data.datasets[0]?.data.length || 5}, (_, i) => i + 1);
+           }
            cfg.options.scales.x = makeXCat(xlabel, D);
        }
        if (errItems.length) { cfg.plugins.push(errPlugin); cfg.options.plugins.errPlugin = { items: errItems }; }
