@@ -11,26 +11,22 @@
 <style>
 /* --- A HUMBLE UNIFIED STYLESHEET START --- */
 :root {
-  /* Brand & Shell Colors */
   --header-bg: #1e2a3a;
   --header-border: #12202e;
   --header-title: #ffffff;
   --header-sub: rgba(255, 255, 255, 0.65);
   --header-ver: rgba(255, 255, 255, 0.45);
 
-  /* Page Canvas & Panel Backgrounds */
   --app-window-bg: #f0f2f5;
   --app-panel-bg: #ffffff;
   --stage-bg: #f9fafc;
 
-  /* Card & Border Accents */
   --card-border: #cbd5e1;
   --card-header-bg: #f8fafc;
   --card-header-border: #e2e8f0;
   --card-header-title: #475569;
   --card-header-icon: #64748b;
 
-  /* Form Elements */
   --input-border: #cbd5e1;
   --input-border-hover: #94a3b8;
   --input-border-focus: #3266ad;
@@ -38,7 +34,6 @@
   --input-text: #1e2a3a;
   --input-label: #475569;
 
-  /* Standard Action Buttons */
   --btn-primary-bg: #3266ad;
   --btn-primary-hover: #185fa5;
   --btn-primary-text: #ffffff;
@@ -57,7 +52,6 @@
   --btn-danger-hover: #8e001a;
   --btn-danger-text: #ffffff;
 
-  /* Layout Spacing */
   --split-gap: 18px;
   --split-padding: 16px;
 }
@@ -177,7 +171,6 @@ html, body {
   overflow: hidden;
 }
 
-/* Independent Scrolling Split Layout - 40% Left / 60% Right */
 .split-layout {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
@@ -235,7 +228,6 @@ html, body {
   background: #ffffff;
 }
 
-/* Placeholder card when no graph is chosen */
 .empty-selection-placeholder {
   border: 2px dashed var(--card-border);
   border-radius: 8px;
@@ -259,7 +251,6 @@ html, body {
   line-height: 1.4;
 }
 
-/* Card Containers */
 .opt-group {
   border: 1px solid var(--card-border);
   border-radius: 8px;
@@ -300,7 +291,6 @@ html, body {
   padding: 12px;
 }
 
-/* Segmented Buttons */
 .type-selector-bar {
   display: grid;
   gap: 8px;
@@ -344,7 +334,6 @@ html, body {
   box-shadow: 0 0 0 1.5px var(--btn-primary-bg);
 }
 
-/* Inputs & Form Controls */
 input[type=text],
 input[type=number],
 select {
@@ -427,7 +416,6 @@ input[type=radio] {
   accent-color: var(--btn-primary-bg);
 }
 
-/* Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -507,7 +495,6 @@ input[type=radio] {
   justify-content: center;
 }
 
-/* Tables */
 .dtbl {
   width: 100%;
   border-collapse: collapse;
@@ -754,7 +741,6 @@ input[type=radio] {
 </head>
 <body>
 <div id="app">
-  <!-- Top Header -->
   <header id="app-header">
     <div class="header-left">
       <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231e2a3a'/%3E%3Cpath d='M6 10h20M6 22h20M10 6v20M22 6v20' stroke='%23334155' stroke-width='1' stroke-dasharray='2 2' fill='none'/%3E%3Cline x1='16' y1='4' x2='16' y2='28' stroke='%23cbd5e1' stroke-width='1.5'/%3E%3Cline x1='4' y1='16' x2='28' y2='16' stroke='%23cbd5e1' stroke-width='1.5'/%3E%3Cpolygon points='16,3 13.5,6 18.5,6' fill='%23cbd5e1'/%3E%3Cpolygon points='29,16 26,13.5 26,18.5' fill='%23cbd5e1'/%3E%3Ccircle cx='22' cy='10' r='2.5' fill='%233266ad' stroke='%23ffffff' stroke-width='1'/%3E%3C/svg%3E" alt="App Icon" class="header-icon">
@@ -764,17 +750,17 @@ input[type=radio] {
       </div>
     </div>
     <div class="header-right">
-      <div class="toolbar-ver">V 2.0.4 &mdash; 2026-10-16</div>
+      <div class="toolbar-ver">V 2.0.5 &mdash; 2026-10-18</div>
     </div>
   </header>
 
   <main class="content">
     <div class="main-pane">
       <div class="split-layout">
-        <!-- LEFT PANEL: Controls, Graph Type Selector, Data Tools & Data Entry -->
+        <!-- LEFT PANEL -->
         <div class="split-left" id="controls-panel">
 
-          <!-- 1. GRAPH TYPE CARD (6 Graphs) -->
+          <!-- 1. GRAPH TYPE CARD -->
           <div class="opt-group">
             <div class="opt-group-header">
               <div class="opt-group-header-left"><i class="ti ti-chart-bar"></i><span class="opt-group-title">Graph Type</span></div>
@@ -791,7 +777,7 @@ input[type=radio] {
             </div>
           </div>
 
-          <!-- 2. DATA TOOLS CARD (Table & Cartesian) -->
+          <!-- 2. DATA TOOLS CARD -->
           <div class="opt-group" style="margin-bottom:14px;">
             <div class="opt-group-header">
               <div class="opt-group-header-left"><i class="ti ti-tools"></i><span class="opt-group-title">Data Tools</span></div>
@@ -804,7 +790,6 @@ input[type=radio] {
             </div>
           </div>
 
-          <!-- Shown before a graph type is selected -->
           <div class="empty-selection-placeholder" id="no-type-selected-notice">
             <i class="ti ti-pointer"></i>
             <div>
@@ -813,7 +798,7 @@ input[type=radio] {
             </div>
           </div>
 
-          <!-- Dynamic Settings Container (hidden until graph type is picked) -->
+          <!-- Settings Container -->
           <div id="settings-container" style="display:none;">
             
             <div id="de-datatable-wrap" style="display:none;margin-bottom:14px;">
@@ -871,7 +856,6 @@ input[type=radio] {
             </div>
 
             <div id="chart-settings-wrap">
-              <!-- 1. GRAPH SIZE CARD (Directly after selector) -->
               <div class="opt-group" id="graph-size-wrap">
                 <div class="opt-group-header">
                   <div class="opt-group-header-left"><i class="ti ti-resize"></i><span class="opt-group-title">Graph size</span></div>
@@ -884,7 +868,6 @@ input[type=radio] {
                 </div>
               </div>
 
-              <!-- 2. LABELS CARD (Directly follows Graph Size) -->
               <div id="ax-cfg-wrap" class="opt-group">
                 <div class="opt-group-header">
                   <div class="opt-group-header-left"><i class="ti ti-typography"></i><span class="opt-group-title">Labels</span></div>
@@ -908,7 +891,6 @@ input[type=radio] {
                 </div>
               </div>
 
-              <!-- 3. SCALE CARD -->
               <div id="scale-cfg-wrap" class="opt-group">
                 <div class="opt-group-header">
                   <div class="opt-group-header-left"><i class="ti ti-ruler-measure"></i><span class="opt-group-title">Scale</span></div>
@@ -940,7 +922,6 @@ input[type=radio] {
                 </div>
               </div>
 
-              <!-- 4. GRIDLINES CARD -->
               <div id="gridlines-wrap" class="opt-group">
                 <div class="opt-group-header">
                   <div class="opt-group-header-left"><i class="ti ti-grid-dots"></i><span class="opt-group-title">Gridlines</span></div>
@@ -964,7 +945,6 @@ input[type=radio] {
                 </div>
               </div>
 
-              <!-- 5. AXIS ARROWS CARD -->
               <div id="arrows-wrap" class="opt-group">
                 <div class="opt-group-header">
                   <div class="opt-group-header-left"><i class="ti ti-arrows-maximize"></i><span class="opt-group-title">Axis arrows</span></div>
@@ -980,7 +960,6 @@ input[type=radio] {
                 </div>
               </div>
 
-              <!-- 6. DISPLAY / DATA OPTIONS CARD (Directly above Data Entry) -->
               <div class="opt-group" id="display-opts-card">
                 <div class="opt-group-header">
                   <div class="opt-group-header-left"><i class="ti ti-adjustments"></i><span class="opt-group-title">Display / Data Options</span></div>
@@ -1139,7 +1118,6 @@ input[type=radio] {
                 <div id="de-cartesian" style="display:none;">
                   <p class="info-note">Configure the coordinate plane below. No data entry needed.</p>
                   
-                  <!-- Cartesian Size Card -->
                   <div class="opt-group" style="margin-bottom:12px;">
                     <div class="opt-group-header">
                       <div class="opt-group-header-left"><i class="ti ti-resize"></i><span class="opt-group-title">Graph size</span></div>
@@ -1221,7 +1199,7 @@ input[type=radio] {
           </div>
         </div>
 
-        <!-- RIGHT PANEL: Fixed Live Preview & Export (60% width) -->
+        <!-- RIGHT PANEL -->
         <div class="split-right" id="stage-panel">
           <div class="preview-container">
             <div id="graph-legend" class="graph-legend"></div>
@@ -1248,12 +1226,11 @@ input[type=radio] {
 
 <script>
 'use strict';
-const APP_VERSION = 'V 2.0.4';
-const APP_DATE = '2026-10-16';
+const APP_VERSION = 'V 2.0.5';
+const APP_DATE = '2026-10-18';
 let selT = null, curChart = null, lineSeriesCount = 0, scatterSeriesCount = 0, bwSeriesCount = 0;
 let debounceTimer = null;
 
-// Grayscale defaults first, followed by Okabe-Ito colors and custom picker
 const APP_PALETTE = [
   { name: 'Charcoal',        hex: '#333333' },
   { name: 'Dim Gray',        hex: '#666666' },
@@ -1280,19 +1257,9 @@ const APP_PALETTE = [
   { name: 'Custom hex',      hex: '' }
 ];
 
-// Default color progression across datasets/groups/slices
 const DEFCOLORS_SERIES = [
-  '#333333', // 1. Charcoal
-  '#666666', // 2. Dim Gray
-  '#999999', // 3. Medium Gray
-  '#cccccc', // 4. Light Gray
-  '#eeeeee', // 5. Off-White
-  '#0072b2', // 6. Blue
-  '#e69f00', // 7. Orange
-  '#009e73', // 8. Bluish Green
-  '#d55e00', // 9. Vermilion
-  '#56b4e9', // 10. Sky Blue
-  '#cc79a7'  // 11. Reddish Purple
+  '#333333', '#666666', '#999999', '#cccccc', '#eeeeee',
+  '#0072b2', '#e69f00', '#009e73', '#d55e00', '#56b4e9', '#cc79a7'
 ];
 
 const DEFTEXTURES_BAR = ['solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'solid'];
@@ -2083,7 +2050,6 @@ const errPlugin = {
       drawBarLines(xc, yT, yB);
       ctx.restore();
 
-      // Only invert error bar portion inside dark bars on bar charts
       if (chart.config.type === 'bar' && el.width !== undefined && el.base !== undefined) {
         const barColor = getColor('barg' + e.di) || '#111827';
         if (typeof contrastColor === 'function' && contrastColor(barColor) === '#ffffff') {
@@ -2200,8 +2166,6 @@ const customPtLabelPlugin = {
     const ctx = chart.ctx;
     const tickSzEl = document.getElementById('tickLabelSize');
     const tickSz = tickSzEl ? (parseInt(tickSzEl.value) || 10) : 10;
-    
-    // 1. Make the label slightly smaller than the standard tick size
     const labelSz = Math.max(6, tickSz - 1.5); 
 
     ctx.save();
@@ -2216,22 +2180,18 @@ const customPtLabelPlugin = {
         const lbl = ds.customLabels[i];
         if (lbl) {
           const textWidth = ctx.measureText(lbl).width;
-          
-          // 2. Increase offset to push the text further from the point
           let xOffset = 10; 
           let yOffset = -10;
 
-          // 3. Prevent cutoff by flipping alignment if it hits the right edge
           if (el.x + xOffset + textWidth > chart.width - 5) {
             ctx.textAlign = 'right';
-            xOffset = -10; // Draw to the left of the point instead
+            xOffset = -10;
           } else {
             ctx.textAlign = 'left';
           }
 
-          // Prevent cutoff if the point is too close to the top edge
           if (el.y + yOffset < 10) {
-            yOffset = 12; // Draw below the point instead
+            yOffset = 12;
           }
 
           ctx.fillText(lbl, el.x + xOffset, el.y + yOffset);
@@ -2265,7 +2225,6 @@ const boldZeroPlugin = {
   }
 };
 
-// Add the custom pie label plugin
 const pieLabelPlugin = {
   id: 'pieLabelPlugin',
   beforeUpdate: function(chart) {
@@ -2293,7 +2252,6 @@ const pieLabelPlugin = {
     ctx.font = 'bold ' + tickSz + 'pt Arial';
     var needsCallout = false;
     
-    // Estimate radius if padding was 10
     var estRadius = Math.min(chart.width - 20, chart.height - 20) / 2;
     var maxCalloutW = 0;
     
@@ -2343,7 +2301,7 @@ const pieLabelPlugin = {
     ctx.restore();
     
     if (needsCallout) {
-      var pW = Math.min(maxCalloutW + 20, chart.width / 2.5); // Add 20 for tail and spacing
+      var pW = Math.min(maxCalloutW + 20, chart.width / 2.5);
       chart.options.layout.padding = { left: pW, right: pW, top: 30, bottom: 30 };
     } else {
       chart.options.layout.padding = 10;
@@ -2392,7 +2350,6 @@ const pieLabelPlugin = {
       var curLine = words.length ? words[0] : '';
       var innerAvailW = chordLen * 0.9;
       
-      // Attempt 1: Wrap for inside the slice
       for (var j = 1; j < words.length; j++) {
           if (ctx.measureText(curLine + ' ' + words[j]).width <= innerAvailW) {
               curLine += ' ' + words[j];
@@ -2406,7 +2363,6 @@ const pieLabelPlugin = {
       var totalH = lines.length * textH;
       var maxLineW = Math.max.apply(null, lines.map(function(l) { return ctx.measureText(l).width; }));
       
-      // Determine if it actually fits inside
       var fitsInside = (maxLineW <= chordLen * 0.95) && (totalH <= (arc.outerRadius - arc.innerRadius) * 0.85);
       var useCallout = cb('pieSmartCallout') && !fitsInside;
       
@@ -2647,15 +2603,6 @@ function makeXCat(label, D) {
   };
 }
 
-function makeXCatStep(label, D, xstep) {
-  const s = makeXCat(label, D);
-  if (xstep && xstep > 0) { 
-    var _step = Math.max(1, Math.round(xstep)); 
-    s.ticks = Object.assign({}, s.ticks, { callback: function(val, idx) { return idx % _step === 0 ? this.getLabelForValue(val) : null; } }); 
-  }
-  return s;
-}
-
 function makeXLin(label, sc, D, pct) {
   return {
     type: 'linear', title: { display: !!label, text: parseHtmlFormatting(label), font: axFont(D), color: '#475569' },
@@ -2759,7 +2706,6 @@ function drawInitialPlaceholder(canvas) {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, W, H);
 
-  // Subtle border & guide message
   ctx.strokeStyle = '#e2e8f0';
   ctx.lineWidth = 1;
   ctx.strokeRect(10, 10, W - 20, H - 20);
@@ -3568,7 +3514,6 @@ function fallbackCopy(tmp) {
   }
 }
 
-// --- RESTORED & HARDENED CORE RENDER LOGIC ---
 function buildGraph() {
   if (!selT) return;
   clearTimeout(debounceTimer); 
@@ -3664,7 +3609,8 @@ function buildGraph() {
     var errItems = [], scErrItems = [], trendDatasets = [];
     var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     var hasY2 = false, minY2 = Infinity, maxY2 = -Infinity;
-    var globalLabels = [];
+    var validNumericXFound = false;
+    var validStringXFound = false;
 
     blks.forEach(function(blk, di) {
       var st = getSeriesState(blk, isLine);
@@ -3690,31 +3636,32 @@ function buildGraph() {
            var xl = xInp ? xInp.value.trim() : '';
            var yRaw = yInp ? yInp.value.trim() : '';
 
-           // Skip row if completely empty
-           if (!xl && !yRaw) return;
+           if (!xl || !yRaw) return;
 
            var yv = parseFloat(yRaw);
+           if (isNaN(yv)) return;
+
            var ev = parseFloat(eInp ? eInp.value : 0) || 0;
            var xv = parseFloat(xl);
 
-           if (xl && !globalLabels.includes(xl)) globalLabels.push(xl);
-
-           if (!isNaN(yv)) {
-             var ptIdx = ds.data.length;
-             if (!isNaN(xv) && xl !== '') {
-                 ds.data.push({ x: xv, y: yv });
-                 if (xv > maxX) maxX = xv;
-                 if (xv < minX) minX = xv;
-             } else {
-                 ds.data.push({ x: xl, y: yv });
-             }
-             ds.customLabels.push(ptLbl);
-             var yAxis = st.y2checked ? 'y2' : 'y';
-             if (ev > 0) errItems.push({ di: di, pi: ptIdx, val: yv, err: ev, yAxis: yAxis });
-             var locMax = yv + ev, locMin = yv - ev;
-             if (st.y2checked) { if (locMax > maxY2) maxY2 = locMax; if (locMin < minY2) minY2 = locMin; }
-             else { if (locMax > maxY) maxY = locMax; if (locMin < minY) minY = locMin; }
+           var ptIdx = ds.data.length;
+           if (!isNaN(xv) && !isNaN(Number(xl))) {
+             ds.data.push({ x: xv, y: yv });
+             validNumericXFound = true;
+             if (xv > maxX) maxX = xv;
+             if (xv < minX) minX = xv;
+           } else {
+             ds.data.push({ x: xl, y: yv });
+             validStringXFound = true;
            }
+
+           ds.customLabels.push(ptLbl);
+           var yAxis = st.y2checked ? 'y2' : 'y';
+           if (ev > 0) errItems.push({ di: di, pi: ptIdx, val: yv, err: ev, yAxis: yAxis });
+           var locMax = yv + ev, locMin = yv - ev;
+           if (st.y2checked) { if (locMax > maxY2) maxY2 = locMax; if (locMin < minY2) minY2 = locMin; }
+           else { if (locMax > maxY) maxY = locMax; if (locMin < minY) minY = locMin; }
+
          } else {
            var xInp = tr.querySelector('.sc-x');
            var yInp = tr.querySelector('.sc-y');
@@ -3723,19 +3670,19 @@ function buildGraph() {
            var xRaw = xInp ? xInp.value.trim() : '';
            var yRaw = yInp ? yInp.value.trim() : '';
            
-           if (!xRaw && !yRaw) return;
+           if (!xRaw || !yRaw) return;
 
            var xv = parseFloat(xRaw), yv = parseFloat(yRaw);
+           if (isNaN(xv) || isNaN(yv)) return;
+
            var xe = parseFloat(xeInp ? xeInp.value : 0) || 0, ye = parseFloat(yeInp ? yeInp.value : 0) || 0;
-           if (!isNaN(xv) && !isNaN(yv)) {
-             ds.data.push({ x: xv, y: yv });
-             ds.customLabels.push(ptLbl);
-             if (xe > 0 || ye > 0) scErrItems.push({ di: di, pi: ds.data.length - 1, x: xv, y: yv, xe: xe, ye: ye, yAxis: st.y2checked ? 'y2' : 'y' });
-             var lMxX = xv + xe, lMnX = xv - xe, lMxY = yv + ye, lMnY = yv - ye;
-             if (lMxX > maxX) maxX = lMxX; if (lMnX < minX) minX = lMnX;
-             if (st.y2checked) { if (lMxY > maxY2) maxY2 = lMxY; if (lMnY < minY2) minY2 = lMnY; }
-             else { if (lMxY > maxY) maxY = lMxY; if (lMnY < minY) minY = lMnY; }
-           }
+           ds.data.push({ x: xv, y: yv });
+           ds.customLabels.push(ptLbl);
+           if (xe > 0 || ye > 0) scErrItems.push({ di: di, pi: ds.data.length - 1, x: xv, y: yv, xe: xe, ye: ye, yAxis: st.y2checked ? 'y2' : 'y' });
+           var lMxX = xv + xe, lMnX = xv - xe, lMxY = yv + ye, lMnY = yv - ye;
+           if (lMxX > maxX) maxX = lMxX; if (lMnX < minX) minX = lMnX;
+           if (st.y2checked) { if (lMxY > maxY2) maxY2 = lMxY; if (lMnY < minY2) minY2 = lMnY; }
+           else { if (lMxY > maxY) maxY = lMxY; if (lMnY < minY) minY = lMnY; }
          }
       });
       cfg.data.datasets.push(ds);
@@ -3776,15 +3723,10 @@ function buildGraph() {
     if (minY2 === Infinity) { minY2 = 0; maxY2 = 10; }
 
     if (isLine) {
-       var allNumeric = globalLabels.length > 0 && globalLabels.every(function(l) { return !isNaN(parseFloat(l)) && l.trim() !== ''; });
-       cfg.data.labels = globalLabels;
-       
-       if (allNumeric) {
+       var useLinear = validNumericXFound && !validStringXFound;
+       if (useLinear) {
            cfg.options.scales.x = makeXLin(xlabel, niceScaleX(minX, maxX, gopt('xmin'), gopt('xmax'), gopt('xstep')), D, D.pctX);
        } else {
-           if (!cfg.data.labels.length) {
-             cfg.data.labels = Array.from({length: cfg.data.datasets[0]?.data.length || 5}, (_, i) => i + 1);
-           }
            cfg.options.scales.x = makeXCat(xlabel, D);
        }
        if (errItems.length) { cfg.plugins.push(errPlugin); cfg.options.plugins.errPlugin = { items: errItems }; }
@@ -3797,7 +3739,7 @@ function buildGraph() {
        cfg.options.scales.y2 = makeYSc(gt(document.getElementById('y2label')), niceScale(minY2, maxY2, undefined, undefined, gopt('y2min'), gopt('y2max'), gopt('y2step')), D, 'right', D.pctY);
        cfg.options.scales.y2.grid.display = false;
     }
-    cfg.plugins.push(makeDLP(D, !isLine));
+    cfg.plugins.push(makeDLP(D, true));
     
   } else if (selT === 'pie') {
     cfg.type = 'pie';
@@ -3902,7 +3844,6 @@ function buildGraph() {
   curChart = new Chart(ctx, cfg);
 }
 
-// Initial unselected state
 drawInitialPlaceholder(document.getElementById('mainChart'));
 </script>
 </body>
