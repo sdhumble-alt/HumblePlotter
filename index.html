@@ -840,7 +840,7 @@ input[type=radio] {
         <button type="button" class="hdr-btn" onclick="document.getElementById('loadFile').click()" title="Open a saved project file"><i class="ti ti-folder-open"></i> Load</button>
         <input type="file" id="loadFile" accept=".json,application/json" style="display:none;" onchange="onLoadFile(this)">
       </div>
-      <div class="toolbar-ver">V 2.1.0 &mdash; 2026-10-18</div>
+      <div class="toolbar-ver">V 2.1.1 &mdash; 2026-10-18</div>
     </div>
   </header>
 
@@ -1308,8 +1308,8 @@ input[type=radio] {
             <div class="export-opts">
               <label for="exportScale">Image resolution</label>
               <select id="exportScale" onchange="triggerLiveUpdate()">
-                <option value="1">Standard (1&times;)</option>
-                <option value="2" selected>High (2&times;)</option>
+                <option value="1" selected>Standard (1&times;)</option>
+                <option value="2">High (2&times;)</option>
                 <option value="3">Print (3&times;)</option>
               </select>
               <span id="export-size-note" style="font-weight:400;color:#64748b;"></span>
@@ -1326,7 +1326,7 @@ input[type=radio] {
 
 <script>
 'use strict';
-const APP_VERSION = 'V 2.1.0';
+const APP_VERSION = 'V 2.1.1';
 const APP_DATE = '2026-10-18';
 let selT = null, curChart = null, lineSeriesCount = 0, scatterSeriesCount = 0, bwSeriesCount = 0, pieRowCount = 0;
 let debounceTimer = null;
@@ -3076,7 +3076,8 @@ function dtCopyHTML() {
   var font = (document.getElementById('dtFont') || {}).value || 'Arial Narrow';
   var borderC = getColor('dtBorderColor') || '#cbd5e1', headC = getColor('dtHeaderBg') || '#f8fafc', altC = getColor('dtAltBg') || '#f1f5f9';
   var aligns = dtGetAligns();
-  var html = '<table style="border-collapse:collapse;font-family:\'' + font + '\',Arial,sans-serif;font-size:' + fontSize + 'pt;width:' + W2 + 'px;'
+  // Centered three ways: align attribute (Word, Google Docs), auto margins (web/email), centered wrapper (fallback)
+  var html = '<div align="center" style="text-align:center;">\n<table align="center" style="margin-left:auto;margin-right:auto;border-collapse:collapse;font-family:\'' + font + '\',Arial,sans-serif;font-size:' + fontSize + 'pt;width:' + W2 + 'px;'
     + (outer ? 'border:1.5px solid ' + borderC + ';' : 'border:none;') + '">\n';
   data.forEach(function(row, ri) {
     var bg = ri === 0 ? headC : (altRows && ri % 2 === 0 ? altC : '');
@@ -3092,7 +3093,7 @@ function dtCopyHTML() {
     });
     html += '  </tr>\n';
   });
-  html += '</table>';
+  html += '</table>\n</div>';
   var plain = data.map(function(r) { return r.map(parseHtmlFormatting).join('\t'); }).join('\n');
   var done = function() { flashCopied(document.getElementById('copyHtmlBtn'), '<i class="ti ti-code"></i> Copy as HTML table'); };
   var fail = function() { showCopyError('Your browser blocked clipboard access. Try again, or use Download PNG.'); };
@@ -3848,7 +3849,7 @@ function makeLegendPlugin(L) {
 }
 
 // ---------- Export resolution and file names ----------
-function exportScale() { return parseInt((document.getElementById('exportScale') || {}).value) || 2; }
+function exportScale() { return parseInt((document.getElementById('exportScale') || {}).value) || 1; }
 function renderScale() { return Math.max(window.devicePixelRatio || 1, exportScale()); }
 
 function updateSizeNote() {
