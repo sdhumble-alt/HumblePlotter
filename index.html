@@ -12873,9 +12873,13 @@
                                                 <input type="checkbox" id="dtAltRows">
                                                 <label for="dtAltRows">Alternating row shading</label>
                                             </div>
-                                            <div class="toggle-row" style="margin-bottom:10px;">
+                                            <div class="toggle-row" style="margin-bottom:6px;">
                                                 <input type="checkbox" id="dtOuterBorder" checked>
                                                 <label for="dtOuterBorder">Outer border</label>
+                                            </div>
+                                            <div class="toggle-row" style="margin-bottom:10px;">
+                                                <input type="checkbox" id="dtFullWidthHtml">
+                                                <label for="dtFullWidthHtml">HTML table fills full width (100%)</label>
                                             </div>
                                             <div style="margin-bottom:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                                                 <button class="btn-add" style="flex:1;" onclick="dtAddRow()">
@@ -15963,8 +15967,8 @@
             }
 
             // Data Table Tool
-            var dtRows = 4
-              , dtCols = 3;
+            var dtRows = 2
+              , dtCols = 2;
 
             function dtAutoSize(inp) {
                 var len = Math.max((inp.value || inp.placeholder || '').length, 6);
@@ -16015,8 +16019,8 @@
             }
 
             function dtInit() {
-                dtRows = 4;
-                dtCols = 3;
+                dtRows = 2;
+                dtCols = 2;
                 dtRebuild();
                 if (!document.getElementById('dt-border-color-wrap').children.length) {
                     document.getElementById('dt-border-color-wrap').innerHTML = makeColorPicker('#cbd5e1', 'dtBorderColor');
@@ -16245,9 +16249,11 @@
                     return;
                 var headerBold = cb('dtHeaderBold')
                   , altRows = cb('dtAltRows')
-                  , outer = cb('dtOuterBorder');
+                  , outer = cb('dtOuterBorder')
+                  , fullWidthHtml = cb('dtFullWidthHtml');
                 var fontSize = parseFloat(document.getElementById('dtFontSize').value) || 12;
                 var W2 = parseInt(document.getElementById('dtWidth').value) || 450;
+                var widthCss = fullWidthHtml ? '100%' : (W2 + 'px');
                 var pad = parseInt(document.getElementById('dtPadding').value) || 6;
                 var font = (document.getElementById('dtFont') || {}).value || 'Arial Narrow';
                 var borderC = getColor('dtBorderColor') || '#cbd5e1'
@@ -16259,7 +16265,7 @@
 
                 var tableBorderAttr = outer ? ' border="1"' : ' border="0"';
                 var tableBorderCss = outer ? 'border:1.5px solid ' + borderC + ';' : 'border:none;';
-                var html = '<div align="center" style="text-align:center;">\n<table align="center"' + tableBorderAttr + ' cellpadding="0" cellspacing="0" style="margin-left:auto;margin-right:auto;border-collapse:collapse;font-family:\'' + font + '\',Arial,sans-serif;font-size:' + fontSize + 'pt;width:' + W2 + 'px;' + tableBorderCss + '">\n';
+                var html = '<div align="center" style="text-align:center;' + (fullWidthHtml ? 'width:100%;' : '') + '">\n<table align="center"' + tableBorderAttr + (fullWidthHtml ? ' width="100%"' : '') + ' cellpadding="0" cellspacing="0" style="margin-left:auto;margin-right:auto;border-collapse:collapse;font-family:\'' + font + '\',Arial,sans-serif;font-size:' + fontSize + 'pt;width:' + widthCss + ';' + tableBorderCss + '">\n';
 
                 data.forEach(function(row, ri) {
                     var bg = ri === 0 ? headC : (altRows && ri % 2 === 0 ? altC : '');
